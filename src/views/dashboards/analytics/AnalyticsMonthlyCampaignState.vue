@@ -1,9 +1,11 @@
 <script setup lang="ts">
-const monthlyCampaignState = [
+const { t } = useI18n({ useScope: 'global' })
+
+const monthlyCampaignState = computed(() => [
   {
     avatarColor: 'success',
     avatarIcon: 'tabler-mail',
-    title: 'Emails',
+    title: t('Emails'),
     count: '12,346',
     stats: '0.3%',
     statsColor: 'success',
@@ -11,7 +13,7 @@ const monthlyCampaignState = [
   {
     avatarColor: 'info',
     avatarIcon: 'tabler-link',
-    title: 'Opened',
+    title: t('Opened'),
     count: '8,734',
     stats: '2.1%',
     statsColor: 'success',
@@ -19,7 +21,7 @@ const monthlyCampaignState = [
   {
     avatarColor: 'warning',
     avatarIcon: 'tabler-mouse',
-    title: 'Clicked',
+    title: t('Clicked'),
     count: '967',
     stats: '1.4%',
     statsColor: 'error',
@@ -27,7 +29,7 @@ const monthlyCampaignState = [
   {
     avatarColor: 'primary',
     avatarIcon: 'tabler-users',
-    title: 'Subscribe',
+    title: t('Subscribe'),
     count: '345',
     stats: '8.5%',
     statsColor: 'success',
@@ -35,7 +37,7 @@ const monthlyCampaignState = [
   {
     avatarColor: 'secondary',
     avatarIcon: 'tabler-alert-triangle',
-    title: 'Complaints',
+    title: t('Complaints'),
     count: '10',
     stats: '1.5%',
     statsColor: 'error',
@@ -43,26 +45,26 @@ const monthlyCampaignState = [
   {
     avatarColor: 'error',
     avatarIcon: 'tabler-ban',
-    title: 'Unsubscribe',
+    title: t('Unsubscribe'),
     count: '86',
     stats: '0.8%',
     statsColor: 'success',
   },
-]
+])
 
-const moreList = [
-  { title: 'Refresh', value: 'refresh' },
-  { title: 'Download', value: 'Download' },
-  { title: 'View All', value: 'View All' },
-]
+const moreList = computed(() => [
+  { title: t('Refresh'), value: 'refresh' },
+  { title: t('Download'), value: 'Download' },
+  { title: t('View All'), value: 'View All' },
+])
 </script>
 
 <template>
   <VCard>
     <VCardItem>
-      <VCardTitle>Monthly Campaign State</VCardTitle>
+      <VCardTitle>{{ t('Monthly Campaign State') }}</VCardTitle>
       <VCardSubtitle>
-        8.52k Social Visitors
+        {{ t('8.52k Social Visitors') }}
       </VCardSubtitle>
       <template #append>
         <div class="mt-n4 me-n2">

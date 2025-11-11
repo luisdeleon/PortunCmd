@@ -1,13 +1,15 @@
 <script setup lang="ts">
 import type { ProjectAnalytics } from '@db/dashboard/type'
 
-const projectTableHeaders = [
-  { title: 'PROJECT', key: 'project' },
-  { title: 'LEADER', key: 'leader' },
-  { title: 'Team', key: 'team', sortable: false },
-  { title: 'PROGRESS', key: 'progress' },
-  { title: 'Action', key: 'Action', sortable: false },
-]
+const { t } = useI18n({ useScope: 'global' })
+
+const projectTableHeaders = computed(() => [
+  { title: t('PROJECT'), key: 'project' },
+  { title: t('LEADER'), key: 'leader' },
+  { title: t('Team'), key: 'team', sortable: false },
+  { title: t('PROGRESS'), key: 'progress' },
+  { title: t('Action'), key: 'Action', sortable: false },
+])
 
 const search = ref('')
 
@@ -34,23 +36,23 @@ const updateOptions = (options: any) => {
 const projects = computed((): ProjectAnalytics[] => projectsData.value?.projects)
 const totalProjects = computed(() => projectsData.value?.totalProjects)
 
-const moreList = [
-  { title: 'Download', value: 'Download' },
-  { title: 'Delete', value: 'Delete' },
-  { title: 'View', value: 'View' },
-]
+const moreList = computed(() => [
+  { title: t('Download'), value: 'Download' },
+  { title: t('Delete'), value: 'Delete' },
+  { title: t('View'), value: 'View' },
+])
 </script>
 
 <template>
   <VCard v-if="projects">
     <VCardItem class="project-header d-flex flex-wrap justify-space-between gap-4">
-      <VCardTitle>Project List</VCardTitle>
+      <VCardTitle>{{ t('Project List') }}</VCardTitle>
 
       <template #append>
         <div style="inline-size: 250px;">
           <AppTextField
             v-model="search"
-            placeholder="Search Project"
+            :placeholder="t('Search Project')"
           />
         </div>
       </template>

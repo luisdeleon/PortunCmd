@@ -4,10 +4,12 @@ import avatar2 from '@images/avatars/avatar-2.png'
 import avatar3 from '@images/avatars/avatar-3.png'
 import pdf from '@images/icons/project-icons/pdf.png'
 
-const moreList = [
-  { title: 'View More', value: 'View More' },
-  { title: 'Delete', value: 'Delete' },
-]
+const { t } = useI18n({ useScope: 'global' })
+
+const moreList = computed(() => [
+  { title: t('View More'), value: 'View More' },
+  { title: t('Delete'), value: 'Delete' },
+])
 </script>
 
 <template>
@@ -30,7 +32,7 @@ const moreList = [
         </div>
       </template>
 
-      <VCardTitle>Activity Timeline</VCardTitle>
+      <VCardTitle>{{ t('Activity Timeline') }}</VCardTitle>
     </VCardItem>
 
     <VCardText>
@@ -49,14 +51,14 @@ const moreList = [
           <!-- 👉 Header -->
           <div class="d-flex justify-space-between align-center gap-2 flex-wrap mb-2">
             <span class="app-timeline-title">
-              12 Invoices have been paid
+              {{ t('12 Invoices have been paid') }}
             </span>
-            <span class="app-timeline-meta">12 min ago</span>
+            <span class="app-timeline-meta">{{ t('12 min ago') }}</span>
           </div>
 
           <!-- 👉 Content -->
           <div class="app-timeline-text mt-1">
-            Invoices have been paid to the company
+            {{ t('Invoices have been paid to the company') }}
           </div>
 
           <div class="d-inline-flex align-center timeline-chip mt-2">
@@ -81,13 +83,13 @@ const moreList = [
           <!-- 👉 Header -->
           <div class="d-flex justify-space-between align-center flex-wrap mb-2">
             <div class="app-timeline-title">
-              Client Meeting
+              {{ t('Client Meeting') }}
             </div>
-            <span class="app-timeline-meta">45 min ago</span>
+            <span class="app-timeline-meta">{{ t('45 min ago') }}</span>
           </div>
 
           <div class="app-timeline-text mt-1">
-            Project meeting with john @10:15am
+            {{ t('Project meeting with john @10:15am') }}
           </div>
 
           <!-- 👉 Person -->
@@ -118,14 +120,14 @@ const moreList = [
           <!-- 👉 Header -->
           <div class="d-flex justify-space-between align-center flex-wrap mb-2">
             <span class="app-timeline-title">
-              Create a new project for client
+              {{ t('Create a new project for client') }}
             </span>
-            <span class="app-timeline-meta">2 Day Ago</span>
+            <span class="app-timeline-meta">{{ t('2 Day Ago') }}</span>
           </div>
 
           <!-- 👉 Content -->
           <p class="app-timeline-text mt-1 mb-2">
-            6 team members in a project
+            {{ t('6 team members in a project') }}
           </p>
 
           <div class="v-avatar-group demo-avatar-group">

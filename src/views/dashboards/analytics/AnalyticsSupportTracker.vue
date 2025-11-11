@@ -2,6 +2,7 @@
 import { useTheme } from 'vuetify'
 import { hexToRgb } from '@layouts/utils'
 
+const { t } = useI18n({ useScope: 'global' })
 const vuetifyTheme = useTheme()
 
 const series = [85]
@@ -92,39 +93,39 @@ const chartOptions = computed(() => {
   }
 })
 
-const supportTicket = [
+const supportTicket = computed(() => [
   {
     avatarColor: 'primary',
     avatarIcon: 'tabler-ticket',
-    title: 'New Tickets',
+    title: t('New Tickets'),
     subtitle: '142',
   },
   {
     avatarColor: 'info',
     avatarIcon: 'tabler-check',
-    title: 'Open Tickets',
+    title: t('Open Tickets'),
     subtitle: '28',
   },
 
   {
     avatarColor: 'warning',
     avatarIcon: 'tabler-clock',
-    title: 'Response Time',
-    subtitle: '1 Day',
+    title: t('Response Time'),
+    subtitle: t('1 Day'),
   },
-]
+])
 
-const moreList = [
-  { title: 'View More', value: 'View More' },
-  { title: 'Delete', value: 'Delete' },
-]
+const moreList = computed(() => [
+  { title: t('View More'), value: 'View More' },
+  { title: t('Delete'), value: 'Delete' },
+])
 </script>
 
 <template>
   <VCard>
     <VCardItem>
-      <VCardTitle>Support Tracker</VCardTitle>
-      <VCardSubtitle>Last 7 Days</VCardSubtitle>
+      <VCardTitle>{{ t('Support Tracker') }}</VCardTitle>
+      <VCardSubtitle>{{ t('Last 7 Days') }}</VCardSubtitle>
 
       <template #append>
         <div class="mt-n4 me-n2">
@@ -148,7 +149,7 @@ const moreList = [
               164
             </h2>
             <p class="text-base mb-0">
-              Total Tickets
+              {{ t('Total Tickets') }}
             </p>
           </div>
 

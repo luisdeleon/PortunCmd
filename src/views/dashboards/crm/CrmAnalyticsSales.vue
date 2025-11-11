@@ -2,6 +2,7 @@
 import { useTheme } from 'vuetify'
 import { hexToRgb } from '@layouts/utils'
 
+const { t } = useI18n({ useScope: 'global' })
 const vuetifyTheme = useTheme()
 
 const series = [
@@ -106,17 +107,17 @@ const chartOptions = computed(() => {
   }
 })
 
-const moreList = [
-  { title: 'View More', value: 'View More' },
-  { title: 'Delete', value: 'Delete' },
-]
+const moreList = computed(() => [
+  { title: t('View More'), value: 'View More' },
+  { title: t('Delete'), value: 'Delete' },
+])
 </script>
 
 <template>
   <VCard>
     <VCardItem class="pb-4">
-      <VCardTitle>Sales</VCardTitle>
-      <VCardSubtitle>Last 6 Months</VCardSubtitle>
+      <VCardTitle>{{ t('Sales') }}</VCardTitle>
+      <VCardSubtitle>{{ t('Last 6 Months') }}</VCardSubtitle>
 
       <template #append>
         <div class="mt-n4 me-n2">

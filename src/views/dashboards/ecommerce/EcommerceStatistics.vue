@@ -1,36 +1,38 @@
 <script setup lang="ts">
-const statistics = [
+const { t } = useI18n({ useScope: 'global' })
+
+const statistics = computed(() => [
   {
-    title: 'Sales',
+    title: t('Sales'),
     stats: '230k',
     icon: 'tabler-chart-pie-2',
     color: 'primary',
   },
   {
-    title: 'Customers',
+    title: t('Customers'),
     stats: '8.549k',
     icon: 'tabler-users',
     color: 'info',
   },
   {
-    title: 'Products',
+    title: t('Products'),
     stats: '1.423k',
     icon: 'tabler-shopping-cart',
     color: 'error',
   },
   {
-    title: 'Revenue',
+    title: t('Revenue'),
     stats: '$9745',
     icon: 'tabler-currency-dollar',
     color: 'success',
   },
-]
+])
 </script>
 
 <template>
-  <VCard title="Statistics">
+  <VCard :title="t('Statistics')">
     <template #append>
-      <span class="text-sm text-disabled">Updated 1 month ago</span>
+      <span class="text-sm text-disabled">{{ t('Updated 1 month ago') }}</span>
     </template>
 
     <VCardText>

@@ -1,9 +1,13 @@
+<script setup lang="ts">
+const { t } = useI18n({ useScope: 'global' })
+</script>
+
 <template>
   <VCard>
     <VCardText>
       <div class="d-flex align-center justify-space-between">
         <div class="text-body-1">
-          Sales Overview
+          {{ t('Sales Overview') }}
         </div>
         <div class="text-success font-weight-medium">
           +18.2%
@@ -31,7 +35,7 @@
                   icon="tabler-shopping-cart"
                 />
               </VAvatar>
-              <span>Order</span>
+              <span>{{ t('Order') }}</span>
             </div>
             <h5 class="text-h5">
               62.2%
@@ -72,7 +76,7 @@
         >
           <div class="py-2">
             <div class="d-flex align-center justify-end mb-3">
-              <span class="me-2">Visits</span>
+              <span class="me-2">{{ t('Visits') }}</span>
               <VAvatar
                 color="primary"
                 variant="tonal"

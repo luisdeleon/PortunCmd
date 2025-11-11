@@ -6,56 +6,58 @@ import frFlag from '@images/icons/countries/fr.png'
 import inFlag from '@images/icons/countries/in.png'
 import usFlag from '@images/icons/countries/us.png'
 
-const salesByCountries = [
+const { t } = useI18n({ useScope: 'global' })
+
+const salesByCountries = computed(() => [
   {
     avatarImg: usFlag,
     stats: '$8,567k',
-    subtitle: 'United states',
+    subtitle: t('United states'),
     profitLoss: 25.8,
   },
   {
     avatarImg: brFlag,
     stats: '$2,415k',
-    subtitle: 'Brazil',
+    subtitle: t('Brazil'),
     profitLoss: -6.2,
   },
   {
     avatarImg: inFlag,
     stats: '$865k',
-    subtitle: 'India',
+    subtitle: t('India'),
     profitLoss: 12.4,
   },
   {
     avatarImg: auFlag,
     stats: '$745k',
-    subtitle: 'Australia',
+    subtitle: t('Australia'),
     profitLoss: -11.9,
   },
   {
     avatarImg: frFlag,
     stats: '$45',
-    subtitle: 'France',
+    subtitle: t('France'),
     profitLoss: 16.2,
   },
   {
     avatarImg: cnFlag,
     stats: '$12k',
-    subtitle: 'China',
+    subtitle: t('China'),
     profitLoss: 14.8,
   },
-]
+])
 
-const moreList = [
-  { title: 'Refresh', value: 'refresh' },
-  { title: 'Download', value: 'Download' },
-  { title: 'View All', value: 'View All' },
-]
+const moreList = computed(() => [
+  { title: t('Refresh'), value: 'refresh' },
+  { title: t('Download'), value: 'Download' },
+  { title: t('View All'), value: 'View All' },
+])
 </script>
 
 <template>
   <VCard
-    title="Sales by Countries"
-    subtitle="Monthly Sales Overview"
+    :title="t('Sales by Countries')"
+    :subtitle="t('Monthly Sales Overview')"
   >
     <template #append>
       <div class="mt-n4 me-n2">

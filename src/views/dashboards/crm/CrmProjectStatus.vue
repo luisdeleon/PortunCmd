@@ -2,6 +2,7 @@
 import { useTheme } from 'vuetify'
 import { prefixWithPlus } from '@core/utils/formatters'
 
+const { t } = useI18n({ useScope: 'global' })
 const vuetifyTheme = useTheme()
 
 const series = [
@@ -73,27 +74,27 @@ const chartOptions = computed(() => {
   }
 })
 
-const projectStatus = [
+const projectStatus = computed(() => [
   {
-    title: 'Donates',
+    title: t('Donates'),
     amount: '$756.26',
     lossProfit: -139.34,
   },
   {
-    title: 'Podcasts',
+    title: t('Podcasts'),
     amount: '$2,207.03',
     lossProfit: +576.24,
   },
-]
+])
 
-const moreList = [
-  { title: 'View More', value: 'View More' },
-  { title: 'Delete', value: 'Delete' },
-]
+const moreList = computed(() => [
+  { title: t('View More'), value: 'View More' },
+  { title: t('Delete'), value: 'Delete' },
+])
 </script>
 
 <template>
-  <VCard title="Project Status">
+  <VCard :title="t('Project Status')">
     <template #append>
       <div class="mt-n4 me-n2">
         <MoreBtn
@@ -118,7 +119,7 @@ const moreList = [
             />
           </template>
           <VListItemSubtitle>
-            Your Earnings
+            {{ t('Your Earnings') }}
           </VListItemSubtitle>
 
           <template #append>

@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { useTheme } from 'vuetify'
 
+const { t } = useI18n({ useScope: 'global' })
 const vuetifyTheme = useTheme()
 
 const series = [
@@ -196,33 +197,33 @@ const chartOptions = computed(() => {
   }
 })
 
-const totalEarnings = [
+const totalEarnings = computed(() => [
   {
     avatar: 'tabler-brand-paypal',
     avatarColor: 'primary',
-    title: 'Total Revenue',
-    subtitle: 'Client Payment',
+    title: t('Total Revenue'),
+    subtitle: t('Client Payment'),
     earning: '+$126',
   },
   {
     avatar: 'tabler-currency-dollar',
     avatarColor: 'secondary',
-    title: 'Total Sales',
-    subtitle: 'Total Sales',
+    title: t('Total Sales'),
+    subtitle: t('Total Sales'),
     earning: '+$98',
   },
-]
+])
 
-const moreList = [
-  { title: 'View More', value: 'View More' },
-  { title: 'Delete', value: 'Delete' },
-]
+const moreList = computed(() => [
+  { title: t('View More'), value: 'View More' },
+  { title: t('Delete'), value: 'Delete' },
+])
 </script>
 
 <template>
   <VCard>
     <VCardItem class="pb-0">
-      <VCardTitle>Total Earning</VCardTitle>
+      <VCardTitle>{{ t('Total Earning') }}</VCardTitle>
 
       <div class="d-flex align-center mt-2">
         <h2 class="text-h2 me-2">

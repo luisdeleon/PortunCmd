@@ -6,6 +6,8 @@ import reactLogo from '@images/icons/brands/react-logo.png'
 import sketchLogo from '@images/icons/brands/sketch-logo.png'
 import vuejsLogo from '@images/icons/brands/vuejs-logo.png'
 
+const { t } = useI18n({ useScope: 'global' })
+
 const activeProjects = [
   {
     avatarImg: laravelLogo,
@@ -51,19 +53,19 @@ const activeProjects = [
   },
 ]
 
-const moreList = [
-  { title: 'Refresh', value: 'refresh' },
-  { title: 'Download', value: 'Download' },
-  { title: 'View All', value: 'View All' },
-]
+const moreList = computed(() => [
+  { title: t('Refresh'), value: 'refresh' },
+  { title: t('Download'), value: 'Download' },
+  { title: t('View All'), value: 'View All' },
+])
 </script>
 
 <template>
   <VCard>
     <VCardItem>
-      <VCardTitle>Active Projects</VCardTitle>
+      <VCardTitle>{{ t('Active Projects') }}</VCardTitle>
       <VCardSubtitle>
-        Average 72% completed
+        {{ t('Average 72% completed') }}
       </VCardSubtitle>
       <template #append>
         <div class="mt-n4 me-n2">

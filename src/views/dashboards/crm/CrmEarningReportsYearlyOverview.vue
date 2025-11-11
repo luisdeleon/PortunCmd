@@ -2,6 +2,7 @@
 import { useTheme } from 'vuetify'
 import { hexToRgb } from '@layouts/utils'
 
+const { t } = useI18n({ useScope: 'global' })
 const vuetifyTheme = useTheme()
 
 const currentTab = ref<number>(0)
@@ -18,7 +19,7 @@ const chartConfigs = computed(() => {
 
   return [
     {
-      title: 'Orders',
+      title: t('Orders'),
       icon: 'tabler-shopping-cart',
       chartOptions: {
         chart: {
@@ -158,7 +159,7 @@ const chartConfigs = computed(() => {
       ],
     },
     {
-      title: 'Sales',
+      title: t('Sales'),
       icon: 'tabler-chart-bar',
       chartOptions: {
         chart: {
@@ -297,7 +298,7 @@ const chartConfigs = computed(() => {
       ],
     },
     {
-      title: 'Profit',
+      title: t('Profit'),
       icon: 'tabler-currency-dollar',
       chartOptions: {
         chart: {
@@ -436,7 +437,7 @@ const chartConfigs = computed(() => {
       ],
     },
     {
-      title: 'Income',
+      title: t('Income'),
       icon: 'tabler-chart-pie-2',
       chartOptions: {
         chart: {
@@ -577,16 +578,16 @@ const chartConfigs = computed(() => {
   ]
 })
 
-const moreList = [
-  { title: 'View More', value: 'View More' },
-  { title: 'Delete', value: 'Delete' },
-]
+const moreList = computed(() => [
+  { title: t('View More'), value: 'View More' },
+  { title: t('Delete'), value: 'Delete' },
+])
 </script>
 
 <template>
   <VCard
-    title="Earning Reports"
-    subtitle="Yearly Earnings Overview"
+    :title="t('Earning Reports')"
+    :subtitle="t('Yearly Earnings Overview')"
   >
     <template #append>
       <div class="mt-n4 me-n2">

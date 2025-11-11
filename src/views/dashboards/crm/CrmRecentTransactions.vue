@@ -3,6 +3,8 @@ import aeIcon from '@images/icons/payments/ae-icon.png'
 import mastercardIcon from '@images/icons/payments/mastercard-icon.png'
 import visaIcon from '@images/icons/payments/visa-icon.png'
 
+const { t } = useI18n({ useScope: 'global' })
+
 interface Status {
   Verified: string
   Rejected: string
@@ -67,17 +69,17 @@ const resolveStatus: Status = {
   Pending: 'secondary',
 }
 
-const moreList = [
-  { title: 'Refresh', value: 'refresh' },
-  { title: 'Download', value: 'Download' },
-  { title: 'View All', value: 'View All' },
-]
+const moreList = computed(() => [
+  { title: t('Refresh'), value: 'refresh' },
+  { title: t('Download'), value: 'Download' },
+  { title: t('View All'), value: 'View All' },
+])
 
 const getPaddingStyle = (index: number) => index ? 'padding-block-end: 1.25rem;' : 'padding-block: 1.25rem;'
 </script>
 
 <template>
-  <VCard title="Last Transaction">
+  <VCard :title="t('Last Transaction')">
     <template #append>
       <div class="me-n2">
         <MoreBtn
@@ -91,11 +93,11 @@ const getPaddingStyle = (index: number) => index ? 'padding-block-end: 1.25rem;'
     <VTable class="text-no-wrap transaction-table">
       <thead>
         <tr>
-          <th>CARD</th>
-          <th>DATE</th>
-          <th>STATUS</th>
+          <th>{{ t('CARD') }}</th>
+          <th>{{ t('DATE') }}</th>
+          <th>{{ t('STATUS') }}</th>
           <th>
-            TREND
+            {{ t('TREND') }}
           </th>
         </tr>
       </thead>
@@ -131,7 +133,7 @@ const getPaddingStyle = (index: number) => index ? 'padding-block-end: 1.25rem;'
             style="padding-inline-end: 1.5rem;"
           >
             <p class="text-high-emphasis text-base mb-0">
-              Sent
+              {{ t('Sent') }}
             </p>
             <div class="text-sm">
               {{ transition.sentDate }}

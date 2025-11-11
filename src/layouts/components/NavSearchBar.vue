@@ -16,6 +16,7 @@ defineOptions({
 })
 
 const configStore = useConfigStore()
+const { t } = useI18n({ useScope: 'global' })
 
 interface SuggestionGroup {
   title: string
@@ -28,63 +29,63 @@ const isLoading = ref(false)
 
 // 👉 Default suggestions
 
-const suggestionGroups: SuggestionGroup[] = [
+const suggestionGroups = computed<SuggestionGroup[]>(() => [
   {
-    title: 'Popular Searches',
+    title: t('Popular Searches'),
     content: [
-      { icon: 'tabler-chart-bar', title: 'Analytics', url: { name: 'dashboards-analytics' } },
-      { icon: 'tabler-chart-donut-3', title: 'CRM', url: { name: 'dashboards-crm' } },
-      { icon: 'tabler-shopping-cart', title: 'eCommerce', url: { name: 'dashboards-ecommerce' } },
-      { icon: 'tabler-truck', title: 'Logistics', url: { name: 'dashboards-logistics' } },
+      { icon: 'tabler-chart-bar', title: t('Analytics'), url: { name: 'dashboards-analytics' } },
+      { icon: 'tabler-chart-donut-3', title: t('CRM'), url: { name: 'dashboards-crm' } },
+      { icon: 'tabler-shopping-cart', title: t('eCommerce'), url: { name: 'dashboards-ecommerce' } },
+      { icon: 'tabler-truck', title: t('Logistics'), url: { name: 'dashboards-logistics' } },
     ],
   },
   {
-    title: 'Apps & Pages',
+    title: t('Apps & Pages'),
     content: [
-      { icon: 'tabler-calendar', title: 'Calendar', url: { name: 'apps-calendar' } },
-      { icon: 'tabler-lock', title: 'Roles & Permissions', url: { name: 'apps-roles' } },
-      { icon: 'tabler-settings', title: 'Account Settings', url: { name: 'pages-account-settings-tab', params: { tab: 'account' } } },
-      { icon: 'tabler-copy', title: 'Dialog Examples', url: { name: 'pages-dialog-examples' } },
+      { icon: 'tabler-calendar', title: t('Calendar'), url: { name: 'apps-calendar' } },
+      { icon: 'tabler-lock', title: t('Roles & Permissions'), url: { name: 'apps-roles' } },
+      { icon: 'tabler-settings', title: t('Account Settings'), url: { name: 'pages-account-settings-tab', params: { tab: 'account' } } },
+      { icon: 'tabler-copy', title: t('Dialog Examples'), url: { name: 'pages-dialog-examples' } },
     ],
   },
   {
-    title: 'User Interface',
+    title: t('User Interface'),
     content: [
-      { icon: 'tabler-typography', title: 'Typography', url: { name: 'pages-typography' } },
-      { icon: 'tabler-menu-2', title: 'Accordion', url: { name: 'components-expansion-panel' } },
-      { icon: 'tabler-info-triangle', title: 'Alert', url: { name: 'components-alert' } },
-      { icon: 'tabler-checkbox', title: 'Cards', url: { name: 'pages-cards-card-basic' } },
+      { icon: 'tabler-typography', title: t('Typography'), url: { name: 'pages-typography' } },
+      { icon: 'tabler-menu-2', title: t('Accordion'), url: { name: 'components-expansion-panel' } },
+      { icon: 'tabler-info-triangle', title: t('Alert'), url: { name: 'components-alert' } },
+      { icon: 'tabler-checkbox', title: t('Cards'), url: { name: 'pages-cards-card-basic' } },
     ],
   },
   {
-    title: 'Forms & Tables',
+    title: t('Forms & Tables'),
     content: [
-      { icon: 'tabler-circle-dot', title: 'Radio', url: { name: 'forms-radio' } },
-      { icon: 'tabler-file-invoice', title: 'Form Layouts', url: { name: 'forms-form-layouts' } },
-      { icon: 'tabler-table', title: 'Table', url: { name: 'tables-data-table' } },
-      { icon: 'tabler-edit', title: 'Editor', url: { name: 'forms-editors' } },
+      { icon: 'tabler-circle-dot', title: t('Radio'), url: { name: 'forms-radio' } },
+      { icon: 'tabler-file-invoice', title: t('Form Layouts'), url: { name: 'forms-form-layouts' } },
+      { icon: 'tabler-table', title: t('Table'), url: { name: 'tables-data-table' } },
+      { icon: 'tabler-edit', title: t('Editor'), url: { name: 'forms-editors' } },
     ],
   },
-]
+])
 
 // 👉 No Data suggestion
-const noDataSuggestions: Suggestion[] = [
+const noDataSuggestions = computed<Suggestion[]>(() => [
   {
-    title: 'Analytics',
+    title: t('Analytics'),
     icon: 'tabler-chart-bar',
     url: { name: 'dashboards-analytics' },
   },
   {
-    title: 'CRM',
+    title: t('CRM'),
     icon: 'tabler-chart-donut-3',
     url: { name: 'dashboards-crm' },
   },
   {
-    title: 'eCommerce',
+    title: t('eCommerce'),
     icon: 'tabler-shopping-cart',
     url: { name: 'dashboards-ecommerce' },
   },
-]
+])
 
 const searchQuery = ref('')
 
@@ -138,7 +139,7 @@ const LazyAppBarSearch = defineAsyncComponent(() => import('@core/components/App
       class="d-none d-md-flex align-center text-disabled ms-2"
       @click="Shepherd.activeTour?.cancel()"
     >
-      <span class="me-2">Search</span>
+      <span class="me-2">{{ t('Search') }}</span>
       <span class="meta-key">&#8984;K</span>
     </span>
   </div>
@@ -191,7 +192,7 @@ const LazyAppBarSearch = defineAsyncComponent(() => import('@core/components/App
     <!-- no data suggestion -->
     <template #noDataSuggestion>
       <div class="mt-9">
-        <span class="d-flex justify-center text-disabled mb-2">Try searching for</span>
+        <span class="d-flex justify-center text-disabled mb-2">{{ t('Try searching for') }}</span>
         <h6
           v-for="suggestion in noDataSuggestions"
           :key="suggestion.title"
