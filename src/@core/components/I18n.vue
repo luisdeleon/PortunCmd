@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { I18nLanguage } from '@layouts/types'
+import { cookieRef } from '@layouts/stores/config'
 
 interface Props {
   languages: I18nLanguage[]
@@ -11,6 +12,13 @@ const props = withDefaults(defineProps<Props>(), {
 })
 
 const { locale } = useI18n({ useScope: 'global' })
+const storedLang = cookieRef<string | null>('language', null)
+
+// Function to change language and save to cookie
+const changeLanguage = (lang: string) => {
+  locale.value = lang
+  storedLang.value = lang
+}
 </script>
 
 <template>
@@ -34,7 +42,7 @@ const { locale } = useI18n({ useScope: 'global' })
           v-for="lang in props.languages"
           :key="lang.i18nLang"
           :value="lang.i18nLang"
-          @click="locale = lang.i18nLang"
+          @click="changeLanguage(lang.i18nLang)"
         >
           <!-- Language label -->
           <VListItemTitle>

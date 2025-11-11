@@ -12,10 +12,43 @@ import authV2MaskDark from '@images/pages/misc-mask-dark.png'
 import authV2MaskLight from '@images/pages/misc-mask-light.png'
 import NavBarI18n from '@core/components/I18n.vue'
 
-const { t } = useI18n({ useScope: 'global' })
+const { t, locale } = useI18n({ useScope: 'global' })
 
-// Get translated validators
-const { requiredValidator, emailValidator } = useValidators()
+// Create validation rules as computed that depend on locale
+// This ensures validators are recreated when locale changes, forcing Vue to re-validate
+// Note: We need to explicitly use the validators from useValidators to avoid
+// conflicts with auto-imported validators from @core/utils/validators
+const emailRules = computed(() => {
+  // Read locale.value to make this computed reactive to locale changes
+  const currentLocale = locale.value
+  // Create new validator functions that use the current locale
+  const validators = useValidators()
+  // Return new array reference so Vue detects the change
+  return [
+    (value: unknown) => validators.requiredValidator(value),
+    (value: unknown) => validators.emailValidator(value),
+  ]
+})
+
+// Watch for locale changes and trigger form re-validation to update error messages
+watch(locale, () => {
+  // When locale changes, the computed rules will update automatically
+  // But we need to re-validate the form to show the new translated messages
+  if (refVForm.value) {
+    // Clear any existing error message
+    errorMessage.value = undefined
+    // Wait for rules to update, then re-validate to show new translated messages
+    nextTick(() => {
+      refVForm.value?.resetValidation()
+      // Re-validate if there's a value in the email field to show errors in new language
+      if (email.value) {
+        setTimeout(() => {
+          refVForm.value?.validate()
+        }, 50)
+      }
+    })
+  }
+})
 
 const email = ref('')
 const refVForm = ref<VForm>()
@@ -163,12 +196,13 @@ const onSubmit = async () => {
               <!-- email -->
               <VCol cols="12">
                 <AppTextField
+                  :key="`email-${locale}`"
                   v-model="email"
                   autofocus
                   :label="t('Email')"
                   type="email"
                   placeholder="johndoe@email.com"
-                  :rules="[requiredValidator, emailValidator]"
+                  :rules="emailRules"
                 />
               </VCol>
 

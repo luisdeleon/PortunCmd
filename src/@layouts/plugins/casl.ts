@@ -46,16 +46,22 @@ export const canNavigate = (to: RouteLocationNormalized) => {
   if (!hasAclMeta)
     return true
 
-  const ability = useAbility()
+  try {
+    const ability = useAbility()
 
-  // Get the most specific route (last one in the matched array)
-  const targetRoute = to.matched[to.matched.length - 1]
+    // Get the most specific route (last one in the matched array)
+    const targetRoute = to.matched[to.matched.length - 1]
 
-  // If the target route has specific permissions, check those first
-  if (targetRoute?.meta?.action && targetRoute?.meta?.subject)
-    return ability.can(targetRoute.meta.action, targetRoute.meta.subject)
+    // If the target route has specific permissions, check those first
+    if (targetRoute?.meta?.action && targetRoute?.meta?.subject)
+      return ability.can(targetRoute.meta.action, targetRoute.meta.subject)
 
-  // If no specific permissions, fall back to checking if any parent route allows access
-  // @ts-expect-error We should allow passing string | undefined to can because for admin ability we omit defining action & subject
-  return to.matched.some(route => ability.can(route.meta.action, route.meta.subject))
+    // If no specific permissions, fall back to checking if any parent route allows access
+    // @ts-expect-error We should allow passing string | undefined to can because for admin ability we omit defining action & subject
+    return to.matched.some(route => ability.can(route.meta.action, route.meta.subject))
+  } catch (error) {
+    // If ability is not available (e.g., during initial load), allow navigation
+    console.warn('Ability check failed in canNavigate, allowing navigation:', error)
+    return true
+  }
 }

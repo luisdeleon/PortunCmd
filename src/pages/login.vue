@@ -29,8 +29,32 @@ definePage({
 const { locale, t } = useI18n({ useScope: 'global' })
 const storedLang = cookieRef<string | null>('language', null)
 
-// Get translated validators
-const { requiredValidator, emailValidator } = useValidators()
+// Create validation rules as computed that depend on locale
+// This ensures validators are recreated when locale changes, forcing Vue to re-validate
+// Note: We need to explicitly use the validators from useValidators to avoid
+// conflicts with auto-imported validators from @core/utils/validators
+const emailRules = computed(() => {
+  // Read locale.value to make this computed reactive to locale changes
+  const currentLocale = locale.value
+  // Create new validator functions that use the current locale
+  const validators = useValidators()
+  // Return new array reference so Vue detects the change
+  return [
+    (value: unknown) => validators.requiredValidator(value),
+    (value: unknown) => validators.emailValidator(value),
+  ]
+})
+
+const passwordRules = computed(() => {
+  // Read locale.value to make this computed reactive to locale changes
+  const currentLocale = locale.value
+  // Create new validator functions that use the current locale
+  const validators = useValidators()
+  // Return new array reference so Vue detects the change
+  return [
+    (value: unknown) => validators.requiredValidator(value),
+  ]
+})
 
 // Auto-detect browser language - run immediately (not in onMounted to avoid flicker)
 if (typeof window !== 'undefined') {
@@ -64,8 +88,6 @@ const errors = ref<Record<string, string | undefined>>({
   password: undefined,
 })
 
-const refVForm = ref<VForm>()
-
 const credentials = ref({
   email: '',
   password: '',
@@ -73,6 +95,29 @@ const credentials = ref({
 
 const rememberMe = ref(false)
 const isLoading = ref(false)
+
+// Watch for locale changes and trigger form re-validation to update error messages
+watch(locale, () => {
+  // When locale changes, the computed rules will update automatically
+  // But we need to re-validate the form to show the new translated messages
+  if (refVForm.value) {
+    // Clear any existing validation errors
+    errors.value = {
+      email: undefined,
+      password: undefined,
+    }
+    // Wait for rules to update, then re-validate to show new translated messages
+    nextTick(() => {
+      refVForm.value?.resetValidation()
+      // Re-validate if there are values in the fields to show errors in new language
+      if (credentials.value.email || credentials.value.password) {
+        setTimeout(() => {
+          refVForm.value?.validate()
+        }, 50)
+      }
+    })
+  }
+})
 
 const login = async () => {
   // Clear previous errors
@@ -224,12 +269,13 @@ const onSubmit = () => {
               <!-- email -->
               <VCol cols="12">
                 <AppTextField
+                  :key="`email-${locale}`"
                   v-model="credentials.email"
                   :label="t('Email')"
                   placeholder="johndoe@email.com"
                   type="email"
                   autofocus
-                  :rules="[requiredValidator, emailValidator]"
+                  :rules="emailRules"
                   :error-messages="errors.email"
                 />
               </VCol>
@@ -237,10 +283,11 @@ const onSubmit = () => {
               <!-- password -->
               <VCol cols="12">
                 <AppTextField
+                  :key="`password-${locale}`"
                   v-model="credentials.password"
                   :label="t('Password')"
                   placeholder="············"
-                  :rules="[requiredValidator]"
+                  :rules="passwordRules"
                   :type="isPasswordVisible ? 'text' : 'password'"
                   autocomplete="password"
                   :error-messages="errors.password"

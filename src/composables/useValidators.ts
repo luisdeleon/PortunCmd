@@ -2,12 +2,16 @@ import { isEmpty, isEmptyArray, isNullOrUndefined } from '@core/utils/helpers'
 
 /**
  * Composable that returns translated validators
- * These validators use the current i18n locale for error messages
+ * These validators use the reactive t() function which automatically updates
+ * when the locale changes. The validators themselves are recreated when
+ * useValidators() is called, so calling it inside a computed that depends
+ * on locale ensures validators are always up-to-date.
  */
 export const useValidators = () => {
   const { t } = useI18n({ useScope: 'global' })
 
-  // 👉 Required Validator
+  // Return validator functions that use the reactive t() function
+  // These will automatically use the current locale when called
   const requiredValidator = (value: unknown) => {
     if (isNullOrUndefined(value) || isEmptyArray(value) || value === false)
       return t('This field is required')
@@ -15,7 +19,6 @@ export const useValidators = () => {
     return !!String(value).trim().length || t('This field is required')
   }
 
-  // 👉 Email Validator
   const emailValidator = (value: unknown) => {
     if (isEmpty(value))
       return true
@@ -28,7 +31,6 @@ export const useValidators = () => {
     return re.test(String(value)) || t('The Email field must be a valid email')
   }
 
-  // 👉 Password Validator
   const passwordValidator = (password: string) => {
     const regExp = /(?=.*\d)(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#$%&*()]).{8,}/
 
@@ -37,7 +39,6 @@ export const useValidators = () => {
     return validPassword || t('Field must contain at least one uppercase, lowercase, special character and digit with min 8 chars')
   }
 
-  // 👉 Confirm Password Validator
   const confirmedValidator = (value: string, target: string) =>
     value === target || t('The Confirm Password field confirmation does not match')
 

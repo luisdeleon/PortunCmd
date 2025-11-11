@@ -38,18 +38,30 @@
       </div>
     </div>
   </div>
-  <script type="module" src="/src/main.ts"></script>
   <script>
+    // Set loader colors first
     const loaderColor = localStorage.getItem('portun-initial-loader-bg') || '#FFFFFF'
     const primaryColor = localStorage.getItem('portun-initial-loader-color') || '#7367F0'
 
     if (loaderColor)
       document.documentElement.style.setProperty('--initial-loader-bg', loaderColor)
-    if (loaderColor)
-      document.documentElement.style.setProperty('--initial-loader-bg', loaderColor)
 
     if (primaryColor)
       document.documentElement.style.setProperty('--initial-loader-color', primaryColor)
-    </script>
+    
+    // Hide loader after a short delay to prevent hanging
+    // This ensures the loader doesn't block the page if Vue takes time to load
+    setTimeout(() => {
+      const loadingBg = document.getElementById('loading-bg')
+      const loading = document.querySelector('.loading')
+      if (loadingBg) {
+        loadingBg.style.display = 'none'
+      }
+      if (loading) {
+        loading.style.display = 'none'
+      }
+    }, 2000) // 2 second max loader time
+  </script>
+  <script type="module" src="/src/main.ts"></script>
   </body>
 </html>
