@@ -76,6 +76,7 @@ if (typeof window !== 'undefined') {
 }
 
 const isPasswordVisible = ref(false)
+const refVForm = ref<VForm>()
 
 const route = useRoute()
 const router = useRouter()
