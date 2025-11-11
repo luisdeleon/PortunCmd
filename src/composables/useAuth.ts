@@ -49,17 +49,26 @@ function getAbilityRulesForRole(roleName: string): UserAbilityRule[] {
 
 export const useAuth = () => {
   const login = async (email: string, password: string): Promise<LoginResponse> => {
+    // Validate inputs
+    if (!email || !password) {
+      throw new Error('Email and password are required')
+    }
+
     const { data: authData, error: authError } = await supabase.auth.signInWithPassword({
       email,
       password,
     })
 
+    // If Supabase returns an error, throw it immediately
     if (authError) {
+      console.error('Supabase auth error:', authError)
       throw new Error(authError.message)
     }
 
-    if (!authData.user || !authData.session) {
-      throw new Error('Login failed')
+    // Ensure we have valid auth data
+    if (!authData?.user || !authData?.session) {
+      console.error('Invalid auth data:', authData)
+      throw new Error('Invalid login credentials')
     }
 
     // Fetch user profile

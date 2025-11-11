@@ -131,6 +131,11 @@ const login = async () => {
   try {
     const res = await authLogin(credentials.value.email, credentials.value.password)
 
+    // Only proceed with redirect if login was successful
+    if (!res || !res.accessToken || !res.userData || !res.userAbilityRules) {
+      throw new Error('Invalid login response')
+    }
+
     const { accessToken, userData, userAbilityRules } = res
 
     // Set cookie expiration based on rememberMe
@@ -154,26 +159,25 @@ const login = async () => {
     accessTokenCookie.value = accessToken
 
     // Redirect to `to` query if exist or redirect to index route
+    // Only redirect on successful login
     await nextTick(() => {
       router.replace(route.query.to ? String(route.query.to) : '/')
     })
   }
   catch (err: any) {
+    // Stay on login page and show error
+    console.error('Login error:', err)
+    
     // Handle Supabase auth errors and translate them
     const errorKey = getErrorMessageTranslationKey(err?.message)
     const translatedMessage = t(errorKey)
     
-    // Determine which field to show the error on
-    const errorMessage = err?.message?.toLowerCase() || ''
-    if (errorMessage.includes('email') || errorKey.includes('email')) {
-      errors.value.email = translatedMessage
-    }
-    else if (errorMessage.includes('password') || errorKey.includes('password')) {
-      errors.value.password = translatedMessage
-    }
-    else {
-      errors.value.email = translatedMessage
-    }
+    // Show error on email field (as it's the most prominent)
+    // This will be displayed in red by Vuetify
+    errors.value.email = translatedMessage
+    
+    // Don't redirect - stay on login page
+    return
   }
   finally {
     isLoading.value = false
