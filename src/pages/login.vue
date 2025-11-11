@@ -138,6 +138,8 @@ const login = async () => {
 
     const { accessToken, userData, userAbilityRules } = res
 
+    console.log('Login successful:', { userData, role: userData.role })
+
     // Set cookie expiration based on rememberMe
     // Note: Cookies are set without namespace for auth tokens
     const maxAge = rememberMe.value
@@ -158,10 +160,18 @@ const login = async () => {
     const accessTokenCookie = useCookie('accessToken', cookieOptions)
     accessTokenCookie.value = accessToken
 
-    // Redirect to `to` query if exist or redirect to index route
+    console.log('Cookies set:', {
+      hasUserData: !!userDataCookie.value,
+      hasAccessToken: !!accessTokenCookie.value,
+      hasAbilityRules: !!userAbilityRulesCookie.value
+    })
+
+    // Redirect to `to` query if exist or redirect to CRM dashboard
     // Only redirect on successful login
     await nextTick(() => {
-      router.replace(route.query.to ? String(route.query.to) : '/')
+      const redirectTo = route.query.to ? String(route.query.to) : '/dashboards/crm'
+      console.log('Login successful, redirecting to:', redirectTo)
+      router.replace(redirectTo)
     })
   }
   catch (err: any) {

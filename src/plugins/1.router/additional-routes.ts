@@ -15,14 +15,16 @@ export const redirects: RouteRecordRaw[] = [
     redirect: to => {
       // TODO: Get type from backend
       const userData = useCookie<Record<string, unknown> | null | undefined>('userData')
-      const userRole = userData.value?.role
+      const userRole = (userData.value?.role as string || '').toLowerCase()
 
-      if (userRole === 'admin')
+      // Check if role contains 'admin' (case-insensitive)
+      if (userRole.includes('admin'))
         return { name: 'dashboards-crm' }
       if (userRole === 'client')
         return { name: 'access-control' }
 
-      return { name: 'login', query: to.query }
+      // Default to CRM dashboard for all logged-in users
+      return { name: 'dashboards-crm' }
     },
   },
   {
