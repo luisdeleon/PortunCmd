@@ -1,274 +1,422 @@
 # Complete Setup Guide for PortunCmd
 
-## Issues You're Experiencing
+This comprehensive guide will walk you through setting up PortunCmd from scratch, including Supabase configuration, authentication, and testing.
 
-1. ❌ Login not working (no redirect, no error messages)
-2. ❌ Forgot password giving error messages
-3. ❌ Dashboard/CRM not accessible
+## 📋 Table of Contents
 
-## Root Cause
+- [Prerequisites](#prerequisites)
+- [Step 1: Environment Setup](#step-1-environment-setup)
+- [Step 2: Supabase Configuration](#step-2-supabase-configuration)
+- [Step 3: Create Test Users](#step-3-create-test-users)
+- [Step 4: Start Development](#step-4-start-development)
+- [Step 5: Test Features](#step-5-test-features)
+- [Production Deployment](#production-deployment)
+- [Troubleshooting](#troubleshooting)
 
-**Missing `.env` file with Supabase credentials!**
+## Prerequisites
 
-Without proper Supabase configuration, the app uses placeholder values which prevents authentication from working.
+Before starting, ensure you have:
 
----
+- ✅ Node.js v18 or higher installed
+- ✅ pnpm package manager installed
+- ✅ Supabase account created
+- ✅ Project cloned to your local machine
 
-## Step 1: Create .env File
+## Step 1: Environment Setup
 
-Create a file named `.env` in the root of your project:
+### 1.1 Create .env File
+
+In your project root directory, create a `.env` file:
 
 ```bash
-# In your project root (PortunCmd/)
-touch .env
+cp .env.example .env
 ```
 
-Add the following content to your `.env` file:
+### 1.2 Get Supabase Credentials
+
+1. Go to [Supabase Dashboard](https://app.supabase.com)
+2. Select your project (or create a new one)
+3. Navigate to **Settings** → **API**
+4. Copy these values:
+   - **Project URL** (looks like `https://xxxxx.supabase.co`)
+   - **anon public** key (starts with `eyJ...`)
+
+### 1.3 Configure .env File
+
+Open `.env` and add your credentials:
 
 ```env
 # Supabase Configuration
-VITE_SUPABASE_URL=https://data.portun.app
-VITE_SUPABASE_ANON_KEY=your_actual_anon_key_here
+VITE_SUPABASE_URL=https://your-project.supabase.co
+VITE_SUPABASE_ANON_KEY=your_anon_key_here
 ```
 
-### How to Get Your Supabase Keys
+> ⚠️ **Important:** Never commit `.env` to version control!
 
-1. Go to your Supabase Dashboard: https://app.supabase.com
-2. Select your project
-3. Go to **Settings** → **API**
-4. Copy:
-   - **Project URL** → Use as `VITE_SUPABASE_URL`
-   - **anon public** key → Use as `VITE_SUPABASE_ANON_KEY`
+## Step 2: Supabase Configuration
 
----
+### 2.1 Configure Authentication URLs
 
-## Step 2: Configure Email Settings in Supabase (Required for Password Reset)
-
-This is **REQUIRED** for the forgot password feature to work!
-
-### A. Enable Email Confirmations
+This is **required** for authentication and password reset to work:
 
 1. Go to **Authentication** → **URL Configuration** in Supabase
-2. Set **Site URL** to your domain:
-   - Local: `http://localhost:5173`
-   - Production: `https://yourdomain.com`
-3. Add **Redirect URLs**:
-   - `http://localhost:5173/*` (for local development)
-   - `https://yourdomain.com/*` (for production)
+2. Set **Site URL**:
+   - For development: `http://localhost:5173`
+   - For production: Your actual domain
 
-### B. Configure Email Template
+3. Add **Redirect URLs** (click "Add URL" for each):
+   ```
+   http://localhost:5173/*
+   http://localhost:5173/login
+   http://localhost:5173/forgot-password
+   ```
 
-1. Go to **Authentication** → **Email Templates** in Supabase
-2. Select **Reset Password** template
-3. Make sure the template is enabled
-4. The reset link should redirect to: `/forgot-password?reset=true`
+   > 💡 The wildcard `/*` pattern allows all routes under that domain
 
-### C. Configure SMTP (Optional but Recommended for Production)
+### 2.2 Configure Email Templates
 
-For production, you should set up custom SMTP:
+1. Go to **Authentication** → **Email Templates**
+2. Select **Reset Password**
+3. Ensure it's **enabled**
+4. Verify the template contains:
+   ```
+   {{ .SiteURL }}/forgot-password?reset=true&token={{ .Token }}
+   ```
+
+### 2.3 (Optional) Configure Custom SMTP
+
+For production, custom SMTP ensures reliable email delivery:
 
 1. Go to **Settings** → **Auth**
 2. Scroll to **SMTP Settings**
-3. Add your SMTP server details (e.g., Gmail, SendGrid, AWS SES)
-4. This prevents emails from going to spam
+3. Enable **Custom SMTP**
+4. Add your SMTP provider details (Gmail, SendGrid, AWS SES, etc.)
 
-### D. Authorize Your Domains
+**Example - Gmail Configuration:**
+```
+SMTP Host: smtp.gmail.com
+SMTP Port: 587
+SMTP User: your-email@gmail.com
+SMTP Password: your-app-password
+Sender Email: your-email@gmail.com
+Sender Name: PortunCmd
+```
 
-1. Go to **Authentication** → **URL Configuration**
-2. Under **Redirect URLs**, add all domains:
-   ```
-   http://localhost:5173/*
-   https://yourdomain.com/*
-   ```
-
----
+> 📧 For Gmail, create an [App Password](https://support.google.com/accounts/answer/185833) instead of using your regular password.
 
 ## Step 3: Create Test Users
 
-To test login, you need users in Supabase:
+You need at least one user to test authentication.
 
-### Option 1: Via Supabase Dashboard (Easiest)
+### Method 1: Via Supabase Dashboard (Easiest)
 
 1. Go to **Authentication** → **Users**
-2. Click **Add User** → **Create new user**
+2. Click **Add User** or **Create User**
 3. Fill in:
-   - Email: `test@example.com`
-   - Password: `password123`
-   - Auto Confirm User: **✓ Check this box!**
+   - **Email:** `admin@example.com` (or any email)
+   - **Password:** Choose a secure password
+   - **Auto Confirm User:** ✅ **Check this box!**
 4. Click **Create User**
 
-### Option 2: Via SQL Editor
+### Method 2: Via SQL (Advanced)
 
-Run this SQL in your Supabase SQL Editor:
+If you need to create profiles manually:
 
 ```sql
--- This will create a user profile automatically via trigger
--- Just create the auth user first via Supabase Dashboard
+-- First create user via Supabase Dashboard (Authentication → Users)
+-- Then create the profile:
 
--- If you need to manually create a profile:
 INSERT INTO profile (id, email, display_name, enabled)
 VALUES (
-  'USER_ID_FROM_AUTH_USERS_TABLE',
-  'test@example.com',
-  'Test User',
+  'USER_ID_FROM_AUTH_USERS',  -- Get this from Authentication → Users
+  'admin@example.com',
+  'Admin User',
   true
 );
 
--- Assign a role (get role ID first)
-SELECT id, role_name FROM role;
+-- Assign a role (optional):
+SELECT id, role_name FROM role;  -- Get available roles
 
--- Then insert into profile_role
 INSERT INTO profile_role (profile_id, role_id)
 VALUES (
-  'USER_PROFILE_ID',
-  'ROLE_ID_FROM_ABOVE_QUERY'
+  'USER_PROFILE_ID',  -- Profile ID from above
+  'ROLE_ID'           -- Role ID from SELECT query
 );
 ```
 
----
+## Step 4: Start Development
 
-## Step 4: Restart Your Development Server
-
-After creating the `.env` file:
+### 4.1 Install Dependencies
 
 ```bash
-# Stop current server (if running)
-# Press Ctrl+C in the terminal
+pnpm install
+```
 
-# Start server again
+### 4.2 Start Development Server
+
+```bash
 pnpm dev
 ```
 
----
+The application will be available at `http://localhost:5173`
 
-## Step 5: Test Everything
+> 💡 If port 5173 is in use, Vite will automatically use port 5174, 5175, etc.
 
-### Test Login
+## Step 5: Test Features
 
-1. Go to http://localhost:5173/login
-2. Enter test credentials
-3. **Expected:**
-   - ✅ Valid credentials → Redirects to dashboard
-   - ❌ Invalid credentials → Shows red error "Invalid login credentials"
-   - ❌ No redirect on failed login
+### 5.1 Test Login
 
-### Test Forgot Password
+1. Navigate to http://localhost:5173/login
+2. Enter your test user credentials
+3. Click **Login**
 
-1. Go to http://localhost:5173/forgot-password
-2. Enter a valid email
-3. Click "Send Reset Link"
-4. **Expected:**
-   - ✅ Green success message appears
-   - ✅ Check your email for reset link
-   - ✅ Click link → Redirects to reset password page
+**Expected Results:**
+- ✅ Successful login redirects to `/dashboards/crm`
+- ✅ Invalid credentials show red error message
+- ✅ No redirect on failed login
 
-### Test Dashboard Access
+### 5.2 Test Password Reset
 
-1. After successful login
-2. Navigate to http://localhost:5173/dashboards/crm
-3. **Expected:**
-   - ✅ Page loads without hanging
-   - ✅ Shows dashboard content
+1. Navigate to http://localhost:5173/forgot-password
+2. Enter a valid email address
+3. Click **Send Reset Link**
 
----
+**Expected Results:**
+- ✅ Green success message appears
+- ✅ Email received (check spam folder)
+- ✅ Click link in email → Redirects to reset password page
 
-## Common Issues & Solutions
+### 5.3 Test Dashboard Access
 
-### Issue: "Network error" on forgot password
-**Solution:** Set up email configuration in Supabase (Step 2)
+After successful login:
 
-### Issue: Login not redirecting
-**Solution:** Check that `.env` file has correct Supabase credentials
+1. Navigate to http://localhost:5173/dashboards/crm
+2. Verify the dashboard loads correctly
 
-### Issue: "Invalid login credentials" not translating
-**Solution:** Already fixed in latest commit (restart server)
+**Expected Results:**
+- ✅ Dashboard displays without errors
+- ✅ Charts and widgets render properly
+- ✅ Navigation menu works
 
-### Issue: Emails going to spam
-**Solution:** Configure custom SMTP in Supabase settings
+### 5.4 Test Multi-Language
 
-### Issue: "User not found" error
-**Solution:** Create test users in Supabase (Step 3)
+1. Look for the language dropdown in the top bar
+2. Switch between English, Spanish, and Portuguese
+3. Verify translations update
 
-### Issue: Dashboard shows blank page
-**Solution:** Check browser console for errors, verify user has roles assigned
-
----
+**Expected Results:**
+- ✅ UI text changes when language is switched
+- ✅ Language preference persists on page reload
 
 ## Production Deployment
 
-When deploying to production (remote server):
+### Cloudflare Pages Deployment
 
-### 1. Set Environment Variables
+#### 1. Set Environment Variables in Cloudflare
 
-Add these to your hosting provider's environment variables:
+1. Go to Cloudflare Dashboard
+2. Select your Pages project
+3. Go to **Settings** → **Environment Variables**
+4. Add for **Production**:
+   ```
+   VITE_SUPABASE_URL = https://your-project.supabase.co
+   VITE_SUPABASE_ANON_KEY = your_anon_key
+   ```
 
-```env
-VITE_SUPABASE_URL=https://data.portun.app
-VITE_SUPABASE_ANON_KEY=your_actual_anon_key_here
-```
+#### 2. Update Supabase URLs for Production
 
-### 2. Update Supabase URLs
+1. Go to Supabase **Authentication** → **URL Configuration**
+2. Update **Site URL** to your production domain:
+   ```
+   https://your-site.pages.dev
+   ```
 
-In Supabase Dashboard:
+3. Add production **Redirect URLs**:
+   ```
+   https://your-site.pages.dev/*
+   https://your-site.pages.dev/login
+   https://your-site.pages.dev/forgot-password
+   ```
 
-1. **Authentication** → **URL Configuration**
-2. Set **Site URL** to: `https://yourproductiondomain.com`
-3. Add redirect URL: `https://yourproductiondomain.com/*`
+   > 💡 Keep localhost URLs for local development!
 
-### 3. Build and Deploy
+#### 3. Deploy
 
 ```bash
-# Build for production
-pnpm build
-
-# Deploy the 'dist' folder to your server
+# Commit and push your changes
+git add .
+git commit -m "Deploy to production"
+git push origin main
 ```
 
----
+Cloudflare Pages will automatically build and deploy your application.
+
+#### 4. Test Production
+
+After deployment completes:
+- ✅ Test login on production URL
+- ✅ Test password reset emails
+- ✅ Verify dashboard loads correctly
+
+For detailed Cloudflare setup, see [Cloudflare Setup Guide](./CLOUDFLARE_SETUP.md).
+
+### Other Hosting Platforms
+
+The `dist/` folder can be deployed to:
+- **Vercel**
+- **Netlify**
+- **AWS S3 + CloudFront**
+- **Any static hosting service**
+
+Build command: `pnpm build`
+Output directory: `dist`
+
+## Troubleshooting
+
+### Login Issues
+
+#### Problem: Login not working / staying on login page
+
+**Solutions:**
+1. Verify `.env` file exists and has correct credentials
+2. Restart development server after creating/updating `.env`
+3. Check browser console for errors (F12)
+4. Verify Supabase project is not paused
+5. Check that user exists in Supabase Authentication → Users
+
+#### Problem: "Invalid login credentials" error
+
+**Solutions:**
+1. Verify email and password are correct
+2. Check that user is confirmed (Email Confirmed = true in Supabase)
+3. Verify profile exists in `profile` table with matching user ID
+4. Check `profile.enabled = true` in database
+
+### Password Reset Issues
+
+#### Problem: Password reset emails not sending
+
+**Solutions:**
+1. Verify Site URL is configured in Supabase
+2. Add your domain to Redirect URLs (with `/*`)
+3. Check email template is enabled
+4. Configure custom SMTP for production
+5. Check Supabase logs: Dashboard → Logs → Auth Logs
+
+#### Problem: Reset link redirects to wrong URL
+
+**Solution:**
+- Site URL in Supabase is incorrect
+- Update to match your current environment (localhost or production domain)
+
+### Dashboard Issues
+
+#### Problem: Dashboard shows blank page
+
+**Solutions:**
+1. Check browser console for errors
+2. Verify user has roles assigned in `profile_role` table
+3. Check that roles are enabled in `role` table
+4. Clear browser cache and cookies
+
+#### Problem: Navigation not working
+
+**Solutions:**
+1. Check Vue Router is properly configured
+2. Verify file-based routing is working (`src/pages/` structure)
+3. Check browser console for routing errors
+
+### Database Issues
+
+#### Problem: "Profile not found" error
+
+**Solutions:**
+1. Create profile in `profile` table with user ID from auth
+2. Set `profile.enabled = true`
+3. Verify profile ID matches Supabase Auth user ID
+
+#### Problem: "Permission denied" errors
+
+**Solutions:**
+1. Check Row Level Security (RLS) policies in Supabase
+2. Verify anon key has proper permissions
+3. Check table permissions in Supabase
+
+### Build Issues
+
+#### Problem: TypeScript errors during build
+
+**Solutions:**
+1. Run `pnpm typecheck` to identify errors
+2. Fix type errors in reported files
+3. Ensure all required types are imported
+
+#### Problem: Build succeeds but app doesn't work in production
+
+**Solutions:**
+1. Verify environment variables are set in hosting platform
+2. Check browser console for errors
+3. Verify API URLs are correct for production
+4. Redeploy after setting environment variables
+
+## Common Configuration Mistakes
+
+### ❌ Mistake 1: Missing .env file
+**Fix:** Create `.env` from `.env.example` and add Supabase credentials
+
+### ❌ Mistake 2: Forgot to restart server after creating .env
+**Fix:** Stop server (Ctrl+C) and run `pnpm dev` again
+
+### ❌ Mistake 3: Wrong Supabase URL in .env
+**Fix:** Copy exact URL from Supabase Dashboard → Settings → API
+
+### ❌ Mistake 4: Redirect URLs not configured
+**Fix:** Add all URLs (with `/*`) in Supabase Authentication → URL Configuration
+
+### ❌ Mistake 5: User not confirmed
+**Fix:** Check "Auto Confirm User" when creating users, or verify email manually
+
+### ❌ Mistake 6: Missing profile in database
+**Fix:** Profile should be auto-created, but verify in `profile` table
 
 ## Quick Checklist
 
-- [ ] Create `.env` file with Supabase credentials
-- [ ] Get Supabase URL and anon key from dashboard
-- [ ] Configure Site URL in Supabase
-- [ ] Add redirect URLs in Supabase
-- [ ] Enable email reset template in Supabase
-- [ ] Create test users in Supabase Auth
-- [ ] Restart development server
-- [ ] Test login with valid/invalid credentials
-- [ ] Test forgot password flow
-- [ ] Test dashboard access after login
+Use this checklist to ensure everything is configured:
 
----
+- [ ] `.env` file created with Supabase credentials
+- [ ] Dependencies installed (`pnpm install`)
+- [ ] Site URL configured in Supabase
+- [ ] Redirect URLs added (localhost + production)
+- [ ] Email templates enabled
+- [ ] Test user created and confirmed
+- [ ] Development server started
+- [ ] Login tested successfully
+- [ ] Password reset tested (email received)
+- [ ] Dashboard loads correctly
 
 ## Need Help?
 
 If you're still experiencing issues:
 
-1. Check browser console for errors (F12)
-2. Check terminal/server logs
-3. Verify Supabase project is not paused
-4. Confirm email in Supabase is verified
-5. Check that profile.enabled = true in database
+1. **Check browser console** (F12 → Console tab)
+2. **Check server logs** (terminal running `pnpm dev`)
+3. **Check Supabase logs** (Dashboard → Logs)
+4. **Verify all steps** in this guide were completed
+5. **Review error messages** carefully - they often indicate the exact issue
+
+### Useful Resources
+
+- [Supabase Documentation](https://supabase.com/docs)
+- [Vue 3 Documentation](https://vuejs.org)
+- [Vuetify Documentation](https://vuetifyjs.com)
+- [Vite Documentation](https://vitejs.dev)
 
 ---
 
-## Summary for Your Current Issue
+**Setup complete! 🎉** You're ready to start developing with PortunCmd.
 
-**Why login isn't working:**
-- No `.env` file → App uses placeholder Supabase client
-- Can't authenticate users without real Supabase connection
-
-**Why forgot password gives error:**
-- Need to configure email settings in Supabase
-- Need to authorize your domain (localhost + production domain)
-
-**Next steps:**
-1. Create `.env` file (most important!)
-2. Add your Supabase credentials
-3. Configure email in Supabase dashboard
-4. Restart server
-5. Test login and forgot password
-
-**Yes, you DO need to authorize domains in Supabase for emails to work!** ✅
-
+For more guides, check:
+- [Getting Started](./GETTING_STARTED.md) - Development workflow
+- [Authentication](./AUTHENTICATION.md) - User management details
+- [Supabase Usage](./SUPABASE_USAGE.md) - Code examples
+- [Cloudflare Setup](./CLOUDFLARE_SETUP.md) - Production deployment
