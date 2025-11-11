@@ -166,13 +166,18 @@ const login = async () => {
       hasAbilityRules: !!userAbilityRulesCookie.value
     })
 
-    // Redirect to `to` query if exist or redirect to CRM dashboard
-    // Only redirect on successful login
-    await nextTick(() => {
-      const redirectTo = route.query.to ? String(route.query.to) : '/dashboards/crm'
-      console.log('Login successful, redirecting to:', redirectTo)
-      router.replace(redirectTo)
-    })
+    // Determine redirect target
+    const redirectQuery = route.query.to
+    const redirectTo = typeof redirectQuery === 'string' && redirectQuery.length
+      ? redirectQuery
+      : Array.isArray(redirectQuery) && redirectQuery.length
+        ? redirectQuery[0]
+        : '/dashboards/crm'
+
+    console.log('Login successful, redirecting to:', redirectTo)
+
+    // Ensure navigation completes before finishing login flow
+    await router.replace(redirectTo)
   }
   catch (err: any) {
     // Stay on login page and show error
