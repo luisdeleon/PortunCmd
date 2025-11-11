@@ -179,12 +179,21 @@ export const useAuth = () => {
   }
 
   const resetPassword = async (email: string) => {
-    const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: `${window.location.origin}/forgot-password?reset=true`,
-    })
+    try {
+      const { error } = await supabase.auth.resetPasswordForEmail(email, {
+        redirectTo: `${window.location.origin}/forgot-password?reset=true`,
+      })
 
-    if (error) {
-      throw new Error(error.message)
+      // Only throw error if Supabase actually returns an error
+      // Note: Supabase will return success even if email doesn't exist (for security)
+      if (error) {
+        console.error('Supabase reset password error:', error)
+        throw new Error(error.message)
+      }
+    } catch (err: any) {
+      // If there's a network error or other issue, throw it
+      console.error('Reset password error:', err)
+      throw err
     }
   }
 

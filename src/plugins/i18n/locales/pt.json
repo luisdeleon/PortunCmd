@@ -84,6 +84,7 @@
   "browsers": "navegadores",
   "Enter your email and we'll send you instructions to reset your password": "Digite seu e-mail e enviaremos instruções para redefinir sua senha",
   "Password reset email sent! Please check your inbox and follow the instructions to reset your password.": "E-mail de redefinição de senha enviado! Por favor, verifique sua caixa de entrada e siga as instruções para redefinir sua senha.",
+  "Please check your inbox for a reset link and click it to update your password. Don't forget to check your spam or junk folder as well.": "Por favor, verifique sua caixa de entrada para um link de redefinição e clique nele para atualizar sua senha. Não se esqueça de verificar sua pasta de spam ou lixo eletrônico também.",
   "Send Reset Link": "Enviar link de redefinição",
   "Back to login": "Voltar ao login",
   "Invalid email or password": "E-mail ou senha inválidos",

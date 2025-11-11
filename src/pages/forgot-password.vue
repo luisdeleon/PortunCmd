@@ -172,7 +172,7 @@ const onSubmit = async () => {
             class="mb-4"
           >
             <p class="text-sm mb-0">
-              {{ t('Password reset email sent! Please check your inbox and follow the instructions to reset your password.') }}
+              {{ t('Please check your inbox for a reset link and click it to update your password. Don\'t forget to check your spam or junk folder as well.') }}
             </p>
           </VAlert>
 
