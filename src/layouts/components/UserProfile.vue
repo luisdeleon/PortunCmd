@@ -3,6 +3,7 @@ import { PerfectScrollbar } from 'vue3-perfect-scrollbar'
 
 const router = useRouter()
 const ability = useAbility()
+const { t } = useI18n({ useScope: 'global' })
 
 // TODO: Get type from backend
 const userData = useCookie<any>('userData')
@@ -36,15 +37,15 @@ const logout = async () => {
   ability.update([])
 }
 
-const userProfileList = [
+const userProfileList = computed(() => [
   { type: 'divider' },
-  { type: 'navItem', icon: 'tabler-user', title: 'Profile', to: { name: 'apps-user-view-id', params: { id: 21 } } },
-  { type: 'navItem', icon: 'tabler-settings', title: 'Settings', to: { name: 'pages-account-settings-tab', params: { tab: 'account' } } },
-  { type: 'navItem', icon: 'tabler-file-dollar', title: 'Billing Plan', to: { name: 'pages-account-settings-tab', params: { tab: 'billing-plans' } }, badgeProps: { color: 'error', content: '4' } },
+  { type: 'navItem', icon: 'tabler-user', title: t('Profile'), to: { name: 'apps-user-view-id', params: { id: 21 } } },
+  { type: 'navItem', icon: 'tabler-settings', title: t('Settings'), to: { name: 'pages-account-settings-tab', params: { tab: 'account' } } },
+  { type: 'navItem', icon: 'tabler-file-dollar', title: t('Billing Plan'), to: { name: 'pages-account-settings-tab', params: { tab: 'billing-plans' } }, badgeProps: { color: 'error', content: '4' } },
   { type: 'divider' },
-  { type: 'navItem', icon: 'tabler-currency-dollar', title: 'Pricing', to: { name: 'pages-pricing' } },
-  { type: 'navItem', icon: 'tabler-question-mark', title: 'FAQ', to: { name: 'pages-faq' } },
-]
+  { type: 'navItem', icon: 'tabler-currency-dollar', title: t('Pricing'), to: { name: 'pages-pricing' } },
+  { type: 'navItem', icon: 'tabler-question-mark', title: t('FAQ'), to: { name: 'pages-faq' } },
+])
 </script>
 
 <template>
@@ -162,7 +163,7 @@ const userProfileList = [
                 append-icon="tabler-logout"
                 @click="logout"
               >
-                Logout
+                {{ t('Logout') }}
               </VBtn>
             </div>
           </PerfectScrollbar>

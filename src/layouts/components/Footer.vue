@@ -1,10 +1,14 @@
+<script setup lang="ts">
+const { t } = useI18n({ useScope: 'global' })
+</script>
+
 <template>
   <div class="h-100 d-flex align-center justify-md-space-between justify-center">
     <!-- 👉 Footer: left content -->
     <span class="d-flex align-center text-medium-emphasis">
       &copy;
       {{ new Date().getFullYear() }}
-      Made With
+      {{ t('Made With') }}
       <VIcon
         icon="tabler-heart-filled"
         color="error"
@@ -23,19 +27,19 @@
       <a
         href="https://themeforest.net/licenses/standard"
         target="noopener noreferrer"
-      >License</a>
+      >{{ t('License') }}</a>
       <a
         href="https://1.envato.market/pixinvent_portfolio"
         target="noopener noreferrer"
-      >More Themes</a>
+      >{{ t('More Themes') }}</a>
       <a
         href="https://github.com/luisdeleon/PortunCmd"
         target="noopener noreferrer"
-      >Documentation</a>
+      >{{ t('Documentation') }}</a>
       <a
         href="https://pixinvent.ticksy.com/"
         target="noopener noreferrer"
-      >Support</a>
+      >{{ t('Support') }}</a>
     </span>
   </div>
 </template>
