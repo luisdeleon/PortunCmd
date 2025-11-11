@@ -340,7 +340,7 @@ const isPageActive = computed(() => menuItems.some(item => item.navItems.some(li
             prepend-icon="tabler-shopping-cart"
             variant="elevated"
             color="primary"
-            href="https://1.envato.market/vuexy_admin"
+            href="#"
             target="_blank"
             rel="noopener noreferrer"
           >
@@ -353,7 +353,7 @@ const isPageActive = computed(() => menuItems.some(item => item.navItems.some(li
             icon
             variant="elevated"
             color="primary"
-            href="https://1.envato.market/vuexy_admin"
+            href="#"
             target="_blank"
             rel="noopener noreferrer"
           >

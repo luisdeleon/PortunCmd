@@ -47,11 +47,19 @@
   }
 }
 
-.auth-logo {
+.auth-header {
   position: absolute;
   z-index: 2;
   inset-block-start: 2rem;
   inset-inline-start: 2.3rem;
+  inset-inline-end: 2.3rem;
+  width: calc(100% - 4.6rem);
+}
+
+.auth-logo {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
 }
 
 .auth-title {
@@ -60,4 +68,13 @@
   letter-spacing: 0.25px;
   line-height: 1.5rem;
   text-transform: capitalize;
+}
+
+.auth-language-switcher {
+  @media (max-width: 599px) {
+    position: fixed;
+    top: 1rem;
+    right: 1rem;
+    z-index: 3;
+  }
 }

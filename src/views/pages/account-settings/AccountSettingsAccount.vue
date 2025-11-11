@@ -287,7 +287,7 @@ const currencies = [
                   v-model="accountDataLocal.language"
                   label="Language"
                   placeholder="Select Language"
-                  :items="['English', 'Spanish', 'Arabic', 'Hindi', 'Urdu']"
+                  :items="['English', 'Spanish', 'Portuguese']"
                 />
               </VCol>
 

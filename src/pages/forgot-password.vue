@@ -1,18 +1,26 @@
 <script setup lang="ts">
+import { VForm } from 'vuetify/components/VForm'
 import { useGenerateImageVariant } from '@core/composable/useGenerateImageVariant'
 import { VNodeRenderer } from '@layouts/components/VNodeRenderer'
 import { themeConfig } from '@themeConfig'
+import { useAuth } from '@/composables/useAuth'
 
-import authV2ForgotPasswordIllustrationDark from '@images/pages/auth-v2-forgot-password-illustration-dark.png'
-import authV2ForgotPasswordIllustrationLight from '@images/pages/auth-v2-forgot-password-illustration-light.png'
+import forgotPasswordImage from '@images/pages/img-forgot-w.png'
 import authV2MaskDark from '@images/pages/misc-mask-dark.png'
 import authV2MaskLight from '@images/pages/misc-mask-light.png'
+import NavBarI18n from '@core/components/I18n.vue'
+
+const { t } = useI18n({ useScope: 'global' })
 
 const email = ref('')
-
-const authThemeImg = useGenerateImageVariant(authV2ForgotPasswordIllustrationLight, authV2ForgotPasswordIllustrationDark)
+const refVForm = ref<VForm>()
+const isLoading = ref(false)
+const isSuccess = ref(false)
+const errorMessage = ref<string | undefined>(undefined)
 
 const authThemeMask = useGenerateImageVariant(authV2MaskLight, authV2MaskDark)
+
+const { resetPassword } = useAuth()
 
 definePage({
   meta: {
@@ -20,17 +28,52 @@ definePage({
     unauthenticatedOnly: true,
   },
 })
+
+const onSubmit = async () => {
+  const { valid } = await refVForm.value?.validate() ?? { valid: false }
+  
+  if (!valid)
+    return
+
+  isLoading.value = true
+  errorMessage.value = undefined
+  isSuccess.value = false
+
+  try {
+    await resetPassword(email.value)
+    isSuccess.value = true
+  }
+  catch (err: any) {
+    errorMessage.value = err?.message || t('Failed to send reset email. Please try again.')
+  }
+  finally {
+    isLoading.value = false
+  }
+}
 </script>
 
 <template>
-  <RouterLink to="/">
-    <div class="auth-logo d-flex align-center gap-x-3">
-      <VNodeRenderer :nodes="themeConfig.app.logo" />
-      <h1 class="auth-title">
-        {{ themeConfig.app.title }}
-      </h1>
+  <div class="auth-header d-flex align-center justify-space-between">
+    <RouterLink to="/">
+      <div class="auth-logo d-flex align-center gap-x-3">
+        <VNodeRenderer :nodes="themeConfig.app.logo" />
+        <h1 class="auth-title">
+          {{ themeConfig.app.title }}
+        </h1>
+      </div>
+    </RouterLink>
+    
+    <!-- Language Dropdown -->
+    <div
+      v-if="themeConfig.app.i18n.enable && themeConfig.app.i18n.langConfig?.length"
+      class="auth-language-switcher"
+    >
+      <NavBarI18n
+        :languages="themeConfig.app.i18n.langConfig"
+        location="bottom end"
+      />
     </div>
-  </RouterLink>
+  </div>
 
   <VRow
     class="auth-wrapper bg-surface"
@@ -47,7 +90,7 @@ definePage({
         >
           <VImg
             max-width="468"
-            :src="authThemeImg"
+            :src="forgotPasswordImage"
             class="auth-illustration mt-16 mb-2"
           />
         </div>
@@ -74,24 +117,51 @@ definePage({
       >
         <VCardText>
           <h4 class="text-h4 mb-1">
-            Forgot Password? 🔒
+            {{ t('Forgot Password?') }} 🔒
           </h4>
           <p class="mb-0">
-            Enter your email and we'll send you instructions to reset your password
+            {{ t('Enter your email and we\'ll send you instructions to reset your password') }}
           </p>
         </VCardText>
 
         <VCardText>
-          <VForm @submit.prevent="() => {}">
+          <VAlert
+            v-if="isSuccess"
+            color="success"
+            variant="tonal"
+            class="mb-4"
+          >
+            <p class="text-sm mb-0">
+              {{ t('Password reset email sent! Please check your inbox and follow the instructions to reset your password.') }}
+            </p>
+          </VAlert>
+
+          <VAlert
+            v-if="errorMessage"
+            color="error"
+            variant="tonal"
+            class="mb-4"
+          >
+            <p class="text-sm mb-0">
+              {{ errorMessage }}
+            </p>
+          </VAlert>
+
+          <VForm
+            v-if="!isSuccess"
+            ref="refVForm"
+            @submit.prevent="onSubmit"
+          >
             <VRow>
               <!-- email -->
               <VCol cols="12">
                 <AppTextField
                   v-model="email"
                   autofocus
-                  label="Email"
+                  :label="t('Email')"
                   type="email"
                   placeholder="johndoe@email.com"
+                  :rules="[requiredValidator, emailValidator]"
                 />
               </VCol>
 
@@ -100,8 +170,9 @@ definePage({
                 <VBtn
                   block
                   type="submit"
+                  :loading="isLoading"
                 >
-                  Send Reset Link
+                  {{ t('Send Reset Link') }}
                 </VBtn>
               </VCol>
 
@@ -116,11 +187,27 @@ definePage({
                     size="20"
                     class="me-1 flip-in-rtl"
                   />
-                  <span>Back to login</span>
+                  <span>{{ t('Back to login') }}</span>
                 </RouterLink>
               </VCol>
             </VRow>
           </VForm>
+
+          <VRow v-else>
+            <VCol cols="12">
+              <RouterLink
+                class="d-flex align-center justify-center"
+                :to="{ name: 'login' }"
+              >
+                <VIcon
+                  icon="tabler-chevron-left"
+                  size="20"
+                  class="me-1 flip-in-rtl"
+                />
+                <span>{{ t('Back to login') }}</span>
+              </RouterLink>
+            </VCol>
+          </VRow>
         </VCardText>
       </VCard>
     </VCol>

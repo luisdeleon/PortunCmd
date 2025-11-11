@@ -1,18 +1,19 @@
-<!-- ❗Errors in the form are set on line 60 -->
 <script setup lang="ts">
 import { VForm } from 'vuetify/components/VForm'
-import AuthProvider from '@/views/pages/authentication/AuthProvider.vue'
 import { useGenerateImageVariant } from '@core/composable/useGenerateImageVariant'
-import authV2LoginIllustrationBorderedDark from '@images/pages/auth-v2-login-illustration-bordered-dark.png'
-import authV2LoginIllustrationBorderedLight from '@images/pages/auth-v2-login-illustration-bordered-light.png'
-import authV2LoginIllustrationDark from '@images/pages/auth-v2-login-illustration-dark.png'
-import authV2LoginIllustrationLight from '@images/pages/auth-v2-login-illustration-light.png'
+import loginImage from '@images/pages/img-login-m.png'
 import authV2MaskDark from '@images/pages/misc-mask-dark.png'
 import authV2MaskLight from '@images/pages/misc-mask-light.png'
+import chromeLogo from '@images/logos/chrome.png'
+import firefoxLogo from '@images/logos/firefox.png'
+import braveLogo from '@images/logos/brave.png'
+import safariLogo from '@images/logos/safari.png'
 import { VNodeRenderer } from '@layouts/components/VNodeRenderer'
 import { themeConfig } from '@themeConfig'
-
-const authThemeImg = useGenerateImageVariant(authV2LoginIllustrationLight, authV2LoginIllustrationDark, authV2LoginIllustrationBorderedLight, authV2LoginIllustrationBorderedDark, true)
+import { useAuth } from '@/composables/useAuth'
+import NavBarI18n from '@core/components/I18n.vue'
+import { cookieRef } from '@layouts/stores/config'
+import { COOKIE_MAX_AGE_1_YEAR } from '@/utils/constants'
 
 const authThemeMask = useGenerateImageVariant(authV2MaskLight, authV2MaskDark)
 
@@ -23,12 +24,36 @@ definePage({
   },
 })
 
+// Language auto-detection and translations
+const { locale, t } = useI18n({ useScope: 'global' })
+const storedLang = cookieRef<string | null>('language', null)
+
+// Auto-detect browser language - run immediately (not in onMounted to avoid flicker)
+if (typeof window !== 'undefined') {
+  // Only auto-detect if no language is stored in cookie
+  if (!storedLang.value) {
+    const browserLang = navigator.language || (navigator as any).userLanguage
+    const langCode = browserLang.split('-')[0].toLowerCase()
+    
+    // Check if browser language is supported (en, es, pt)
+    const supportedLangs = ['en', 'es', 'pt']
+    if (supportedLangs.includes(langCode)) {
+      locale.value = langCode
+      storedLang.value = langCode
+    }
+  } else {
+    // Use stored language
+    locale.value = storedLang.value
+  }
+}
+
 const isPasswordVisible = ref(false)
 
 const route = useRoute()
 const router = useRouter()
 
 const ability = useAbility()
+const { login: authLogin } = useAuth()
 
 const errors = ref<Record<string, string | undefined>>({
   email: undefined,
@@ -38,41 +63,68 @@ const errors = ref<Record<string, string | undefined>>({
 const refVForm = ref<VForm>()
 
 const credentials = ref({
-  email: 'admin@demo.com',
-  password: 'admin',
+  email: '',
+  password: '',
 })
 
 const rememberMe = ref(false)
+const isLoading = ref(false)
 
 const login = async () => {
+  // Clear previous errors
+  errors.value = {
+    email: undefined,
+    password: undefined,
+  }
+
+  isLoading.value = true
+
   try {
-    const res = await $api('/auth/login', {
-      method: 'POST',
-      body: {
-        email: credentials.value.email,
-        password: credentials.value.password,
-      },
-      onResponseError({ response }) {
-        errors.value = response._data.errors
-      },
-    })
+    const res = await authLogin(credentials.value.email, credentials.value.password)
 
     const { accessToken, userData, userAbilityRules } = res
 
-    useCookie('userAbilityRules').value = userAbilityRules
+    // Set cookie expiration based on rememberMe
+    // Note: Cookies are set without namespace for auth tokens
+    const maxAge = rememberMe.value
+      ? COOKIE_MAX_AGE_1_YEAR // 1 year if remember me is checked
+      : 60 * 60 * 24 * 30 // 30 days if not checked
+
+    // Set cookies with appropriate expiration
+    // Create cookies with custom maxAge options
+    const cookieOptions = { maxAge, path: '/' }
+    
+    const userAbilityRulesCookie = useCookie('userAbilityRules', cookieOptions)
+    userAbilityRulesCookie.value = userAbilityRules
     ability.update(userAbilityRules)
 
-    useCookie('userData').value = userData
-    useCookie('accessToken').value = accessToken
+    const userDataCookie = useCookie('userData', cookieOptions)
+    userDataCookie.value = userData
+    
+    const accessTokenCookie = useCookie('accessToken', cookieOptions)
+    accessTokenCookie.value = accessToken
 
     // Redirect to `to` query if exist or redirect to index route
-    // ❗ nextTick is required to wait for DOM updates and later redirect
     await nextTick(() => {
       router.replace(route.query.to ? String(route.query.to) : '/')
     })
   }
-  catch (err) {
-    console.error(err)
+  catch (err: any) {
+    // Handle Supabase auth errors
+    const errorMessage = err?.message || t('Invalid email or password')
+    
+    if (errorMessage.includes('email') || errorMessage.includes('Email')) {
+      errors.value.email = errorMessage
+    }
+    else if (errorMessage.includes('password') || errorMessage.includes('Password')) {
+      errors.value.password = errorMessage
+    }
+    else {
+      errors.value.email = errorMessage
+    }
+  }
+  finally {
+    isLoading.value = false
   }
 }
 
@@ -86,14 +138,27 @@ const onSubmit = () => {
 </script>
 
 <template>
-  <RouterLink to="/">
-    <div class="auth-logo d-flex align-center gap-x-3">
-      <VNodeRenderer :nodes="themeConfig.app.logo" />
-      <h1 class="auth-title">
-        {{ themeConfig.app.title }}
-      </h1>
+  <div class="auth-header d-flex align-center justify-space-between">
+    <RouterLink to="/">
+      <div class="auth-logo d-flex align-center gap-x-3">
+        <VNodeRenderer :nodes="themeConfig.app.logo" />
+        <h1 class="auth-title">
+          {{ themeConfig.app.title }}
+        </h1>
+      </div>
+    </RouterLink>
+    
+    <!-- Language Dropdown -->
+    <div
+      v-if="themeConfig.app.i18n.enable && themeConfig.app.i18n.langConfig?.length"
+      class="auth-language-switcher"
+    >
+      <NavBarI18n
+        :languages="themeConfig.app.i18n.langConfig"
+        location="bottom end"
+      />
     </div>
-  </RouterLink>
+  </div>
 
   <VRow
     no-gutters
@@ -106,11 +171,11 @@ const onSubmit = () => {
       <div class="position-relative bg-background w-100 me-0">
         <div
           class="d-flex align-center justify-center w-100 h-100"
-          style="padding-inline: 6.25rem;"
+          style="padding-inline: 150px;"
         >
           <VImg
-            max-width="613"
-            :src="authThemeImg"
+            max-width="468"
+            :src="loginImage"
             class="auth-illustration mt-16 mb-2"
           />
         </div>
@@ -137,24 +202,11 @@ const onSubmit = () => {
       >
         <VCardText>
           <h4 class="text-h4 mb-1">
-            Welcome to <span class="text-capitalize"> {{ themeConfig.app.title }} </span>! 👋🏻
+            {{ t('Welcome to') }} <span class="text-capitalize"> {{ themeConfig.app.title }} </span>! 👋🏻
           </h4>
           <p class="mb-0">
-            Please sign-in to your account and start the adventure
+            {{ t('Please sign-in to your account and start the adventure') }}
           </p>
-        </VCardText>
-        <VCardText>
-          <VAlert
-            color="primary"
-            variant="tonal"
-          >
-            <p class="text-sm mb-2">
-              Admin Email: <strong>admin@demo.com</strong> / Pass: <strong>admin</strong>
-            </p>
-            <p class="text-sm mb-0">
-              Client Email: <strong>client@demo.com</strong> / Pass: <strong>client</strong>
-            </p>
-          </VAlert>
         </VCardText>
         <VCardText>
           <VForm
@@ -166,7 +218,7 @@ const onSubmit = () => {
               <VCol cols="12">
                 <AppTextField
                   v-model="credentials.email"
-                  label="Email"
+                  :label="t('Email')"
                   placeholder="johndoe@email.com"
                   type="email"
                   autofocus
@@ -179,7 +231,7 @@ const onSubmit = () => {
               <VCol cols="12">
                 <AppTextField
                   v-model="credentials.password"
-                  label="Password"
+                  :label="t('Password')"
                   placeholder="············"
                   :rules="[requiredValidator]"
                   :type="isPasswordVisible ? 'text' : 'password'"
@@ -192,52 +244,104 @@ const onSubmit = () => {
                 <div class="d-flex align-center flex-wrap justify-space-between my-6">
                   <VCheckbox
                     v-model="rememberMe"
-                    label="Remember me"
+                    :label="t('Remember me')"
                   />
                   <RouterLink
                     class="text-primary ms-2 mb-1"
                     :to="{ name: 'forgot-password' }"
                   >
-                    Forgot Password?
+                    {{ t('Forgot Password?') }}
                   </RouterLink>
                 </div>
 
                 <VBtn
                   block
                   type="submit"
+                  :loading="isLoading"
                 >
-                  Login
+                  {{ t('Login') }}
                 </VBtn>
-              </VCol>
-
-              <!-- create account -->
-              <VCol
-                cols="12"
-                class="text-center"
-              >
-                <span>New on our platform?</span>
-                <RouterLink
-                  class="text-primary ms-1"
-                  :to="{ name: 'register' }"
-                >
-                  Create an account
-                </RouterLink>
               </VCol>
               <VCol
                 cols="12"
                 class="d-flex align-center"
               >
                 <VDivider />
-                <span class="mx-4">or</span>
+                <span class="mx-4 text-sm">{{ t('browsers') }}</span>
                 <VDivider />
               </VCol>
 
-              <!-- auth providers -->
+              <!-- browser recommendations -->
               <VCol
                 cols="12"
                 class="text-center"
               >
-                <AuthProvider />
+                <div class="d-flex justify-center flex-wrap gap-3">
+                  <a
+                    href="https://www.google.com/chrome/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="text-decoration-none"
+                  >
+                    <VAvatar
+                      size="32"
+                      class="cursor-pointer browser-logo"
+                    >
+                      <VImg
+                        :src="chromeLogo"
+                        alt="Chrome"
+                      />
+                    </VAvatar>
+                  </a>
+                  <a
+                    href="https://www.mozilla.org/firefox/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="text-decoration-none"
+                  >
+                    <VAvatar
+                      size="32"
+                      class="cursor-pointer browser-logo"
+                    >
+                      <VImg
+                        :src="firefoxLogo"
+                        alt="Firefox"
+                      />
+                    </VAvatar>
+                  </a>
+                  <a
+                    href="https://brave.com/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="text-decoration-none"
+                  >
+                    <VAvatar
+                      size="32"
+                      class="cursor-pointer browser-logo"
+                    >
+                      <VImg
+                        :src="braveLogo"
+                        alt="Brave"
+                      />
+                    </VAvatar>
+                  </a>
+                  <a
+                    href="https://www.apple.com/safari/"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    class="text-decoration-none"
+                  >
+                    <VAvatar
+                      size="32"
+                      class="cursor-pointer browser-logo"
+                    >
+                      <VImg
+                        :src="safariLogo"
+                        alt="Safari"
+                      />
+                    </VAvatar>
+                  </a>
+                </div>
               </VCol>
             </VRow>
           </VForm>

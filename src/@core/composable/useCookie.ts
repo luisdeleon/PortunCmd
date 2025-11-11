@@ -39,5 +39,7 @@ function serializeCookie(name: string, value: any, opts: CookieSerializeOptions 
   if (value === null || value === undefined)
     return serialize(name, value, { ...opts, maxAge: -1 })
 
-  return serialize(name, value, { ...opts, maxAge: 60 * 60 * 24 * 30 })
+  // Use maxAge from opts if provided, otherwise default to 30 days
+  const maxAge = opts.maxAge !== undefined ? opts.maxAge : 60 * 60 * 24 * 30
+  return serialize(name, value, { ...opts, maxAge })
 }

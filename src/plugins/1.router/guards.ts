@@ -1,10 +1,11 @@
 import type { RouteNamedMap, _RouterTyped } from 'unplugin-vue-router'
 import { canNavigate } from '@layouts/plugins/casl'
+import { supabase } from '@/lib/supabase'
 
 export const setupGuards = (router: _RouterTyped<RouteNamedMap & { [key: string]: any }>) => {
   // 👉 router.beforeEach
   // Docs: https://router.vuejs.org/guide/advanced/navigation-guards.html#global-before-guards
-  router.beforeEach(to => {
+  router.beforeEach(async to => {
     /*
      * If it's a public route, continue navigation. This kind of pages are allowed to visited by login & non-login users. Basically, without any restrictions.
      * Examples of public routes are, 404, under maintenance, etc.
@@ -13,10 +14,26 @@ export const setupGuards = (router: _RouterTyped<RouteNamedMap & { [key: string]
       return
 
     /**
-     * Check if user is logged in by checking if token & user data exists in local storage
-     * Feel free to update this logic to suit your needs
+     * Check if user is logged in by checking cookies and Supabase session
+     * We check cookies first for performance, then verify with Supabase session
      */
-    const isLoggedIn = !!(useCookie('userData').value && useCookie('accessToken').value)
+    const userData = useCookie('userData').value
+    const accessToken = useCookie('accessToken').value
+    const hasCookies = !!(userData && accessToken)
+    
+    // If cookies exist, verify session (this is async but only if cookies exist)
+    let isLoggedIn = false
+    if (hasCookies) {
+      const { data: { session } } = await supabase.auth.getSession()
+      isLoggedIn = !!session
+      
+      // If session doesn't match cookies, clear them
+      if (!session) {
+        useCookie('userData').value = null
+        useCookie('accessToken').value = null
+        useCookie('userAbilityRules').value = null
+      }
+    }
 
     /*
       If user is logged in and is trying to access login like page, redirect to home

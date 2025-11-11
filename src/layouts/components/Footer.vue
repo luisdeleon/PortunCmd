@@ -29,7 +29,7 @@
         target="noopener noreferrer"
       >More Themes</a>
       <a
-        href="https://demos.pixinvent.com/vuexy-vuejs-admin-template/documentation/"
+        href="https://github.com/luisdeleon/PortunCmd"
         target="noopener noreferrer"
       >Documentation</a>
       <a

@@ -8,6 +8,17 @@ const ability = useAbility()
 const userData = useCookie<any>('userData')
 
 const logout = async () => {
+  const { useAuth } = await import('@/composables/useAuth')
+  const { logout: authLogout } = useAuth()
+
+  try {
+    // Sign out from Supabase
+    await authLogout()
+  }
+  catch (error) {
+    console.error('Error signing out:', error)
+  }
+
   // Remove "accessToken" from cookie
   useCookie('accessToken').value = null
 

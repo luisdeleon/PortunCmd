@@ -45,6 +45,9 @@
       ],
       "@api-utils/*": [
         "./src/plugins/fake-api/utils/*"
+      ],
+      "@/types/*": [
+        "./src/types/*"
       ]
     },
     "lib": [

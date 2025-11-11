@@ -10,7 +10,7 @@ import { AppContentLayoutNav, ContentWidth, FooterType, NavbarType } from '@layo
 
 export const { themeConfig, layoutConfig } = defineThemeConfig({
   app: {
-    title: 'vuexy',
+    title: 'portun',
     logo: h('div', { innerHTML: logo, style: 'line-height:0; color: rgb(var(--v-global-theme-primary))' }),
     contentWidth: ContentWidth.Boxed,
     contentLayoutNav: AppContentLayoutNav.Vertical,
@@ -25,14 +25,14 @@ export const { themeConfig, layoutConfig } = defineThemeConfig({
           isRTL: false,
         },
         {
-          label: 'French',
-          i18nLang: 'fr',
+          label: 'Spanish',
+          i18nLang: 'es',
           isRTL: false,
         },
         {
-          label: 'Arabic',
-          i18nLang: 'ar',
-          isRTL: true,
+          label: 'Portuguese',
+          i18nLang: 'pt',
+          isRTL: false,
         },
       ],
     },

@@ -47,7 +47,7 @@ export default [
       },
       {
         title: 'Documentation',
-        href: 'https://demos.pixinvent.com/vuexy-vuejs-admin-template/documentation/',
+        href: 'https://github.com/luisdeleon/PortunCmd',
         icon: { icon: 'tabler-file-text' },
         target: '_blank',
       },
