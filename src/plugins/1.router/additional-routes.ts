@@ -9,6 +9,9 @@ export const redirects: RouteRecordRaw[] = [
   {
     path: '/',
     name: 'index',
+    meta: {
+      public: true, // Mark as public so router guard doesn't block it
+    },
     redirect: to => {
       // TODO: Get type from backend
       const userData = useCookie<Record<string, unknown> | null | undefined>('userData')

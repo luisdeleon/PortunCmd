@@ -4,6 +4,8 @@ import { useGenerateImageVariant } from '@core/composable/useGenerateImageVarian
 import { VNodeRenderer } from '@layouts/components/VNodeRenderer'
 import { themeConfig } from '@themeConfig'
 import { useAuth } from '@/composables/useAuth'
+import { getErrorMessageTranslationKey } from '@/utils/errorTranslations'
+import { useValidators } from '@/composables/useValidators'
 
 import forgotPasswordImage from '@images/pages/img-forgot-w.png'
 import authV2MaskDark from '@images/pages/misc-mask-dark.png'
@@ -11,6 +13,9 @@ import authV2MaskLight from '@images/pages/misc-mask-light.png'
 import NavBarI18n from '@core/components/I18n.vue'
 
 const { t } = useI18n({ useScope: 'global' })
+
+// Get translated validators
+const { requiredValidator, emailValidator } = useValidators()
 
 const email = ref('')
 const refVForm = ref<VForm>()
@@ -44,7 +49,9 @@ const onSubmit = async () => {
     isSuccess.value = true
   }
   catch (err: any) {
-    errorMessage.value = err?.message || t('Failed to send reset email. Please try again.')
+    // Translate error message
+    const errorKey = getErrorMessageTranslationKey(err?.message)
+    errorMessage.value = t(errorKey)
   }
   finally {
     isLoading.value = false

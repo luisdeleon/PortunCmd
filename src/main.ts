@@ -15,3 +15,14 @@ registerPlugins(app)
 
 // Mount vue app
 app.mount('#app')
+
+// Hide initial loader after Vue has mounted and replaced the content
+if (typeof document !== 'undefined') {
+  // Use nextTick to ensure Vue has rendered
+  setTimeout(() => {
+    const loadingBg = document.getElementById('loading-bg')
+    if (loadingBg) {
+      loadingBg.style.display = 'none'
+    }
+  }, 100)
+}

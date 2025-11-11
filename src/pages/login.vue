@@ -6,7 +6,6 @@ import authV2MaskDark from '@images/pages/misc-mask-dark.png'
 import authV2MaskLight from '@images/pages/misc-mask-light.png'
 import chromeLogo from '@images/logos/chrome.png'
 import firefoxLogo from '@images/logos/firefox.png'
-import braveLogo from '@images/logos/brave.png'
 import safariLogo from '@images/logos/safari.png'
 import { VNodeRenderer } from '@layouts/components/VNodeRenderer'
 import { themeConfig } from '@themeConfig'
@@ -14,6 +13,8 @@ import { useAuth } from '@/composables/useAuth'
 import NavBarI18n from '@core/components/I18n.vue'
 import { cookieRef } from '@layouts/stores/config'
 import { COOKIE_MAX_AGE_1_YEAR } from '@/utils/constants'
+import { getErrorMessageTranslationKey } from '@/utils/errorTranslations'
+import { useValidators } from '@/composables/useValidators'
 
 const authThemeMask = useGenerateImageVariant(authV2MaskLight, authV2MaskDark)
 
@@ -27,6 +28,9 @@ definePage({
 // Language auto-detection and translations
 const { locale, t } = useI18n({ useScope: 'global' })
 const storedLang = cookieRef<string | null>('language', null)
+
+// Get translated validators
+const { requiredValidator, emailValidator } = useValidators()
 
 // Auto-detect browser language - run immediately (not in onMounted to avoid flicker)
 if (typeof window !== 'undefined') {
@@ -110,17 +114,20 @@ const login = async () => {
     })
   }
   catch (err: any) {
-    // Handle Supabase auth errors
-    const errorMessage = err?.message || t('Invalid email or password')
+    // Handle Supabase auth errors and translate them
+    const errorKey = getErrorMessageTranslationKey(err?.message)
+    const translatedMessage = t(errorKey)
     
-    if (errorMessage.includes('email') || errorMessage.includes('Email')) {
-      errors.value.email = errorMessage
+    // Determine which field to show the error on
+    const errorMessage = err?.message?.toLowerCase() || ''
+    if (errorMessage.includes('email') || errorKey.includes('email')) {
+      errors.value.email = translatedMessage
     }
-    else if (errorMessage.includes('password') || errorMessage.includes('Password')) {
-      errors.value.password = errorMessage
+    else if (errorMessage.includes('password') || errorKey.includes('password')) {
+      errors.value.password = translatedMessage
     }
     else {
-      errors.value.email = errorMessage
+      errors.value.email = translatedMessage
     }
   }
   finally {
@@ -306,22 +313,6 @@ const onSubmit = () => {
                       <VImg
                         :src="firefoxLogo"
                         alt="Firefox"
-                      />
-                    </VAvatar>
-                  </a>
-                  <a
-                    href="https://brave.com/"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    class="text-decoration-none"
-                  >
-                    <VAvatar
-                      size="32"
-                      class="cursor-pointer browser-logo"
-                    >
-                      <VImg
-                        :src="braveLogo"
-                        alt="Brave"
                       />
                     </VAvatar>
                   </a>

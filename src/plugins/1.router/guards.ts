@@ -14,25 +14,33 @@ export const setupGuards = (router: _RouterTyped<RouteNamedMap & { [key: string]
       return
 
     /**
-     * Check if user is logged in by checking cookies and Supabase session
-     * We check cookies first for performance, then verify with Supabase session
+     * Check if user is logged in by checking cookies
+     * For performance, we rely on cookies first. Session verification happens in background.
      */
     const userData = useCookie('userData').value
     const accessToken = useCookie('accessToken').value
     const hasCookies = !!(userData && accessToken)
     
-    // If cookies exist, verify session (this is async but only if cookies exist)
-    let isLoggedIn = false
+    // Use cookies as primary indicator - session verification happens asynchronously
+    let isLoggedIn = hasCookies
+    
+    // Verify session in background (non-blocking) if cookies exist
     if (hasCookies) {
-      const { data: { session } } = await supabase.auth.getSession()
-      isLoggedIn = !!session
-      
-      // If session doesn't match cookies, clear them
-      if (!session) {
+      // Don't await - verify session asynchronously without blocking navigation
+      supabase.auth.getSession().then(({ data: { session }, error }) => {
+        if (error || !session) {
+          // Session invalid - clear cookies
+          useCookie('userData').value = null
+          useCookie('accessToken').value = null
+          useCookie('userAbilityRules').value = null
+        }
+      }).catch((error) => {
+        console.error('Session verification error:', error)
+        // On error, clear cookies
         useCookie('userData').value = null
         useCookie('accessToken').value = null
         useCookie('userAbilityRules').value = null
-      }
+      })
     }
 
     /*
@@ -47,18 +55,21 @@ export const setupGuards = (router: _RouterTyped<RouteNamedMap & { [key: string]
         return undefined
     }
 
+    // Only check navigation permissions if user is logged in
+    // If not logged in, redirect to login (unless route is public)
+    if (!isLoggedIn) {
+      return {
+        name: 'login',
+        query: {
+          ...to.query,
+          to: to.fullPath !== '/' ? to.path : undefined,
+        },
+      }
+    }
+
+    // If logged in, check if user can navigate to this route
     if (!canNavigate(to) && to.matched.length) {
-      /* eslint-disable indent */
-      return isLoggedIn
-        ? { name: 'not-authorized' }
-        : {
-            name: 'login',
-            query: {
-              ...to.query,
-              to: to.fullPath !== '/' ? to.path : undefined,
-            },
-          }
-      /* eslint-enable indent */
+      return { name: 'not-authorized' }
     }
   })
 }

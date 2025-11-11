@@ -41,6 +41,11 @@ export const canViewNavMenuGroup = (item: NavGroup) => {
 }
 
 export const canNavigate = (to: RouteLocationNormalized) => {
+  // If route has no meta with action/subject, allow navigation (no ACL restriction)
+  const hasAclMeta = to.matched.some(route => route.meta?.action || route.meta?.subject)
+  if (!hasAclMeta)
+    return true
+
   const ability = useAbility()
 
   // Get the most specific route (last one in the matched array)
