@@ -2,6 +2,9 @@
 import AddNewUserDrawer from '@/views/apps/user/list/AddNewUserDrawer.vue'
 import type { UserProperties } from '@db/apps/users/types'
 
+const { useSupabase } = await import('@/composables/useSupabase')
+const supabase = useSupabase()
+
 // 👉 Store
 const searchQuery = ref('')
 const selectedRole = ref()
@@ -21,32 +24,100 @@ const updateOptions = (options: any) => {
   orderBy.value = options.sortBy[0]?.order
 }
 
-// Headers
+// Headers - Updated to show Default Community and Default Property
 const headers = [
   { title: 'User', key: 'user' },
   { title: 'Role', key: 'role' },
-  { title: 'Plan', key: 'plan' },
-  { title: 'Billing', key: 'billing' },
+  { title: 'Default Community', key: 'defaultCommunity' },
+  { title: 'Default Property', key: 'defaultProperty' },
   { title: 'Status', key: 'status' },
   { title: 'Actions', key: 'actions', sortable: false },
 ]
 
-// 👉 Fetching users
-const { data: usersData, execute: fetchUsers } = await useApi<any>(createUrl('/apps/users', {
-  query: {
-    q: searchQuery,
-    status: selectedStatus,
-    plan: selectedPlan,
-    role: selectedRole,
-    itemsPerPage,
-    page,
-    sortBy,
-    orderBy,
-  },
-}))
+// 👉 Fetching profiles from Supabase
+const users = ref([])
+const totalUsers = ref(0)
+const isLoading = ref(false)
 
-const users = computed((): UserProperties[] => usersData.value.users)
-const totalUsers = computed(() => usersData.value.totalUsers)
+const fetchUsers = async () => {
+  try {
+    isLoading.value = true
+
+    // Build query
+    let query = supabase
+      .from('profile')
+      .select(`
+        id,
+        display_name,
+        email,
+        enabled,
+        def_community_id,
+        def_property_id,
+        community:def_community_id(name),
+        property:def_property_id(name),
+        profile_role(
+          role:role_id(role_name)
+        )
+      `)
+
+    // Apply search filter
+    if (searchQuery.value) {
+      query = query.or(`display_name.ilike.%${searchQuery.value}%,email.ilike.%${searchQuery.value}%`)
+    }
+
+    // Apply role filter
+    if (selectedRole.value) {
+      // This would require a more complex query with joins
+      // For now, we'll fetch all and filter client-side
+    }
+
+    // Apply pagination
+    const from = (page.value - 1) * itemsPerPage.value
+    const to = from + itemsPerPage.value - 1
+
+    if (itemsPerPage.value !== -1) {
+      query = query.range(from, to)
+    }
+
+    const { data, error, count } = await query
+
+    if (error) {
+      console.error('Error fetching profiles:', error)
+      return
+    }
+
+    // Transform data to match the table structure
+    users.value = data?.map(profile => ({
+      id: profile.id,
+      fullName: profile.display_name || 'N/A',
+      email: profile.email,
+      role: profile.profile_role?.[0]?.role?.role_name || 'No Role',
+      defaultCommunity: profile.community?.name || 'N/A',
+      defaultProperty: profile.property?.name || 'N/A',
+      status: profile.enabled ? 'active' : 'inactive',
+      avatar: null, // Can be added later if you have avatar URLs
+    })) || []
+
+    // Get total count
+    const { count: totalCount } = await supabase
+      .from('profile')
+      .select('*', { count: 'exact', head: true })
+
+    totalUsers.value = totalCount || 0
+  } catch (err) {
+    console.error('Error in fetchUsers:', err)
+  } finally {
+    isLoading.value = false
+  }
+}
+
+// Fetch users on mount
+await fetchUsers()
+
+// Watch for filter changes
+watch([searchQuery, selectedRole, selectedStatus, page, itemsPerPage], () => {
+  fetchUsers()
+})
 
 // 👉 search filters
 const roles = [
@@ -201,7 +272,7 @@ const widgetData = ref([
           <!-- 👉 Select Role -->
           <VCol
             cols="12"
-            sm="4"
+            sm="6"
           >
             <AppSelect
               v-model="selectedRole"
@@ -211,23 +282,10 @@ const widgetData = ref([
               clear-icon="tabler-x"
             />
           </VCol>
-          <!-- 👉 Select Plan -->
-          <VCol
-            cols="12"
-            sm="4"
-          >
-            <AppSelect
-              v-model="selectedPlan"
-              placeholder="Select Plan"
-              :items="plans"
-              clearable
-              clear-icon="tabler-x"
-            />
-          </VCol>
           <!-- 👉 Select Status -->
           <VCol
             cols="12"
-            sm="4"
+            sm="6"
           >
             <AppSelect
               v-model="selectedStatus"
@@ -347,10 +405,17 @@ const widgetData = ref([
           </div>
         </template>
 
-        <!-- Plan -->
-        <template #item.plan="{ item }">
-          <div class="text-body-1 text-high-emphasis text-capitalize">
-            {{ item.currentPlan }}
+        <!-- Default Community -->
+        <template #item.defaultCommunity="{ item }">
+          <div class="text-body-1 text-high-emphasis">
+            {{ item.defaultCommunity }}
+          </div>
+        </template>
+
+        <!-- Default Property -->
+        <template #item.defaultProperty="{ item }">
+          <div class="text-body-1 text-high-emphasis">
+            {{ item.defaultProperty }}
           </div>
         </template>
 
