@@ -13,7 +13,7 @@ PortunCmd is a modern admin dashboard template featuring:
 
 ## Documentation
 
-All documentation is available in the [`/doc`](./doc/) folder:
+Additional setup and development documentation is available in the [`/doc`](./doc/) folder:
 
 - [Getting Started](./doc/GETTING_STARTED.md) - Setup and development guide
 
