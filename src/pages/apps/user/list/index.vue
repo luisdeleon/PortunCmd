@@ -139,18 +139,18 @@ const status = [
 const resolveUserRoleVariant = (role: string) => {
   const roleLowerCase = role.toLowerCase()
 
-  if (roleLowerCase === 'subscriber')
-    return { color: 'success', icon: 'tabler-user' }
-  if (roleLowerCase === 'author')
-    return { color: 'error', icon: 'tabler-device-desktop' }
-  if (roleLowerCase === 'maintainer')
-    return { color: 'info', icon: 'tabler-chart-pie' }
-  if (roleLowerCase === 'editor')
-    return { color: 'warning', icon: 'tabler-edit' }
-  if (roleLowerCase === 'admin')
-    return { color: 'primary', icon: 'tabler-crown' }
+  if (roleLowerCase === 'super admin' || roleLowerCase === 'superadmin')
+    return { color: 'error', icon: 'tabler-crown' }
+  if (roleLowerCase === 'administrator' || roleLowerCase === 'admin')
+    return { color: 'primary', icon: 'tabler-shield-check' }
+  if (roleLowerCase === 'dealer')
+    return { color: 'warning', icon: 'tabler-briefcase' }
+  if (roleLowerCase === 'guard')
+    return { color: 'info', icon: 'tabler-shield-lock' }
+  if (roleLowerCase === 'resident')
+    return { color: 'success', icon: 'tabler-home' }
 
-  return { color: 'primary', icon: 'tabler-user' }
+  return { color: 'secondary', icon: 'tabler-user' }
 }
 
 const resolveUserStatusVariant = (stat: string) => {
@@ -405,10 +405,17 @@ const widgetData = ref([
           </div>
         </template>
 
-        <!-- Plan -->
+        <!-- 👉 Role (Plan) -->
         <template #item.plan="{ item }">
-          <div class="text-body-1 text-high-emphasis text-capitalize">
-            {{ item.currentPlan }}
+          <div class="d-flex align-center gap-x-2">
+            <VIcon
+              :size="22"
+              :icon="resolveUserRoleVariant(item.currentPlan).icon"
+              :color="resolveUserRoleVariant(item.currentPlan).color"
+            />
+            <div class="text-capitalize text-high-emphasis text-body-1">
+              {{ item.currentPlan }}
+            </div>
           </div>
         </template>
 
