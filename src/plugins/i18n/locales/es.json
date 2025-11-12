@@ -449,5 +449,11 @@
       "edit": "Editar",
       "delete": "Eliminar"
     }
+  },
+  "footer": {
+    "copyright": "Copyright © {year} Webzy LLC. Todos los derechos reservados.",
+    "termsAndConditions": "Términos y Condiciones",
+    "termsOfService": "Términos de Servicio",
+    "privacyPolicy": "Política de Privacidad"
   }
 }

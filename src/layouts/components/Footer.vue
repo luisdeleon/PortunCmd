@@ -3,43 +3,32 @@ const { t } = useI18n({ useScope: 'global' })
 </script>
 
 <template>
-  <div class="h-100 d-flex align-center justify-md-space-between justify-center">
-    <!-- 👉 Footer: left content -->
-    <span class="d-flex align-center text-medium-emphasis">
-      &copy;
-      {{ new Date().getFullYear() }}
-      {{ t('Made With') }}
-      <VIcon
-        icon="tabler-heart-filled"
-        color="error"
-        size="1.25rem"
-        class="mx-1"
-      />
-      By <a
-        href="https://pixinvent.com"
+  <div class="h-100 d-flex align-center justify-space-between">
+    <!-- 👉 Footer: left content - copyright -->
+    <span class="text-medium-emphasis">
+      {{ t('footer.copyright', { year: new Date().getFullYear() }) }}
+    </span>
+
+    <!-- 👉 Footer: right content - links -->
+    <span class="d-flex gap-x-4 text-medium-emphasis">
+      <a
+        href="https://webzy.io/terms-and-conditions"
         target="_blank"
         rel="noopener noreferrer"
-        class="text-primary ms-1"
-      >Pixinvent</a>
-    </span>
-    <!-- 👉 Footer: right content -->
-    <span class="d-md-flex gap-x-4 text-primary d-none">
+        class="text-medium-emphasis"
+      >{{ t('footer.termsAndConditions') }}</a>
       <a
-        href="https://themeforest.net/licenses/standard"
-        target="noopener noreferrer"
-      >{{ t('License') }}</a>
+        href="https://webzy.io/terms-of-service"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="text-medium-emphasis"
+      >{{ t('footer.termsOfService') }}</a>
       <a
-        href="https://1.envato.market/pixinvent_portfolio"
-        target="noopener noreferrer"
-      >{{ t('More Themes') }}</a>
-      <a
-        href="https://github.com/luisdeleon/PortunCmd"
-        target="noopener noreferrer"
-      >{{ t('Documentation') }}</a>
-      <a
-        href="https://pixinvent.ticksy.com/"
-        target="noopener noreferrer"
-      >{{ t('Support') }}</a>
+        href="https://webzy.io/privacy-policy"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="text-medium-emphasis"
+      >{{ t('footer.privacyPolicy') }}</a>
     </span>
   </div>
 </template>
