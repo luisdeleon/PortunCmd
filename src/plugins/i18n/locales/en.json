@@ -399,5 +399,55 @@
       "enterFullscreen": "Enter Fullscreen",
       "volume": "Volume"
     }
+  },
+  "userList": {
+    "title": "User List",
+    "widgets": {
+      "totalUsers": "Total Users",
+      "residentCount": "Resident Count",
+      "activeUsers": "Active Users",
+      "inactiveUsers": "Inactive Users",
+      "last30DaysGrowth": "Last 30 Days Growth",
+      "last30DaysAnalytics": "Last 30 Days Analytics"
+    },
+    "filters": {
+      "title": "Filters",
+      "filterByRole": "Filter by Role",
+      "filterByCommunity": "Filter by Community",
+      "filterByEnabled": "Filter by Enabled",
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "table": {
+      "user": "User",
+      "role": "Role",
+      "community": "Community",
+      "property": "Property",
+      "enabled": "Enabled",
+      "actions": "Actions"
+    },
+    "buttons": {
+      "export": "Export",
+      "addNewUser": "Add New User"
+    },
+    "search": {
+      "placeholder": "Search User"
+    },
+    "roles": {
+      "superAdmin": "Super Admin",
+      "administrator": "Administrator",
+      "dealer": "Dealer",
+      "guard": "Guard",
+      "resident": "Resident"
+    },
+    "status": {
+      "active": "Active",
+      "inactive": "Inactive"
+    },
+    "actions": {
+      "view": "View",
+      "edit": "Edit",
+      "delete": "Delete"
+    }
   }
 }

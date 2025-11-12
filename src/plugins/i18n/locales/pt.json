@@ -399,5 +399,55 @@
       "enterFullscreen": "Enter Fullscreen",
       "volume": "Volume"
     }
+  },
+  "userList": {
+    "title": "Lista de Usuários",
+    "widgets": {
+      "totalUsers": "Total de Usuários",
+      "residentCount": "Quantidade de Residentes",
+      "activeUsers": "Usuários Ativos",
+      "inactiveUsers": "Usuários Inativos",
+      "last30DaysGrowth": "Crescimento Últimos 30 Dias",
+      "last30DaysAnalytics": "Análise Últimos 30 Dias"
+    },
+    "filters": {
+      "title": "Filtros",
+      "filterByRole": "Filtrar por Função",
+      "filterByCommunity": "Filtrar por Comunidade",
+      "filterByEnabled": "Filtrar por Status",
+      "active": "Ativo",
+      "inactive": "Inativo"
+    },
+    "table": {
+      "user": "Usuário",
+      "role": "Função",
+      "community": "Comunidade",
+      "property": "Propriedade",
+      "enabled": "Status",
+      "actions": "Ações"
+    },
+    "buttons": {
+      "export": "Exportar",
+      "addNewUser": "Adicionar Novo Usuário"
+    },
+    "search": {
+      "placeholder": "Buscar Usuário"
+    },
+    "roles": {
+      "superAdmin": "Super Administrador",
+      "administrator": "Administrador",
+      "dealer": "Distribuidor",
+      "guard": "Guarda",
+      "resident": "Residente"
+    },
+    "status": {
+      "active": "Ativo",
+      "inactive": "Inativo"
+    },
+    "actions": {
+      "view": "Visualizar",
+      "edit": "Editar",
+      "delete": "Excluir"
+    }
   }
 }

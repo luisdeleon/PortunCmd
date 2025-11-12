@@ -2,6 +2,10 @@
 import AddNewUserDrawer from '@/views/apps/user/list/AddNewUserDrawer.vue'
 import type { UserProperties } from '@db/apps/users/types'
 import { supabase } from '@/lib/supabase'
+import { useI18n } from 'vue-i18n'
+
+// 👉 i18n
+const { t } = useI18n()
 
 // 👉 Store
 const searchQuery = ref('')
@@ -23,14 +27,14 @@ const updateOptions = (options: any) => {
 }
 
 // Headers
-const headers = [
-  { title: 'User', key: 'user' },
-  { title: 'Role', key: 'plan' },
-  { title: 'Community', key: 'community' },
-  { title: 'Property', key: 'property' },
-  { title: 'Enabled', key: 'enabled' },
-  { title: 'Actions', key: 'actions', sortable: false },
-]
+const headers = computed(() => [
+  { title: t('userList.table.user'), key: 'user' },
+  { title: t('userList.table.role'), key: 'plan' },
+  { title: t('userList.table.community'), key: 'community' },
+  { title: t('userList.table.property'), key: 'property' },
+  { title: t('userList.table.enabled'), key: 'enabled' },
+  { title: t('userList.table.actions'), key: 'actions', sortable: false },
+])
 
 // 👉 Fetching users from Supabase
 const users = ref<UserProperties[]>([])
@@ -293,20 +297,20 @@ watch([searchQuery, selectedRole, selectedCommunity, selectedEnabled, page, item
 })
 
 // 👉 search filters
-const roles = ref([
-  { title: 'Super Admin', value: 'Super Admin' },
-  { title: 'Administrator', value: 'Administrator' },
-  { title: 'Dealer', value: 'Dealer' },
-  { title: 'Guard', value: 'Guard' },
-  { title: 'Resident', value: 'Resident' },
+const roles = computed(() => [
+  { title: t('userList.roles.superAdmin'), value: 'Super Admin' },
+  { title: t('userList.roles.administrator'), value: 'Administrator' },
+  { title: t('userList.roles.dealer'), value: 'Dealer' },
+  { title: t('userList.roles.guard'), value: 'Guard' },
+  { title: t('userList.roles.resident'), value: 'Resident' },
 ])
 
 const communities = ref([])
 
-const enabledOptions = [
-  { title: 'Active', value: true },
-  { title: 'Inactive', value: false },
-]
+const enabledOptions = computed(() => [
+  { title: t('userList.filters.active'), value: true },
+  { title: t('userList.filters.inactive'), value: false },
+])
 
 const resolveUserRoleVariant = (role: string) => {
   const roleLowerCase = role.toLowerCase()
@@ -388,10 +392,10 @@ const widgetData = computed(() => {
     : 0
 
   return [
-    { title: 'Total Users', value: totalUsers.value.toLocaleString(), change: growthPercentage, desc: 'Last 30 Days Growth', icon: 'tabler-users', iconColor: 'primary' },
-    { title: 'Resident Count', value: totalResidents.value.toLocaleString(), change: residentGrowthPercentage, desc: 'Last 30 Days Growth', icon: 'tabler-home', iconColor: 'error' },
-    { title: 'Active Users', value: totalActiveUsers.value.toLocaleString(), change: activeGrowthPercentage, desc: 'Last 30 Days Analytics', icon: 'tabler-user-check', iconColor: 'success' },
-    { title: 'Inactive Users', value: totalInactiveUsers.value.toLocaleString(), change: inactiveGrowthPercentage, desc: 'Last 30 Days Analytics', icon: 'tabler-user-x', iconColor: 'warning' },
+    { title: t('userList.widgets.totalUsers'), value: totalUsers.value.toLocaleString(), change: growthPercentage, desc: t('userList.widgets.last30DaysGrowth'), icon: 'tabler-users', iconColor: 'primary' },
+    { title: t('userList.widgets.residentCount'), value: totalResidents.value.toLocaleString(), change: residentGrowthPercentage, desc: t('userList.widgets.last30DaysGrowth'), icon: 'tabler-home', iconColor: 'error' },
+    { title: t('userList.widgets.activeUsers'), value: totalActiveUsers.value.toLocaleString(), change: activeGrowthPercentage, desc: t('userList.widgets.last30DaysAnalytics'), icon: 'tabler-user-check', iconColor: 'success' },
+    { title: t('userList.widgets.inactiveUsers'), value: totalInactiveUsers.value.toLocaleString(), change: inactiveGrowthPercentage, desc: t('userList.widgets.last30DaysAnalytics'), icon: 'tabler-user-x', iconColor: 'warning' },
   ]
 })
 </script>
@@ -453,7 +457,7 @@ const widgetData = computed(() => {
 
     <VCard class="mb-6">
       <VCardItem class="pb-4">
-        <VCardTitle>Filters</VCardTitle>
+        <VCardTitle>{{ $t('userList.filters.title') }}</VCardTitle>
       </VCardItem>
 
       <VCardText>
@@ -465,7 +469,7 @@ const widgetData = computed(() => {
           >
             <AppSelect
               v-model="selectedRole"
-              placeholder="Filter by Role"
+              :placeholder="$t('userList.filters.filterByRole')"
               :items="roles"
               clearable
               clear-icon="tabler-x"
@@ -478,7 +482,7 @@ const widgetData = computed(() => {
           >
             <AppSelect
               v-model="selectedCommunity"
-              placeholder="Filter by Community"
+              :placeholder="$t('userList.filters.filterByCommunity')"
               :items="communities"
               clearable
               clear-icon="tabler-x"
@@ -491,7 +495,7 @@ const widgetData = computed(() => {
           >
             <AppSelect
               v-model="selectedEnabled"
-              placeholder="Filter by Enabled"
+              :placeholder="$t('userList.filters.filterByEnabled')"
               :items="enabledOptions"
               clearable
               clear-icon="tabler-x"
@@ -524,7 +528,7 @@ const widgetData = computed(() => {
           <div style="inline-size: 15.625rem;">
             <AppTextField
               v-model="searchQuery"
-              placeholder="Search User"
+              :placeholder="$t('userList.search.placeholder')"
               clearable
               clear-icon="tabler-x"
             />
@@ -536,7 +540,7 @@ const widgetData = computed(() => {
             color="secondary"
             prepend-icon="tabler-upload"
           >
-            Export
+            {{ $t('userList.buttons.export') }}
           </VBtn>
 
           <!-- 👉 Add user button -->
@@ -544,7 +548,7 @@ const widgetData = computed(() => {
             prepend-icon="tabler-plus"
             @click="isAddNewUserDrawerVisible = true"
           >
-            Add New User
+            {{ $t('userList.buttons.addNewUser') }}
           </VBtn>
         </div>
       </VCardText>
@@ -657,21 +661,21 @@ const widgetData = computed(() => {
                     <VIcon icon="tabler-eye" />
                   </template>
 
-                  <VListItemTitle>View</VListItemTitle>
+                  <VListItemTitle>{{ $t('userList.actions.view') }}</VListItemTitle>
                 </VListItem>
 
                 <VListItem link>
                   <template #prepend>
                     <VIcon icon="tabler-pencil" />
                   </template>
-                  <VListItemTitle>Edit</VListItemTitle>
+                  <VListItemTitle>{{ $t('userList.actions.edit') }}</VListItemTitle>
                 </VListItem>
 
                 <VListItem @click="deleteUser(item.id)">
                   <template #prepend>
                     <VIcon icon="tabler-trash" />
                   </template>
-                  <VListItemTitle>Delete</VListItemTitle>
+                  <VListItemTitle>{{ $t('userList.actions.delete') }}</VListItemTitle>
                 </VListItem>
               </VList>
             </VMenu>
