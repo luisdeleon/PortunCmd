@@ -40,12 +40,13 @@ const worker = setupWorker(
 )
 
 export default function () {
-  const workerUrl = `${import.meta.env.BASE_URL ?? '/'}mockServiceWorker.js`
+  // MSW temporarily disabled due to module loading conflicts
+  // const workerUrl = `${import.meta.env.BASE_URL ?? '/'}mockServiceWorker.js`
 
-  worker.start({
-    serviceWorker: {
-      url: workerUrl,
-    },
-    onUnhandledRequest: 'bypass',
-  })
+  // worker.start({
+  //   serviceWorker: {
+  //     url: workerUrl,
+  //   },
+  //   onUnhandledRequest: 'bypass',
+  // })
 }
