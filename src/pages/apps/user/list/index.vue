@@ -6,8 +6,8 @@ import { supabase } from '@/lib/supabase'
 // 👉 Store
 const searchQuery = ref('')
 const selectedRole = ref()
-const selectedPlan = ref()
-const selectedStatus = ref()
+const selectedCommunity = ref()
+const selectedEnabled = ref()
 
 // Data table options
 const itemsPerPage = ref(10)
@@ -35,6 +35,13 @@ const headers = [
 // 👉 Fetching users from Supabase
 const users = ref<UserProperties[]>([])
 const totalUsers = ref(0)
+const usersLast30Days = ref(0)
+const totalResidents = ref(0)
+const residentsLast30Days = ref(0)
+const totalActiveUsers = ref(0)
+const activeUsersLast30Days = ref(0)
+const totalInactiveUsers = ref(0)
+const inactiveUsersLast30Days = ref(0)
 const isLoading = ref(false)
 
 // Mock data for role, plan, billing, and status
@@ -61,9 +68,24 @@ const fetchUsers = async () => {
         )
       `, { count: 'exact' })
 
-    // Apply search filter
+    // Apply search filter - search by Name and Email only
     if (searchQuery.value) {
       query = query.or(`display_name.ilike.%${searchQuery.value}%,email.ilike.%${searchQuery.value}%`)
+    }
+
+    // Apply role filter
+    if (selectedRole.value) {
+      // We'll need to filter client-side since role is in a nested join
+    }
+
+    // Apply community filter
+    if (selectedCommunity.value) {
+      query = query.eq('def_community_id', selectedCommunity.value)
+    }
+
+    // Apply enabled filter
+    if (selectedEnabled.value !== undefined && selectedEnabled.value !== null) {
+      query = query.eq('enabled', selectedEnabled.value)
     }
 
     // Apply pagination
@@ -81,8 +103,18 @@ const fetchUsers = async () => {
       return
     }
 
+    // Transform and filter Supabase data
+    let filteredData = data || []
+
+    // Client-side role filter
+    if (selectedRole.value) {
+      filteredData = filteredData.filter(profile =>
+        profile.profile_role?.[0]?.role?.role_name === selectedRole.value
+      )
+    }
+
     // Transform Supabase data to match UserProperties format
-    users.value = data?.map((profile, index) => ({
+    users.value = filteredData.map((profile, index) => ({
       id: profile.id,
       fullName: profile.display_name || 'No Name',
       email: profile.email || 'No Email',
@@ -94,7 +126,7 @@ const fetchUsers = async () => {
       role: profile.profile_role?.[0]?.role?.role_name || 'No Role',
       status: profile.enabled ? 'active' : 'inactive',
       billing: 'Auto Debit',
-    })) || []
+    }))
 
     totalUsers.value = count || 0
   } catch (err) {
@@ -104,36 +136,176 @@ const fetchUsers = async () => {
   }
 }
 
-// Fetch users on mount
+// Fetch communities for filter
+const fetchCommunities = async () => {
+  try {
+    const { data, error } = await supabase
+      .from('community')
+      .select('id')
+      .order('id')
+
+    if (error) {
+      console.error('Error fetching communities:', error)
+      return
+    }
+
+    communities.value = data?.map(community => ({
+      title: community.id.toString(),
+      value: community.id,
+    })) || []
+  } catch (err) {
+    console.error('Error in fetchCommunities:', err)
+  }
+}
+
+// Fetch users created in last 30 days for growth calculation
+const fetchUserGrowth = async () => {
+  try {
+    const thirtyDaysAgo = new Date()
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
+
+    const { count, error } = await supabase
+      .from('profile')
+      .select('*', { count: 'exact', head: true })
+      .gte('created_at', thirtyDaysAgo.toISOString())
+
+    if (error) {
+      console.error('Error fetching user growth:', error)
+      return
+    }
+
+    usersLast30Days.value = count || 0
+  } catch (err) {
+    console.error('Error in fetchUserGrowth:', err)
+  }
+}
+
+// Fetch resident count and growth
+const fetchResidentStats = async () => {
+  try {
+    // Fetch all residents
+    const { data: allResidents, error: allError } = await supabase
+      .from('profile')
+      .select(`
+        id,
+        created_at,
+        profile_role(
+          role:role_id(role_name)
+        )
+      `)
+
+    if (allError) {
+      console.error('Error fetching residents:', allError)
+      return
+    }
+
+    // Filter for residents
+    const residents = allResidents?.filter(profile =>
+      profile.profile_role?.[0]?.role?.role_name === 'Resident'
+    ) || []
+
+    totalResidents.value = residents.length
+
+    // Calculate residents created in last 30 days
+    const thirtyDaysAgo = new Date()
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
+
+    residentsLast30Days.value = residents.filter(resident =>
+      resident.created_at && new Date(resident.created_at) >= thirtyDaysAgo
+    ).length
+  } catch (err) {
+    console.error('Error in fetchResidentStats:', err)
+  }
+}
+
+// Fetch active and inactive users stats
+const fetchActiveInactiveStats = async () => {
+  try {
+    const thirtyDaysAgo = new Date()
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
+
+    // Fetch active users (enabled = true)
+    const { count: activeCount, error: activeError } = await supabase
+      .from('profile')
+      .select('*', { count: 'exact', head: true })
+      .eq('enabled', true)
+
+    if (activeError) {
+      console.error('Error fetching active users:', activeError)
+    } else {
+      totalActiveUsers.value = activeCount || 0
+    }
+
+    // Fetch active users created in last 30 days
+    const { count: activeRecent, error: activeRecentError } = await supabase
+      .from('profile')
+      .select('*', { count: 'exact', head: true })
+      .eq('enabled', true)
+      .gte('created_at', thirtyDaysAgo.toISOString())
+
+    if (activeRecentError) {
+      console.error('Error fetching recent active users:', activeRecentError)
+    } else {
+      activeUsersLast30Days.value = activeRecent || 0
+    }
+
+    // Fetch inactive users (enabled = false)
+    const { count: inactiveCount, error: inactiveError } = await supabase
+      .from('profile')
+      .select('*', { count: 'exact', head: true })
+      .eq('enabled', false)
+
+    if (inactiveError) {
+      console.error('Error fetching inactive users:', inactiveError)
+    } else {
+      totalInactiveUsers.value = inactiveCount || 0
+    }
+
+    // Fetch inactive users created in last 30 days
+    const { count: inactiveRecent, error: inactiveRecentError } = await supabase
+      .from('profile')
+      .select('*', { count: 'exact', head: true })
+      .eq('enabled', false)
+      .gte('created_at', thirtyDaysAgo.toISOString())
+
+    if (inactiveRecentError) {
+      console.error('Error fetching recent inactive users:', inactiveRecentError)
+    } else {
+      inactiveUsersLast30Days.value = inactiveRecent || 0
+    }
+  } catch (err) {
+    console.error('Error in fetchActiveInactiveStats:', err)
+  }
+}
+
+// Fetch users and communities on mount
 onMounted(() => {
   fetchUsers()
+  fetchCommunities()
+  fetchUserGrowth()
+  fetchResidentStats()
+  fetchActiveInactiveStats()
 })
 
 // Watch for filter changes
-watch([searchQuery, selectedRole, selectedPlan, selectedStatus, page, itemsPerPage], () => {
+watch([searchQuery, selectedRole, selectedCommunity, selectedEnabled, page, itemsPerPage], () => {
   fetchUsers()
 })
 
 // 👉 search filters
-const roles = [
-  { title: 'Admin', value: 'admin' },
-  { title: 'Author', value: 'author' },
-  { title: 'Editor', value: 'editor' },
-  { title: 'Maintainer', value: 'maintainer' },
-  { title: 'Subscriber', value: 'subscriber' },
-]
+const roles = ref([
+  { title: 'Super Admin', value: 'Super Admin' },
+  { title: 'Administrator', value: 'Administrator' },
+  { title: 'Dealer', value: 'Dealer' },
+  { title: 'Guard', value: 'Guard' },
+  { title: 'Resident', value: 'Resident' },
+])
 
-const plans = [
-  { title: 'Basic', value: 'basic' },
-  { title: 'Company', value: 'company' },
-  { title: 'Enterprise', value: 'enterprise' },
-  { title: 'Team', value: 'team' },
-]
+const communities = ref([])
 
-const status = [
-  { title: 'Pending', value: 'pending' },
-  { title: 'Active', value: 'active' },
-  { title: 'Inactive', value: 'inactive' },
+const enabledOptions = [
+  { title: 'Active', value: true },
+  { title: 'Inactive', value: false },
 ]
 
 const resolveUserRoleVariant = (role: string) => {
@@ -194,12 +366,34 @@ const deleteUser = async (id: number) => {
   fetchUsers()
 }
 
-const widgetData = ref([
-  { title: 'Session', value: '21,459', change: 29, desc: 'Total Users', icon: 'tabler-users', iconColor: 'primary' },
-  { title: 'Paid Users', value: '4,567', change: 18, desc: 'Last Week Analytics', icon: 'tabler-user-plus', iconColor: 'error' },
-  { title: 'Active Users', value: '19,860', change: -14, desc: 'Last Week Analytics', icon: 'tabler-user-check', iconColor: 'success' },
-  { title: 'Pending Users', value: '237', change: 42, desc: 'Last Week Analytics', icon: 'tabler-user-search', iconColor: 'warning' },
-])
+const widgetData = computed(() => {
+  // Calculate growth percentage based on users created in last 30 days
+  const growthPercentage = totalUsers.value > 0 && usersLast30Days.value > 0
+    ? Math.round((usersLast30Days.value / totalUsers.value) * 100)
+    : 0
+
+  // Calculate resident growth percentage
+  const residentGrowthPercentage = totalResidents.value > 0 && residentsLast30Days.value > 0
+    ? Math.round((residentsLast30Days.value / totalResidents.value) * 100)
+    : 0
+
+  // Calculate active users growth percentage
+  const activeGrowthPercentage = totalActiveUsers.value > 0 && activeUsersLast30Days.value > 0
+    ? Math.round((activeUsersLast30Days.value / totalActiveUsers.value) * 100)
+    : 0
+
+  // Calculate inactive users growth percentage
+  const inactiveGrowthPercentage = totalInactiveUsers.value > 0 && inactiveUsersLast30Days.value > 0
+    ? Math.round((inactiveUsersLast30Days.value / totalInactiveUsers.value) * 100)
+    : 0
+
+  return [
+    { title: 'Total Users', value: totalUsers.value.toLocaleString(), change: growthPercentage, desc: 'Last 30 Days Growth', icon: 'tabler-users', iconColor: 'primary' },
+    { title: 'Resident Count', value: totalResidents.value.toLocaleString(), change: residentGrowthPercentage, desc: 'Last 30 Days Growth', icon: 'tabler-home', iconColor: 'error' },
+    { title: 'Active Users', value: totalActiveUsers.value.toLocaleString(), change: activeGrowthPercentage, desc: 'Last 30 Days Analytics', icon: 'tabler-user-check', iconColor: 'success' },
+    { title: 'Inactive Users', value: totalInactiveUsers.value.toLocaleString(), change: inactiveGrowthPercentage, desc: 'Last 30 Days Analytics', icon: 'tabler-user-x', iconColor: 'warning' },
+  ]
+})
 </script>
 
 <template>
@@ -264,41 +458,41 @@ const widgetData = ref([
 
       <VCardText>
         <VRow>
-          <!-- 👉 Select Role -->
+          <!-- 👉 Filter by Role -->
           <VCol
             cols="12"
             sm="4"
           >
             <AppSelect
               v-model="selectedRole"
-              placeholder="Select Role"
+              placeholder="Filter by Role"
               :items="roles"
               clearable
               clear-icon="tabler-x"
             />
           </VCol>
-          <!-- 👉 Select Plan -->
+          <!-- 👉 Filter by Community -->
           <VCol
             cols="12"
             sm="4"
           >
             <AppSelect
-              v-model="selectedPlan"
-              placeholder="Select Plan"
-              :items="plans"
+              v-model="selectedCommunity"
+              placeholder="Filter by Community"
+              :items="communities"
               clearable
               clear-icon="tabler-x"
             />
           </VCol>
-          <!-- 👉 Select Status -->
+          <!-- 👉 Filter by Enabled -->
           <VCol
             cols="12"
             sm="4"
           >
             <AppSelect
-              v-model="selectedStatus"
-              placeholder="Select Status"
-              :items="status"
+              v-model="selectedEnabled"
+              placeholder="Filter by Enabled"
+              :items="enabledOptions"
               clearable
               clear-icon="tabler-x"
             />
@@ -331,6 +525,8 @@ const widgetData = ref([
             <AppTextField
               v-model="searchQuery"
               placeholder="Search User"
+              clearable
+              clear-icon="tabler-x"
             />
           </div>
 
