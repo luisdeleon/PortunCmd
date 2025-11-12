@@ -455,5 +455,44 @@
     "termsAndConditions": "Terms and Conditions",
     "termsOfService": "Terms of Service",
     "privacyPolicy": "Privacy Policy"
+  },
+  "userView": {
+    "loading": "Loading user data...",
+    "notFound": "User with ID {id} not found!",
+    "tabs": {
+      "account": "Account",
+      "security": "Security",
+      "billingPlan": "Billing & Plan",
+      "notifications": "Notifications",
+      "connections": "Connections"
+    },
+    "bioPanel": {
+      "taskDone": "Task Done",
+      "projectDone": "Project Done",
+      "details": "Details",
+      "username": "Username",
+      "email": "Email",
+      "status": "Status",
+      "role": "Role",
+      "taxId": "Tax ID",
+      "contact": "Contact",
+      "language": "Language",
+      "country": "Country",
+      "edit": "Edit",
+      "suspend": "Suspend"
+    },
+    "plan": {
+      "popular": "Popular",
+      "perMonth": "/ month",
+      "days": "Days",
+      "daysProgress": "{current} of {total} Days",
+      "daysRemaining": "{count} days remaining",
+      "upgradePlan": "Upgrade Plan",
+      "benefits": {
+        "users": "10 Users",
+        "storage": "Up to 10GB storage",
+        "support": "Basic Support"
+      }
+    }
   }
 }

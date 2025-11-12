@@ -5,24 +5,112 @@ import UserTabBillingsPlans from '@/views/apps/user/view/UserTabBillingsPlans.vu
 import UserTabConnections from '@/views/apps/user/view/UserTabConnections.vue'
 import UserTabNotifications from '@/views/apps/user/view/UserTabNotifications.vue'
 import UserTabSecurity from '@/views/apps/user/view/UserTabSecurity.vue'
+import { supabase } from '@/lib/supabase'
+import { useI18n } from 'vue-i18n'
 
 const route = useRoute('apps-user-view-id')
+const { t } = useI18n()
 
 const userTab = ref(null)
 
-const tabs = [
-  { icon: 'tabler-users', title: 'Account' },
-  { icon: 'tabler-lock', title: 'Security' },
-  { icon: 'tabler-bookmark', title: 'Billing & Plan' },
-  { icon: 'tabler-bell', title: 'Notifications' },
-  { icon: 'tabler-link', title: 'Connections' },
-]
+const tabs = computed(() => [
+  { icon: 'tabler-users', title: t('userView.tabs.account') },
+  { icon: 'tabler-lock', title: t('userView.tabs.security') },
+  { icon: 'tabler-bookmark', title: t('userView.tabs.billingPlan') },
+  { icon: 'tabler-bell', title: t('userView.tabs.notifications') },
+  { icon: 'tabler-link', title: t('userView.tabs.connections') },
+])
 
-const { data: userData } = await useApi<any>(`/apps/users/${route.params.id}`)
+// Fetch user data from Supabase
+const userData = ref(null)
+const isLoading = ref(true)
+const hasError = ref(false)
+
+const fetchUserData = async () => {
+  try {
+    isLoading.value = true
+    hasError.value = false
+
+    const { data, error } = await supabase
+      .from('profile')
+      .select(`
+        id,
+        display_name,
+        email,
+        enabled,
+        def_community_id,
+        def_property_id,
+        profile_role(
+          role:role_id(role_name)
+        )
+      `)
+      .eq('id', route.params.id)
+      .single()
+
+    if (error) {
+      console.error('Error fetching user:', error)
+      hasError.value = true
+      return
+    }
+
+    if (!data) {
+      hasError.value = true
+      return
+    }
+
+    // Transform data to match expected format
+    userData.value = {
+      id: data.id,
+      fullName: data.display_name || 'No Name',
+      firstName: data.display_name?.split(' ')[0] || '',
+      lastName: data.display_name?.split(' ').slice(1).join(' ') || '',
+      company: 'N/A',
+      username: data.display_name || 'No Name',
+      role: data.profile_role?.[0]?.role?.role_name || 'No Role',
+      country: 'N/A',
+      contact: 'N/A',
+      email: data.email || 'No Email',
+      currentPlan: data.profile_role?.[0]?.role?.role_name || 'No Role',
+      status: data.enabled ? 'active' : 'inactive',
+      avatar: null,
+      taskDone: 0,
+      projectDone: 0,
+      taxId: 'N/A',
+      language: 'English',
+    }
+  } catch (err) {
+    console.error('Error in fetchUserData:', err)
+    hasError.value = true
+  } finally {
+    isLoading.value = false
+  }
+}
+
+onMounted(() => {
+  fetchUserData()
+})
 </script>
 
 <template>
-  <VRow v-if="userData">
+  <div v-if="isLoading">
+    <VRow>
+      <VCol cols="12">
+        <VCard>
+          <VCardText class="text-center">
+            <VProgressCircular
+              indeterminate
+              color="primary"
+              size="64"
+            />
+            <div class="mt-4">
+              {{ $t('userView.loading') }}
+            </div>
+          </VCardText>
+        </VCard>
+      </VCol>
+    </VRow>
+  </div>
+  <VRow v-else-if="userData">
     <VCol
       cols="12"
       md="5"
@@ -85,7 +173,7 @@ const { data: userData } = await useApi<any>(`/apps/users/${route.params.id}`)
       type="error"
       variant="tonal"
     >
-      Invoice with ID  {{ route.params.id }} not found!
+      {{ $t('userView.notFound', { id: route.params.id }) }}
     </VAlert>
   </div>
 </template>

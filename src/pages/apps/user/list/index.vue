@@ -640,46 +640,17 @@ const widgetData = computed(() => {
 
         <!-- Actions -->
         <template #item.actions="{ item }">
-          <IconBtn @click="deleteUser(item.id)">
-            <VIcon icon="tabler-trash" />
-          </IconBtn>
-
-          <IconBtn>
+          <IconBtn :to="{ name: 'apps-user-view-id', params: { id: item.id } }">
             <VIcon icon="tabler-eye" />
           </IconBtn>
 
-          <VBtn
-            icon
-            variant="text"
-            color="medium-emphasis"
-          >
-            <VIcon icon="tabler-dots-vertical" />
-            <VMenu activator="parent">
-              <VList>
-                <VListItem :to="{ name: 'apps-user-view-id', params: { id: item.id } }">
-                  <template #prepend>
-                    <VIcon icon="tabler-eye" />
-                  </template>
+          <IconBtn>
+            <VIcon icon="tabler-pencil" />
+          </IconBtn>
 
-                  <VListItemTitle>{{ $t('userList.actions.view') }}</VListItemTitle>
-                </VListItem>
-
-                <VListItem link>
-                  <template #prepend>
-                    <VIcon icon="tabler-pencil" />
-                  </template>
-                  <VListItemTitle>{{ $t('userList.actions.edit') }}</VListItemTitle>
-                </VListItem>
-
-                <VListItem @click="deleteUser(item.id)">
-                  <template #prepend>
-                    <VIcon icon="tabler-trash" />
-                  </template>
-                  <VListItemTitle>{{ $t('userList.actions.delete') }}</VListItemTitle>
-                </VListItem>
-              </VList>
-            </VMenu>
-          </VBtn>
+          <IconBtn @click="deleteUser(item.id)">
+            <VIcon icon="tabler-trash" />
+          </IconBtn>
         </template>
 
         <!-- pagination -->

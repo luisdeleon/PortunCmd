@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { useI18n } from 'vue-i18n'
+
 interface Props {
   userData: {
     id: number
@@ -22,12 +24,17 @@ interface Props {
 }
 
 const props = defineProps<Props>()
+const { t } = useI18n()
 
-const standardPlan = {
+const standardPlan = computed(() => ({
   plan: 'Standard',
   price: 99,
-  benefits: ['10 Users', 'Up to 10GB storage', 'Basic Support'],
-}
+  benefits: [
+    t('userView.plan.benefits.users'),
+    t('userView.plan.benefits.storage'),
+    t('userView.plan.benefits.support'),
+  ],
+}))
 
 const isUserInfoEditDialogVisible = ref(false)
 const isUpgradePlanDialogVisible = ref(false)
@@ -111,7 +118,7 @@ const resolveUserRoleVariant = (role: string) => {
                   {{ `${(props.userData.taskDone / 1000).toFixed(2)}k` }}
                 </h5>
 
-                <span class="text-sm">Task Done</span>
+                <span class="text-sm">{{ $t('userView.bioPanel.taskDone') }}</span>
               </div>
             </div>
 
@@ -133,14 +140,14 @@ const resolveUserRoleVariant = (role: string) => {
                 <h5 class="text-h5">
                   {{ kFormatter(props.userData.projectDone) }}
                 </h5>
-                <span class="text-sm">Project Done</span>
+                <span class="text-sm">{{ $t('userView.bioPanel.projectDone') }}</span>
               </div>
             </div>
           </div>
 
           <!-- 👉 Details -->
           <h5 class="text-h5">
-            Details
+            {{ $t('userView.bioPanel.details') }}
           </h5>
 
           <VDivider class="my-4" />
@@ -150,7 +157,7 @@ const resolveUserRoleVariant = (role: string) => {
             <VListItem>
               <VListItemTitle>
                 <h6 class="text-h6">
-                  Username:
+                  {{ $t('userView.bioPanel.username') }}:
                   <div class="d-inline-block text-body-1">
                     {{ props.userData.fullName }}
                   </div>
@@ -161,7 +168,7 @@ const resolveUserRoleVariant = (role: string) => {
             <VListItem>
               <VListItemTitle>
                 <span class="text-h6">
-                  Billing Email:
+                  {{ $t('userView.bioPanel.email') }}:
                 </span>
                 <span class="text-body-1">
                   {{ props.userData.email }}
@@ -172,7 +179,7 @@ const resolveUserRoleVariant = (role: string) => {
             <VListItem>
               <VListItemTitle>
                 <h6 class="text-h6">
-                  Status:
+                  {{ $t('userView.bioPanel.status') }}:
                   <div class="d-inline-block text-body-1 text-capitalize">
                     {{ props.userData.status }}
                   </div>
@@ -183,7 +190,7 @@ const resolveUserRoleVariant = (role: string) => {
             <VListItem>
               <VListItemTitle>
                 <h6 class="text-h6">
-                  Role:
+                  {{ $t('userView.bioPanel.role') }}:
                   <div class="d-inline-block text-capitalize text-body-1">
                     {{ props.userData.role }}
                   </div>
@@ -194,7 +201,7 @@ const resolveUserRoleVariant = (role: string) => {
             <VListItem>
               <VListItemTitle>
                 <h6 class="text-h6">
-                  Tax ID:
+                  {{ $t('userView.bioPanel.taxId') }}:
                   <div class="d-inline-block text-body-1">
                     {{ props.userData.taxId }}
                   </div>
@@ -205,7 +212,7 @@ const resolveUserRoleVariant = (role: string) => {
             <VListItem>
               <VListItemTitle>
                 <h6 class="text-h6">
-                  Contact:
+                  {{ $t('userView.bioPanel.contact') }}:
                   <div class="d-inline-block text-body-1">
                     {{ props.userData.contact }}
                   </div>
@@ -216,7 +223,7 @@ const resolveUserRoleVariant = (role: string) => {
             <VListItem>
               <VListItemTitle>
                 <h6 class="text-h6">
-                  Language:
+                  {{ $t('userView.bioPanel.language') }}:
                   <div class="d-inline-block text-body-1">
                     {{ props.userData.language }}
                   </div>
@@ -227,7 +234,7 @@ const resolveUserRoleVariant = (role: string) => {
             <VListItem>
               <VListItemTitle>
                 <h6 class="text-h6">
-                  Country:
+                  {{ $t('userView.bioPanel.country') }}:
                   <div class="d-inline-block text-body-1">
                     {{ props.userData.country }}
                   </div>
@@ -243,14 +250,14 @@ const resolveUserRoleVariant = (role: string) => {
             variant="elevated"
             @click="isUserInfoEditDialogVisible = true"
           >
-            Edit
+            {{ $t('userView.bioPanel.edit') }}
           </VBtn>
 
           <VBtn
             variant="tonal"
             color="error"
           >
-            Suspend
+            {{ $t('userView.bioPanel.suspend') }}
           </VBtn>
         </VCardText>
       </VCard>
@@ -268,7 +275,7 @@ const resolveUserRoleVariant = (role: string) => {
             size="small"
             class="font-weight-medium"
           >
-            Popular
+            {{ $t('userView.plan.popular') }}
           </VChip>
 
           <VSpacer />
@@ -279,7 +286,7 @@ const resolveUserRoleVariant = (role: string) => {
             <h1 class="text-h1 text-primary">
               99
             </h1>
-            <sub class="mt-3"><h6 class="text-h6 font-weight-regular mb-n1">/ month</h6></sub>
+            <sub class="mt-3"><h6 class="text-h6 font-weight-regular mb-n1">{{ $t('userView.plan.perMonth') }}</h6></sub>
           </div>
         </VCardText>
 
@@ -307,10 +314,10 @@ const resolveUserRoleVariant = (role: string) => {
           <div class="my-6">
             <div class="d-flex justify-space-between mb-1">
               <h6 class="text-h6">
-                Days
+                {{ $t('userView.plan.days') }}
               </h6>
               <h6 class="text-h6">
-                26 of 30 Days
+                {{ $t('userView.plan.daysProgress', { current: 26, total: 30 }) }}
               </h6>
             </div>
 
@@ -323,7 +330,7 @@ const resolveUserRoleVariant = (role: string) => {
             />
 
             <p class="mt-1">
-              4 days remaining
+              {{ $t('userView.plan.daysRemaining', { count: 4 }) }}
             </p>
           </div>
 
@@ -333,7 +340,7 @@ const resolveUserRoleVariant = (role: string) => {
               block
               @click="isUpgradePlanDialogVisible = true"
             >
-              Upgrade Plan
+              {{ $t('userView.plan.upgradePlan') }}
             </VBtn>
           </div>
         </VCardText>
