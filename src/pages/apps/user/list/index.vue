@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import AddNewUserDrawer from '@/views/apps/user/list/AddNewUserDrawer.vue'
 import type { UserProperties } from '@db/apps/users/types'
+import { supabase } from '@/lib/supabase'
 
 // 👉 Store
 const searchQuery = ref('')
@@ -24,29 +25,94 @@ const updateOptions = (options: any) => {
 // Headers
 const headers = [
   { title: 'User', key: 'user' },
-  { title: 'Role', key: 'role' },
-  { title: 'Plan', key: 'plan' },
-  { title: 'Billing', key: 'billing' },
-  { title: 'Status', key: 'status' },
+  { title: 'Role', key: 'plan' },
+  { title: 'Community', key: 'community' },
+  { title: 'Property', key: 'property' },
+  { title: 'Enabled', key: 'enabled' },
   { title: 'Actions', key: 'actions', sortable: false },
 ]
 
-// 👉 Fetching users
-const { data: usersData, execute: fetchUsers } = await useApi<any>(createUrl('/apps/users', {
-  query: {
-    q: searchQuery,
-    status: selectedStatus,
-    plan: selectedPlan,
-    role: selectedRole,
-    itemsPerPage,
-    page,
-    sortBy,
-    orderBy,
-  },
-}))
+// 👉 Fetching users from Supabase
+const users = ref<UserProperties[]>([])
+const totalUsers = ref(0)
+const isLoading = ref(false)
 
-const users = computed((): UserProperties[] => usersData.value.users)
-const totalUsers = computed(() => usersData.value.totalUsers)
+// Mock data for role, plan, billing, and status
+const mockRoles = ['Admin', 'Author', 'Editor', 'Maintainer', 'Subscriber']
+const mockPlans = ['Basic', 'Company', 'Enterprise', 'Team']
+const mockStatuses = ['Active', 'Inactive', 'Pending']
+
+const fetchUsers = async () => {
+  try {
+    isLoading.value = true
+
+    // Build query for Supabase with role join
+    let query = supabase
+      .from('profile')
+      .select(`
+        id,
+        display_name,
+        email,
+        enabled,
+        def_community_id,
+        def_property_id,
+        profile_role(
+          role:role_id(role_name)
+        )
+      `, { count: 'exact' })
+
+    // Apply search filter
+    if (searchQuery.value) {
+      query = query.or(`display_name.ilike.%${searchQuery.value}%,email.ilike.%${searchQuery.value}%`)
+    }
+
+    // Apply pagination
+    const from = (page.value - 1) * itemsPerPage.value
+    const to = from + itemsPerPage.value - 1
+
+    if (itemsPerPage.value !== -1) {
+      query = query.range(from, to)
+    }
+
+    const { data, error, count } = await query
+
+    if (error) {
+      console.error('Error fetching users from Supabase:', error)
+      return
+    }
+
+    // Transform Supabase data to match UserProperties format
+    users.value = data?.map((profile, index) => ({
+      id: profile.id,
+      fullName: profile.display_name || 'No Name',
+      email: profile.email || 'No Email',
+      currentPlan: profile.profile_role?.[0]?.role?.role_name || 'No Role',
+      community: profile.def_community_id || 'N/A',
+      property: profile.def_property_id || 'N/A',
+      enabled: profile.enabled ? 'Active' : 'Inactive',
+      avatar: null,
+      role: profile.profile_role?.[0]?.role?.role_name || 'No Role',
+      status: profile.enabled ? 'active' : 'inactive',
+      billing: 'Auto Debit',
+    })) || []
+
+    totalUsers.value = count || 0
+  } catch (err) {
+    console.error('Error in fetchUsers:', err)
+  } finally {
+    isLoading.value = false
+  }
+}
+
+// Fetch users on mount
+onMounted(() => {
+  fetchUsers()
+})
+
+// Watch for filter changes
+watch([searchQuery, selectedRole, selectedPlan, selectedStatus, page, itemsPerPage], () => {
+  fetchUsers()
+})
 
 // 👉 search filters
 const roles = [
@@ -332,18 +398,10 @@ const widgetData = ref([
           </div>
         </template>
 
-        <!-- 👉 Role -->
-        <template #item.role="{ item }">
-          <div class="d-flex align-center gap-x-2">
-            <VIcon
-              :size="22"
-              :icon="resolveUserRoleVariant(item.role).icon"
-              :color="resolveUserRoleVariant(item.role).color"
-            />
-
-            <div class="text-capitalize text-high-emphasis text-body-1">
-              {{ item.role }}
-            </div>
+        <!-- 👉 Community -->
+        <template #item.community="{ item }">
+          <div class="text-body-1 text-high-emphasis">
+            {{ item.community }}
           </div>
         </template>
 
@@ -354,15 +412,22 @@ const widgetData = ref([
           </div>
         </template>
 
-        <!-- Status -->
-        <template #item.status="{ item }">
+        <!-- 👉 Property -->
+        <template #item.property="{ item }">
+          <div class="text-body-1 text-high-emphasis">
+            {{ item.property }}
+          </div>
+        </template>
+
+        <!-- 👉 Enabled -->
+        <template #item.enabled="{ item }">
           <VChip
-            :color="resolveUserStatusVariant(item.status)"
+            :color="item.enabled === 'Active' ? 'success' : 'error'"
             size="small"
             label
             class="text-capitalize"
           >
-            {{ item.status }}
+            {{ item.enabled }}
           </VChip>
         </template>
 
