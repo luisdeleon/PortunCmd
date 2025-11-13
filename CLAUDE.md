@@ -1,0 +1,229 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## Overview
+
+PortunCmd is a Vue 3 + Vuetify + Supabase property management system with visitor access control, multi-tenant architecture, and IoT automation capabilities. The application uses file-based routing, auto-imported composables, and CASL for authorization.
+
+## Development Commands
+
+```bash
+# Development
+pnpm dev              # Start dev server at localhost:5173
+pnpm dev:host         # Start with network access
+
+# Building & Preview
+pnpm build            # Production build (outputs to dist/)
+pnpm preview          # Preview production build locally
+
+# Code Quality
+pnpm typecheck        # Run TypeScript checks
+pnpm lint             # Run ESLint with auto-fix
+```
+
+## Environment Setup
+
+Required environment variables in `.env`:
+- `VITE_SUPABASE_URL` - Supabase project URL
+- `VITE_SUPABASE_ANON_KEY` - Supabase anonymous key
+- `VITE_MAPBOX_ACCESS_TOKEN` - (Optional) For map features
+
+The app will gracefully degrade if Supabase variables are missing, creating a placeholder client to prevent crashes during development.
+
+## Architecture
+
+### Core Concepts
+
+1. **File-based Routing**: Pages in `src/pages/` automatically become routes via `unplugin-vue-router`. Route names are kebab-case (e.g., `user-list`).
+
+2. **Auto-imports**: Composables from `src/composables/`, `src/@core/composable/`, and utils are auto-imported. Vue APIs (ref, computed, etc.), VueUse, Pinia, and i18n are also auto-imported.
+
+3. **Plugin System**: Plugins in `src/plugins/` or `src/plugins/*/index.ts` are automatically registered via `registerPlugins()`. Plugins are loaded in alphabetical order (hence `1.router` for router precedence).
+
+4. **Layout System**: Uses `vite-plugin-vue-meta-layouts` with layouts in `src/layouts/`. Components specify layouts via route meta or component options.
+
+5. **Path Aliases**:
+   - `@/` → `src/`
+   - `@core/` → `src/@core/`
+   - `@layouts/` → `src/@layouts/`
+   - `@images/` → `src/assets/images/`
+   - `@styles/` → `src/assets/styles/`
+   - `@themeConfig` → `themeConfig.ts`
+
+### Authentication Flow
+
+Authentication is managed via `src/composables/useAuth.ts`:
+
+1. **Login** (`login(email, password)`):
+   - Authenticates with Supabase
+   - Fetches user profile from `profile` table
+   - Checks if profile is enabled
+   - Fetches user roles from `profile_role` joined with `role` table
+   - Determines primary role (admin takes precedence)
+   - Generates CASL ability rules based on role
+   - Returns `accessToken`, `userData`, and `userAbilityRules`
+
+2. **Session Management**:
+   - Session data stored in cookies: `userData`, `accessToken`, `userAbilityRules`
+   - Router guards (`src/plugins/1.router/guards.ts`) check cookies for auth state
+   - Background session verification via `supabase.auth.getSession()` (non-blocking)
+
+3. **Authorization**:
+   - CASL-based permissions defined in `src/plugins/casl/ability.ts`
+   - Admin roles get `{ action: 'manage', subject: 'all' }`
+   - Other roles get limited permissions
+   - Routes can specify required permissions via meta
+   - `canNavigate()` function checks if user can access route
+
+### Supabase Integration
+
+**Client Setup**: `src/lib/supabase.ts` creates a typed Supabase client:
+```typescript
+import { supabase } from '@/lib/supabase'
+```
+
+**Types**: Generated Supabase types in `src/types/supabase/`:
+- `Database` - Full database schema
+- `Tables<'table_name'>` - Table row types
+- `TablesInsert<'table_name'>` - Insert types
+- `TablesUpdate<'table_name'>` - Update types
+
+**Composable**: `useSupabase()` provides access to the client and types.
+
+### Key Database Tables
+
+- `profile` - User profiles (links to auth.users)
+- `role` - Available roles (Super Admin, Administrator, Guard, Resident, Dealer, Client)
+- `profile_role` - User-role assignments (many-to-many)
+- `community` - Communities/condominiums
+- `property` - Properties/units within communities
+- `community_manager` - Manager-community assignments
+- `property_owner` - Owner-property relationships
+- `visitor_records_uid` - Visitor access records with QR codes
+- `visitor_record_logs` - Entry/exit logs
+- `automation_devices` - IoT devices (Shelly) for gate control
+- `notifications` & `notification_users` - Notification system
+
+### Component Organization
+
+- `src/@core/components/` - Core reusable components (auto-imported)
+- `src/components/` - App-specific components (auto-imported)
+- `src/views/` - View components for complex pages
+- `src/@core/` - Framework-level code (not specific to this app)
+- `src/@layouts/` - Layout components and utilities
+
+### Styling
+
+- Vuetify for component library (Material Design)
+- SCSS with Vuetify variables in `src/assets/styles/variables/_vuetify.scss`
+- Theme config in `themeConfig.ts` (app title, logo, i18n, theme, skin)
+- Supports light/dark mode with system preference detection
+- Bordered skin (`Skins.Bordered`) applied by default
+
+### Internationalization
+
+Configured in `src/plugins/i18n/`:
+- Supported languages: English (en), Spanish (es), Portuguese (pt)
+- Enabled by default (`themeConfig.app.i18n.enable: true`)
+- Default locale: English
+- Translation files in `src/plugins/i18n/locales/`
+
+## Design Guidelines
+
+**CRITICAL: Do not deviate from the established template design and theme colors.**
+
+- **Preserve existing design system** - The application uses a carefully crafted Vuetify template with specific design patterns. Do not introduce new design paradigms or UI patterns that conflict with the existing template.
+- **Maintain theme colors** - Theme colors are defined in `themeConfig.ts` and `src/assets/styles/variables/_vuetify.scss`. Do not modify the color scheme or introduce custom colors that break the established palette.
+- **Use existing components** - Leverage components from `src/@core/components/` and Vuetify's component library. Do not create custom styled components that deviate from the template's visual language.
+- **Respect the bordered skin** - The app uses `Skins.Bordered` as the default skin. Maintain this design choice and the associated visual styling.
+- **Follow layout patterns** - Use the existing layout system in `src/@layouts/` and `src/layouts/`. Do not create custom layouts that break the visual consistency.
+
+When adding new features or components, study similar existing pages and components to ensure visual and interaction consistency with the rest of the application.
+
+## Common Patterns
+
+### Creating a New Page
+
+1. Add Vue file to `src/pages/` (e.g., `src/pages/my-page.vue`)
+2. Route is auto-generated as `/my-page`
+3. Use route meta for configuration:
+```vue
+<route lang="yaml">
+meta:
+  public: false  # Requires authentication
+  layout: default
+</route>
+```
+
+### Using Supabase
+
+```typescript
+// Fetch data
+const { data, error } = await supabase
+  .from('table_name')
+  .select('*')
+  .eq('column', value)
+
+// With types
+const { data, error } = await supabase
+  .from('profile')
+  .select('*')
+  .eq('id', userId)
+  .single() // Returns single object
+```
+
+### Authorization
+
+```typescript
+// In route meta
+<route lang="yaml">
+meta:
+  action: read
+  subject: Admin
+</route>
+
+// Check ability programmatically
+import { useAbility } from '@casl/vue'
+const ability = useAbility()
+if (ability.can('read', 'Admin')) {
+  // User has permission
+}
+```
+
+### Creating a Composable
+
+Add to `src/composables/` - it will be auto-imported:
+```typescript
+// src/composables/useMyFeature.ts
+export const useMyFeature = () => {
+  // Your logic
+  return { ... }
+}
+
+// Use anywhere without import
+const { ... } = useMyFeature()
+```
+
+## MSW (Mock Service Worker)
+
+MSW is installed but currently disabled. The worker directory is in `public/`. If re-enabling, update service worker registration in the app initialization.
+
+## Important Notes
+
+- **Router guards run on every navigation** - cookies are checked first for performance, session verification happens in background
+- **Profile must be enabled** - `profile.enabled` must be true for users to log in
+- **Roles are extensible** - new roles can be added to the `role` table and ability rules updated in `useAuth.ts`
+- **File-based routing** - nested routes use folder structure, dynamic routes use `[param]` syntax
+- **TypeScript strict mode** - enabled, so all types must be properly defined
+- **Vuetify components** - don't need imports, globally available
+- **Icon system** - uses Iconify with Tabler icons (`tabler-icon-name`)
+
+## Testing & Deployment
+
+No test suite is currently configured. The app is deployed to Cloudflare Pages (see `docs/CLOUDFLARE_SETUP.md` for deployment guide).
+
+Build outputs to `dist/` and includes:
+- Chunk size warning limit: 5000kb
+- Vuetify excluded from pre-bundling for optimal loading
+- All assets hashed for cache busting
