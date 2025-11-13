@@ -86,6 +86,7 @@ Comprehensive guides are available in the [`/docs`](./docs/) folder:
 
 - 🗄️ [Supabase Schema](./docs/SUPABASE_SCHEMA.md) - Complete database schema
 - 💻 [Supabase Usage](./docs/SUPABASE_USAGE.md) - Code examples and patterns
+- 🔐 [RBAC Guide](./docs/RBAC_GUIDE.md) - Role-based access control implementation guide
 
 ## Quick Start
 

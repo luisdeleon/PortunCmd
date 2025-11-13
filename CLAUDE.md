@@ -226,6 +226,24 @@ When creating commits or pull requests:
 - Write clear, concise commit messages that follow the repository's existing style
 - Do not add "Co-Authored-By: Claude" or similar attribution
 
+## Documentation Guidelines
+
+When creating documentation, tutorials, or guides:
+- **All documentation must be placed in the `/docs` folder** - Never create documentation files in the root directory
+- **Reference all documentation in README.md** - Update the documentation section of `README.md` to include links to new guides
+- **Use descriptive filenames** - Use UPPERCASE names with underscores (e.g., `RBAC_GUIDE.md`, `API_REFERENCE.md`)
+- **Follow existing structure** - Review existing documentation to maintain consistent formatting and organization
+- **Keep README.md updated** - The README serves as the main entry point; ensure all documentation is discoverable through it
+
+Available documentation in `/docs`:
+- `SETUP_GUIDE.md` - Complete setup instructions
+- `GETTING_STARTED.md` - Development environment setup
+- `AUTHENTICATION.md` - User management and auth configuration
+- `CLOUDFLARE_SETUP.md` - Production deployment guide
+- `SUPABASE_SCHEMA.md` - Complete database schema
+- `SUPABASE_USAGE.md` - Code examples and patterns
+- `RBAC_GUIDE.md` - Role-based access control implementation guide
+
 ## Testing & Deployment
 
 No test suite is currently configured. The app is deployed to Cloudflare Pages (see `docs/CLOUDFLARE_SETUP.md` for deployment guide).
