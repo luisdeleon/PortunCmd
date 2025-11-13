@@ -2322,12 +2322,26 @@ describe('Authentication Flow', () => {
 
 ### Step 1: Backup Current Database
 
+**⚠️ CRITICAL: Always backup before migrations. See [Database Backup Guide](./DATABASE_BACKUP.md) for complete procedures.**
+
 ```bash
-# Backup via Supabase CLI
-supabase db dump -f backup_$(date +%Y%m%d).sql
+# Using the provided backup script (recommended)
+./scripts/backup-database.sh before_rbac_migration
+
+# Or via Supabase CLI directly
+supabase db dump -f backups/backup_$(date +%Y%m%d).sql
 
 # Or via pg_dump if you have direct access
-pg_dump -h db.xxxxx.supabase.co -U postgres -d postgres > backup.sql
+pg_dump -h db.xxxxx.supabase.co -U postgres -d postgres > backups/backup.sql
+```
+
+**Verify your backup:**
+```bash
+# Check backup exists and has reasonable size
+ls -lh backups/backup_*.sql*
+
+# If compressed, verify integrity
+gunzip -t backups/backup_*.sql.gz
 ```
 
 ### Step 2: Run Migrations in Staging

@@ -41,3 +41,10 @@ public/mockServiceWorker.js
 # Env files
 .env*
 !.env.example
+
+# Database backups (never commit to git)
+backups/*
+!backups/.gitkeep
+*.sql
+*.sql.gz
+*.dump

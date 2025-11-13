@@ -250,6 +250,53 @@ Available documentation in `/docs`:
 - `SUPABASE_USAGE.md` - Code examples and patterns
 - `RBAC_GUIDE.md` - Role-based access control implementation guide
 
+## Database Backup Policy
+
+**CRITICAL: ALWAYS create a database backup before making any database changes.**
+
+### When to Backup
+
+Create a backup before:
+- Running database migrations
+- Modifying table schemas (ALTER TABLE)
+- Adding/removing columns or constraints
+- Updating Row Level Security (RLS) policies
+- Making bulk data changes
+- Testing new features that modify data structure
+- Deploying database changes to production
+
+### How to Backup
+
+**Use the provided backup script:**
+```bash
+# Before migration
+./scripts/backup-database.sh before_migration_name
+
+# Before schema changes
+./scripts/backup-database.sh before_adding_permissions_table
+
+# Before RLS updates
+./scripts/backup-database.sh before_rls_policies
+```
+
+**Never skip backups.** See `docs/DATABASE_BACKUP.md` for complete backup procedures, restoration guides, and automation options.
+
+### Backup Verification
+
+After creating a backup:
+1. Verify the backup file exists in `backups/` directory
+2. Check the file size is reasonable (not 0 bytes)
+3. If compressed, verify with: `gunzip -t backups/backup_file.sql.gz`
+
+### Emergency Recovery
+
+If something goes wrong:
+1. Stop the application immediately
+2. Assess the damage
+3. Review `docs/DATABASE_BACKUP.md` recovery procedures
+4. Restore from the most recent backup before the issue
+5. Document the incident
+
 ## Testing & Deployment
 
 No test suite is currently configured. The app is deployed to Cloudflare Pages (see `docs/CLOUDFLARE_SETUP.md` for deployment guide).

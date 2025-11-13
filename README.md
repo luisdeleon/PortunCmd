@@ -297,6 +297,7 @@ All project documentation is available in the [`/docs`](./docs/) directory:
 
 - **[Supabase Schema](./docs/SUPABASE_SCHEMA.md)** - Complete database schema documentation
 - **[Supabase Usage](./docs/SUPABASE_USAGE.md)** - Code examples and usage patterns
+- **[Database Backup](./docs/DATABASE_BACKUP.md)** - Backup procedures, restoration guides, and migration safety
 
 ### Security & Access Control
 
