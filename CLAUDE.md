@@ -219,6 +219,13 @@ MSW is installed but currently disabled. The worker directory is in `public/`. I
 - **Vuetify components** - don't need imports, globally available
 - **Icon system** - uses Iconify with Tabler icons (`tabler-icon-name`)
 
+## Git Workflow
+
+When creating commits or pull requests:
+- **Do not include Claude Code branding** in commit messages or PR descriptions
+- Write clear, concise commit messages that follow the repository's existing style
+- Do not add "Co-Authored-By: Claude" or similar attribution
+
 ## Testing & Deployment
 
 No test suite is currently configured. The app is deployed to Cloudflare Pages (see `docs/CLOUDFLARE_SETUP.md` for deployment guide).
