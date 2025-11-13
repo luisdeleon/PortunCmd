@@ -230,10 +230,16 @@ When creating commits or pull requests:
 
 When creating documentation, tutorials, or guides:
 - **All documentation must be placed in the `/docs` folder** - Never create documentation files in the root directory
-- **Reference all documentation in README.md** - Update the documentation section of `README.md` to include links to new guides
+- **Reference all documentation in README.md** - Update BOTH the "Documentation" section at the top AND the "Complete Documentation Index" section at the bottom of `README.md` to include links to new guides
 - **Use descriptive filenames** - Use UPPERCASE names with underscores (e.g., `RBAC_GUIDE.md`, `API_REFERENCE.md`)
 - **Follow existing structure** - Review existing documentation to maintain consistent formatting and organization
+- **Categorize appropriately** - Place new documentation in the appropriate category in the "Complete Documentation Index" section (Getting Started, Database & Backend, Security & Access Control, Deployment, etc.)
 - **Keep README.md updated** - The README serves as the main entry point; ensure all documentation is discoverable through it
+
+**IMPORTANT**: When adding new documentation, you MUST update the "Complete Documentation Index" section at the bottom of README.md with:
+1. A link to the new document
+2. A brief description of what it covers
+3. Placement in the appropriate category or create a new category if needed
 
 Available documentation in `/docs`:
 - `SETUP_GUIDE.md` - Complete setup instructions

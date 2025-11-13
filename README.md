@@ -283,6 +283,35 @@ This project is private and proprietary.
 
 ---
 
+## Complete Documentation Index
+
+All project documentation is available in the [`/docs`](./docs/) directory:
+
+### Getting Started Guides
+
+- **[Setup Guide](./docs/SETUP_GUIDE.md)** - Complete setup instructions for new developers
+- **[Getting Started](./docs/GETTING_STARTED.md)** - Development environment setup and workflow
+- **[Authentication](./docs/AUTHENTICATION.md)** - User management, auth configuration, and demo accounts
+
+### Database & Backend
+
+- **[Supabase Schema](./docs/SUPABASE_SCHEMA.md)** - Complete database schema documentation
+- **[Supabase Usage](./docs/SUPABASE_USAGE.md)** - Code examples and usage patterns
+
+### Security & Access Control
+
+- **[RBAC Guide](./docs/RBAC_GUIDE.md)** - Comprehensive role-based access control implementation guide
+  - Role hierarchy and permissions
+  - Database schema enhancements
+  - Implementation phases and migration
+  - Code examples and best practices
+
+### Deployment
+
+- **[Cloudflare Setup](./docs/CLOUDFLARE_SETUP.md)** - Production deployment guide for Cloudflare Pages
+
+---
+
 ## Need Help?
 
 - 📚 Check the [Setup Guide](./docs/SETUP_GUIDE.md) for detailed instructions
