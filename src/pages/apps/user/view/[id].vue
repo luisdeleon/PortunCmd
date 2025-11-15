@@ -40,8 +40,9 @@ const fetchUserData = async () => {
         enabled,
         def_community_id,
         def_property_id,
-        profile_role(
-          role:role_id(role_name)
+        profile_role!profile_role_profile_id_fkey(
+          role_id,
+          role!profile_role_role_id_fkey(role_name)
         )
       `)
       .eq('id', route.params.id)
