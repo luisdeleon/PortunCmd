@@ -1,14 +1,25 @@
 <script setup lang="ts">
 import { VForm } from 'vuetify/components/VForm'
+import { supabase } from '@/lib/supabase'
 
 interface Permission {
+  id: string
   name: string
-  read: boolean
-  write: boolean
-  create: boolean
+  resource: string
+  action: string
+  description?: string
+  checked: boolean
+}
+
+interface PermissionGroup {
+  resource: string
+  icon: string
+  color: string
+  permissions: Permission[]
 }
 
 interface Roles {
+  id?: string
   name: string
   permissions: Permission[]
 }
@@ -31,128 +42,158 @@ const props = withDefaults(defineProps<Props>(), {
 
 const emit = defineEmits<Emit>()
 
-// 👉 Permission List
-const permissions = ref<Permission[]>([
-  {
-    name: 'User Management',
-    read: false,
-    write: false,
-    create: false,
-  },
-  {
-    name: 'Content Management',
-    read: false,
-    write: false,
-    create: false,
-  },
-  {
-    name: 'Disputes Management',
-    read: false,
-    write: false,
-    create: false,
-  },
-  {
-    name: 'Database Management',
-    read: false,
-    write: false,
-    create: false,
-  },
-  {
-    name: 'Financial Management',
-    read: false,
-    write: false,
-    create: false,
-  },
-  {
-    name: 'Reporting',
-    read: false,
-    write: false,
-    create: false,
-  },
-  {
-    name: 'API Control',
-    read: false,
-    write: false,
-    create: false,
-  },
-  {
-    name: 'Repository Management',
-    read: false,
-    write: false,
-    create: false,
-  },
-  {
-    name: 'Payroll',
-    read: false,
-    write: false,
-    create: false,
-  },
-])
+// 👉 Permission Groups
+const permissionGroups = ref<PermissionGroup[]>([])
+const isLoading = ref(false)
 
 const isSelectAll = ref(false)
 const role = ref('')
 const refPermissionForm = ref<VForm>()
 
+// Resource icons and colors
+const resourceConfig: Record<string, { icon: string; color: string }> = {
+  community: { icon: 'tabler-building-community', color: 'primary' },
+  property: { icon: 'tabler-home', color: 'success' },
+  resident: { icon: 'tabler-users', color: 'info' },
+  visitor: { icon: 'tabler-door-enter', color: 'warning' },
+  automation: { icon: 'tabler-bolt', color: 'error' },
+  administrator: { icon: 'tabler-shield-check', color: 'secondary' },
+  analytics: { icon: 'tabler-chart-bar', color: 'primary' },
+  notification: { icon: 'tabler-bell', color: 'warning' },
+  system: { icon: 'tabler-settings', color: 'secondary' },
+}
+
+// Fetch all permissions and group by resource
+const fetchPermissions = async () => {
+  try {
+    isLoading.value = true
+
+    // Fetch all permissions
+    const { data: allPermissions, error } = await supabase
+      .from('permissions')
+      .select('id, name, resource, action, description')
+      .order('resource')
+      .order('action')
+
+    if (error) {
+      console.error('Error fetching permissions:', error)
+      return
+    }
+
+    // If we have a role ID, fetch which permissions it has
+    let rolePermissionIds: string[] = []
+    if (props.rolePermissions?.id) {
+      const { data: rolePerms } = await supabase
+        .from('role_permissions')
+        .select('permission_id')
+        .eq('role_id', props.rolePermissions.id)
+
+      rolePermissionIds = rolePerms?.map(rp => rp.permission_id) || []
+    }
+
+    // Group permissions by resource
+    const grouped = (allPermissions || []).reduce((acc, perm) => {
+      const resource = perm.resource
+      if (!acc[resource]) {
+        acc[resource] = []
+      }
+      acc[resource].push({
+        ...perm,
+        checked: rolePermissionIds.includes(perm.id),
+      })
+      return acc
+    }, {} as Record<string, Permission[]>)
+
+    // Convert to array of PermissionGroup
+    permissionGroups.value = Object.entries(grouped).map(([resource, permissions]) => ({
+      resource: resource.charAt(0).toUpperCase() + resource.slice(1),
+      icon: resourceConfig[resource]?.icon || 'tabler-file',
+      color: resourceConfig[resource]?.color || 'secondary',
+      permissions,
+    }))
+  } catch (err) {
+    console.error('Error in fetchPermissions:', err)
+  } finally {
+    isLoading.value = false
+  }
+}
+
+// Count checked permissions
 const checkedCount = computed(() => {
   let counter = 0
-
-  permissions.value.forEach(permission => {
-    Object.entries(permission).forEach(([key, value]) => {
-      if (key !== 'name' && value)
-        counter++
+  permissionGroups.value.forEach(group => {
+    group.permissions.forEach(permission => {
+      if (permission.checked) counter++
     })
   })
-
   return counter
 })
 
-const isIndeterminate = computed(() => checkedCount.value > 0 && checkedCount.value < (permissions.value.length * 3))
+// Total permissions count
+const totalPermissions = computed(() => {
+  let total = 0
+  permissionGroups.value.forEach(group => {
+    total += group.permissions.length
+  })
+  return total
+})
 
-// select all
+const isIndeterminate = computed(() =>
+  checkedCount.value > 0 && checkedCount.value < totalPermissions.value
+)
+
+// Select all functionality
 watch(isSelectAll, val => {
-  permissions.value = permissions.value.map(permission => ({
-    ...permission,
-    read: val,
-    write: val,
-    create: val,
-  }))
-})
-
-// if Indeterminate is false, then set isSelectAll to false
-watch(isIndeterminate, () => {
-  if (!isIndeterminate.value)
-    isSelectAll.value = false
-})
-
-// if all permissions are checked, then set isSelectAll to true
-watch(permissions, () => {
-  if (checkedCount.value === (permissions.value.length * 3))
-    isSelectAll.value = true
-}, { deep: true })
-
-// if rolePermissions is not empty, then set permissions
-watch(() => props, () => {
-  if (props.rolePermissions && props.rolePermissions.permissions.length) {
-    role.value = props.rolePermissions.name
-    permissions.value = permissions.value.map(permission => {
-      const rolePermission = props.rolePermissions?.permissions.find(item => item.name === permission.name)
-
-      if (rolePermission) {
-        return {
-          ...permission,
-          ...rolePermission,
-        }
-      }
-
-      return permission
+  permissionGroups.value.forEach(group => {
+    group.permissions.forEach(permission => {
+      permission.checked = val
     })
+  })
+})
+
+// Watch for dialog visibility and fetch permissions
+watch(() => props.isDialogVisible, async (newVal) => {
+  if (newVal) {
+    role.value = props.rolePermissions?.name || ''
+    await fetchPermissions()
+    updateSelectAll()
   }
 })
 
+// Watch for role changes
+watch(() => props.rolePermissions, async (newVal) => {
+  if (newVal && props.isDialogVisible) {
+    role.value = newVal.name || ''
+    await fetchPermissions()
+    updateSelectAll()
+  }
+}, { deep: true })
+
+// Update select all checkbox state
+const updateSelectAll = () => {
+  isSelectAll.value = checkedCount.value === totalPermissions.value && totalPermissions.value > 0
+}
+
+// Watch permission changes to update select all state
+watch(permissionGroups, () => {
+  updateSelectAll()
+}, { deep: true })
+
 const onSubmit = () => {
+  // Collect all checked permissions
+  const checkedPermissions: Permission[] = []
+  permissionGroups.value.forEach(group => {
+    group.permissions.forEach(permission => {
+      if (permission.checked) {
+        checkedPermissions.push(permission)
+      }
+    })
+  })
+
   const rolePermissions = {
+    id: props.rolePermissions?.id,
     name: role.value,
-    permissions: permissions.value,
+    permissions: checkedPermissions,
   }
 
   emit('update:rolePermissions', rolePermissions)
@@ -164,6 +205,7 @@ const onSubmit = () => {
 const onReset = () => {
   emit('update:isDialogVisible', false)
   isSelectAll.value = false
+  permissionGroups.value = []
   refPermissionForm.value?.reset()
 }
 </script>
@@ -196,69 +238,104 @@ const onReset = () => {
             placeholder="Enter Role Name"
           />
 
-          <h5 class="text-h5 my-6">
-            Role Permissions
-          </h5>
+          <div class="d-flex justify-space-between align-center my-6">
+            <h5 class="text-h5">
+              Role Permissions
+            </h5>
+            <VCheckbox
+              v-model="isSelectAll"
+              v-model:indeterminate="isIndeterminate"
+              label="Select All"
+              hide-details
+            />
+          </div>
 
-          <!-- 👉 Role Permissions -->
+          <div class="text-caption text-disabled mb-4">
+            {{ checkedCount }} of {{ totalPermissions }} permissions selected
+          </div>
 
-          <VTable class="permission-table text-no-wrap mb-6">
-            <!-- 👉 Admin  -->
-            <tr>
-              <td>
-                <h6 class="text-h6">
-                  Administrator Access
-                </h6>
-              </td>
-              <td colspan="3">
-                <div class="d-flex justify-end">
-                  <VCheckbox
-                    v-model="isSelectAll"
-                    v-model:indeterminate="isIndeterminate"
-                    label="Select All"
-                  />
-                </div>
-              </td>
-            </tr>
+          <!-- 👉 Loading State -->
+          <VCard
+            v-if="isLoading"
+            flat
+            class="mb-6"
+          >
+            <VCardText class="text-center py-10">
+              <VProgressCircular
+                indeterminate
+                color="primary"
+                size="48"
+              />
+              <div class="mt-4 text-body-2">
+                Loading permissions...
+              </div>
+            </VCardText>
+          </VCard>
 
-            <!-- 👉 Other permission loop -->
-            <template
-              v-for="permission in permissions"
-              :key="permission.name"
+          <!-- 👉 Permission Groups -->
+          <VExpansionPanels
+            v-else
+            multiple
+            variant="accordion"
+            class="mb-6"
+          >
+            <VExpansionPanel
+              v-for="group in permissionGroups"
+              :key="group.resource"
             >
-              <tr>
-                <td>
-                  <h6 class="text-h6">
-                    {{ permission.name }}
-                  </h6>
-                </td>
-                <td>
-                  <div class="d-flex justify-end">
-                    <VCheckbox
-                      v-model="permission.read"
-                      label="Read"
+              <VExpansionPanelTitle>
+                <div class="d-flex align-center gap-3">
+                  <VAvatar
+                    size="32"
+                    :color="group.color"
+                    variant="tonal"
+                  >
+                    <VIcon
+                      :icon="group.icon"
+                      size="20"
                     />
+                  </VAvatar>
+                  <div>
+                    <div class="text-body-1 font-weight-medium">
+                      {{ group.resource }}
+                    </div>
+                    <div class="text-caption text-disabled">
+                      {{ group.permissions.filter(p => p.checked).length }} / {{ group.permissions.length }} selected
+                    </div>
                   </div>
-                </td>
-                <td>
-                  <div class="d-flex justify-end">
+                </div>
+              </VExpansionPanelTitle>
+              <VExpansionPanelText>
+                <VRow>
+                  <VCol
+                    v-for="permission in group.permissions"
+                    :key="permission.id"
+                    cols="12"
+                    sm="6"
+                  >
                     <VCheckbox
-                      v-model="permission.write"
-                      label="Write"
-                    />
-                  </div>
-                </td>
-                <td>
-                  <div class="d-flex justify-end">
-                    <VCheckbox
-                      v-model="permission.create"
-                      label="Create"
-                    />
-                  </div>
-                </td>
-              </tr>
-            </template>
-          </VTable>
+                      v-model="permission.checked"
+                      hide-details
+                    >
+                      <template #label>
+                        <div>
+                          <div class="text-body-2">
+                            {{ permission.name }}
+                          </div>
+                          <div
+                            v-if="permission.description"
+                            class="text-caption text-disabled"
+                          >
+                            {{ permission.description }}
+                          </div>
+                        </div>
+                      </template>
+                    </VCheckbox>
+                  </VCol>
+                </VRow>
+              </VExpansionPanelText>
+            </VExpansionPanel>
+          </VExpansionPanels>
 
           <!-- 👉 Actions button -->
           <div class="d-flex align-center justify-center gap-4">
@@ -280,23 +357,9 @@ const onReset = () => {
   </VDialog>
 </template>
 
-<style lang="scss">
-.permission-table {
-  td {
-    border-block-end: 1px solid rgba(var(--v-border-color), var(--v-border-opacity));
-    padding-block: 0.5rem;
-
-    .v-checkbox {
-      min-inline-size: 4.75rem;
-    }
-
-    &:not(:first-child) {
-      padding-inline: 0.5rem;
-    }
-
-    .v-label {
-      white-space: nowrap;
-    }
-  }
+<style lang="scss" scoped>
+// Custom styles for permission dialog
+.v-expansion-panel-text :deep(.v-expansion-panel-text__wrapper) {
+  padding-block: 1rem;
 }
 </style>
