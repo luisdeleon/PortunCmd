@@ -88,6 +88,10 @@ Comprehensive guides are available in the [`/docs`](./docs/) folder:
 - 💻 [Supabase Usage](./docs/SUPABASE_USAGE.md) - Code examples and patterns
 - 🔐 [RBAC Guide](./docs/RBAC_GUIDE.md) - Role-based access control implementation guide
 
+### Development Tools
+
+- 📊 [Statusline Setup](./docs/STATUSLINE_SETUP.md) - Claude CLI statusline configuration with usage tracking
+
 ## Quick Start
 
 ### Prerequisites
@@ -310,6 +314,14 @@ All project documentation is available in the [`/docs`](./docs/) directory:
 ### Deployment
 
 - **[Cloudflare Setup](./docs/CLOUDFLARE_SETUP.md)** - Production deployment guide for Cloudflare Pages
+
+### Development & Tooling
+
+- **[Statusline Setup](./docs/STATUSLINE_SETUP.md)** - Claude CLI statusline configuration guide
+  - Custom statusline displaying model, directory, git branch
+  - Session and week usage tracking
+  - Quick update commands and automation
+  - Troubleshooting and customization options
 
 ---
 
