@@ -8,6 +8,19 @@ type Profile = Tables<'profile'>
 type ProfileRole = Tables<'profile_role'>
 type Role = Tables<'role'>
 
+interface RoleScope {
+  scopeType: 'global' | 'dealer' | 'community' | 'property'
+  scopeDealerId?: string | null
+  scopeCommunityIds?: string[]
+  scopePropertyIds?: string[]
+}
+
+interface Permission {
+  name: string
+  resource: string
+  action: string
+}
+
 interface UserData {
   id: string
   email: string
@@ -16,6 +29,7 @@ interface UserData {
   avatar?: string
   role: string
   abilityRules: UserAbilityRule[]
+  scope?: RoleScope
 }
 
 interface LoginResponse {
@@ -24,27 +38,66 @@ interface LoginResponse {
   userAbilityRules: UserAbilityRule[]
 }
 
-// Map role names to ability rules
-function getAbilityRulesForRole(roleName: string): UserAbilityRule[] {
-  const roleLower = roleName.toLowerCase()
-  
-  // Admin roles get full access
-  if (roleLower.includes('admin') || roleLower === 'super admin') {
-    return [
-      {
-        action: 'manage',
-        subject: 'all',
-      },
-    ]
+// Generate CASL ability rules from permissions with scope conditions
+function generateAbilityRules(
+  roleName: string,
+  permissions: Permission[],
+  scope: RoleScope
+): UserAbilityRule[] {
+  const rules: UserAbilityRule[] = []
+
+  // Super Admin with global scope gets unrestricted access
+  if (roleName === 'Super Admin' && scope.scopeType === 'global') {
+    return [{ action: 'manage', subject: 'all' }]
   }
-  
-  // Default rules for other roles (Guard, Resident, Dealer, Client)
-  return [
-    {
-      action: 'read',
-      subject: 'AclDemo',
-    },
-  ]
+
+  // Convert permissions to CASL rules with scope conditions
+  permissions.forEach(permission => {
+    const conditions: any = {}
+
+    // Apply scope restrictions based on resource and scope type
+    if (scope.scopeType === 'dealer') {
+      // Dealers can only access their own communities
+      if (permission.resource === 'community') {
+        // Will be filtered by RLS, but we can add client-side hints
+        conditions.dealer_id = scope.scopeDealerId
+      }
+    }
+    else if (scope.scopeType === 'community') {
+      // Administrators/Guards restricted to specific communities
+      if (permission.resource === 'community' || permission.resource === 'property' || permission.resource === 'resident') {
+        if (scope.scopeCommunityIds && scope.scopeCommunityIds.length > 0) {
+          conditions.community_id = { $in: scope.scopeCommunityIds }
+        }
+      }
+    }
+    else if (scope.scopeType === 'property') {
+      // Residents restricted to specific properties
+      if (permission.resource === 'property') {
+        if (scope.scopePropertyIds && scope.scopePropertyIds.length > 0) {
+          conditions.id = { $in: scope.scopePropertyIds }
+        }
+      }
+      if (permission.resource === 'community') {
+        if (scope.scopeCommunityIds && scope.scopeCommunityIds.length > 0) {
+          conditions.id = { $in: scope.scopeCommunityIds }
+        }
+      }
+    }
+
+    rules.push({
+      action: permission.action as any,
+      subject: permission.resource as any,
+      ...(Object.keys(conditions).length > 0 ? { conditions } : {}),
+    })
+  })
+
+  // Fallback if no permissions found
+  if (rules.length === 0) {
+    return [{ action: 'read', subject: 'AclDemo' }]
+  }
+
+  return rules
 }
 
 export const useAuth = () => {
@@ -115,14 +168,22 @@ export const useAuth = () => {
       throw new Error('Your account has been disabled. Please contact support.')
     }
 
-    // Fetch user roles
+    // Fetch user roles with scope information
     let roles: string[] = []
+    let primaryRoleData: any = null
+    let roleScope: RoleScope = { scopeType: 'global' }
+
     try {
       const { data: profileRoles, error: rolesError } = await supabase
         .from('profile_role')
         .select(`
           role_id,
+          scope_type,
+          scope_dealer_id,
+          scope_community_ids,
+          scope_property_ids,
           role:role_id (
+            id,
             role_name,
             enabled
           )
@@ -134,23 +195,66 @@ export const useAuth = () => {
       }
       else if (profileRoles && profileRoles.length > 0) {
         // Get enabled roles
-        roles = profileRoles
-          .filter((pr: any) => pr.role && pr.role.enabled)
-          .map((pr: any) => pr.role.role_name)
-          .filter(Boolean)
+        const enabledRoles = profileRoles.filter((pr: any) => pr.role && pr.role.enabled)
+        roles = enabledRoles.map((pr: any) => pr.role.role_name).filter(Boolean)
+
+        // Determine primary role (admin takes precedence, otherwise first role)
+        primaryRoleData = enabledRoles.find((pr: any) =>
+          pr.role.role_name?.toLowerCase().includes('admin')
+        ) || enabledRoles[0]
+
+        // Extract scope from primary role
+        if (primaryRoleData) {
+          roleScope = {
+            scopeType: primaryRoleData.scope_type || 'global',
+            scopeDealerId: primaryRoleData.scope_dealer_id,
+            scopeCommunityIds: primaryRoleData.scope_community_ids || [],
+            scopePropertyIds: primaryRoleData.scope_property_ids || [],
+          }
+        }
       }
     }
     catch (error) {
       console.warn('Error fetching roles:', error)
     }
-    
-    // Determine primary role (admin takes precedence, otherwise first role, default to 'Resident')
-    const primaryRole = roles.find((r: string) => r?.toLowerCase().includes('admin')) || roles[0] || 'Resident'
-    
-    // Get ability rules based on role
-    const abilityRules = getAbilityRulesForRole(primaryRole)
 
-    // Build user data
+    // Determine primary role name
+    const primaryRole = primaryRoleData?.role?.role_name || roles[0] || 'Resident'
+    const primaryRoleId = primaryRoleData?.role?.id
+
+    // Fetch permissions for the primary role
+    let permissions: Permission[] = []
+    if (primaryRoleId) {
+      try {
+        const { data: rolePermissions, error: permError } = await (supabase as any)
+          .from('role_permissions')
+          .select(`
+            permission:permission_id (
+              name,
+              resource,
+              action
+            )
+          `)
+          .eq('role_id', primaryRoleId)
+
+        if (permError) {
+          console.warn('Failed to fetch permissions:', permError)
+        }
+        else if (rolePermissions) {
+          permissions = rolePermissions
+            .map((rp: any) => rp.permission)
+            .filter(Boolean)
+        }
+      }
+      catch (error) {
+        console.warn('Error fetching permissions:', error)
+      }
+    }
+
+    // Generate ability rules from permissions with scope
+    const abilityRules = generateAbilityRules(primaryRole, permissions, roleScope)
+
+    // Build user data with scope
     const userData: UserData = {
       id: profile.id,
       email: profile.email,
@@ -159,6 +263,7 @@ export const useAuth = () => {
       avatar: undefined, // You can add avatar URL from profile if needed
       role: primaryRole,
       abilityRules,
+      scope: roleScope,
     }
 
     // Store session token as accessToken
