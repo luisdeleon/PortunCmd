@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import AddNewUserDrawer from '@/views/apps/user/list/AddNewUserDrawer.vue'
+import AssignRoleDialog from '@/components/dialogs/AssignRoleDialog.vue'
 import type { UserProperties } from '@/plugins/fake-api/handlers/apps/users/types'
 import { supabase } from '@/lib/supabase'
 import { useI18n } from 'vue-i18n'
@@ -57,7 +58,7 @@ const fetchUsers = async () => {
   try {
     isLoading.value = true
 
-    // Build query for Supabase with role join
+    // Build query for Supabase with role join and scope info
     let query = supabase
       .from('profile')
       .select(`
@@ -69,6 +70,10 @@ const fetchUsers = async () => {
         def_property_id,
         profile_role!profile_role_profile_id_fkey(
           role_id,
+          scope_type,
+          scope_dealer_id,
+          scope_community_ids,
+          scope_property_ids,
           role!profile_role_role_id_fkey(role_name)
         )
       `, { count: 'exact' })
@@ -129,6 +134,7 @@ const fetchUsers = async () => {
       enabled: profile.enabled ? 'Active' : 'Inactive',
       avatar: null,
       role: profile.profile_role?.[0]?.role?.role_name || 'No Role',
+      scopeType: profile.profile_role?.[0]?.scope_type || 'global',
       status: profile.enabled ? 'active' : 'inactive',
       billing: 'Auto Debit',
     }))
@@ -344,6 +350,21 @@ const resolveUserStatusVariant = (stat: string) => {
 }
 
 const isAddNewUserDrawerVisible = ref(false)
+const isAssignRoleDialogVisible = ref(false)
+const selectedUserForRole = ref<string | null>(null)
+
+// Open assign role dialog
+const openAssignRoleDialog = (userId: string) => {
+  selectedUserForRole.value = userId
+  isAssignRoleDialogVisible.value = true
+}
+
+// Handle role assigned
+const handleRoleAssigned = () => {
+  isAssignRoleDialogVisible.value = false
+  selectedUserForRole.value = null
+  fetchUsers() // Refresh user list
+}
 
 // 👉 Add new user
 const addNewUser = async (userData: UserProperties) => {
@@ -609,15 +630,30 @@ const widgetData = computed(() => {
 
         <!-- 👉 Role (Plan) -->
         <template #item.plan="{ item }">
-          <div class="d-flex align-center gap-x-2">
-            <VIcon
-              :size="22"
-              :icon="resolveUserRoleVariant(item.currentPlan).icon"
-              :color="resolveUserRoleVariant(item.currentPlan).color"
-            />
-            <div class="text-capitalize text-high-emphasis text-body-1">
-              {{ item.currentPlan }}
+          <div class="d-flex flex-column gap-y-1">
+            <div class="d-flex align-center gap-x-2">
+              <VIcon
+                :size="22"
+                :icon="resolveUserRoleVariant(item.currentPlan).icon"
+                :color="resolveUserRoleVariant(item.currentPlan).color"
+              />
+              <div class="text-capitalize text-high-emphasis text-body-1">
+                {{ item.currentPlan }}
+              </div>
             </div>
+            <VChip
+              v-if="item.scopeType && item.scopeType !== 'global'"
+              size="x-small"
+              :color="item.scopeType === 'dealer' ? 'warning' : item.scopeType === 'community' ? 'primary' : 'info'"
+              variant="tonal"
+            >
+              <VIcon
+                start
+                :icon="item.scopeType === 'dealer' ? 'tabler-briefcase' : item.scopeType === 'community' ? 'tabler-building-community' : 'tabler-home'"
+                size="14"
+              />
+              {{ item.scopeType }}
+            </VChip>
           </div>
         </template>
 
@@ -644,14 +680,42 @@ const widgetData = computed(() => {
         <template #item.actions="{ item }">
           <IconBtn :to="{ name: 'apps-user-view-id', params: { id: item.id } }">
             <VIcon icon="tabler-eye" />
+            <VTooltip
+              activator="parent"
+              location="top"
+            >
+              View User
+            </VTooltip>
+          </IconBtn>
+
+          <IconBtn @click="openAssignRoleDialog(item.id)">
+            <VIcon icon="tabler-shield-plus" />
+            <VTooltip
+              activator="parent"
+              location="top"
+            >
+              Assign Role
+            </VTooltip>
           </IconBtn>
 
           <IconBtn>
             <VIcon icon="tabler-pencil" />
+            <VTooltip
+              activator="parent"
+              location="top"
+            >
+              Edit User
+            </VTooltip>
           </IconBtn>
 
           <IconBtn @click="deleteUser(item.id)">
             <VIcon icon="tabler-trash" />
+            <VTooltip
+              activator="parent"
+              location="top"
+            >
+              Delete User
+            </VTooltip>
           </IconBtn>
         </template>
 
@@ -670,6 +734,13 @@ const widgetData = computed(() => {
     <AddNewUserDrawer
       v-model:is-drawer-open="isAddNewUserDrawerVisible"
       @user-data="addNewUser"
+    />
+
+    <!-- 👉 Assign Role Dialog -->
+    <AssignRoleDialog
+      v-model:is-dialog-visible="isAssignRoleDialogVisible"
+      :user-id="selectedUserForRole"
+      @role-assigned="handleRoleAssigned"
     />
   </section>
 </template>

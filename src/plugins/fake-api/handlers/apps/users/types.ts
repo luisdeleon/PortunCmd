@@ -14,4 +14,5 @@ export interface UserProperties {
   community?: string
   property?: string
   enabled?: string
+  scopeType?: 'global' | 'dealer' | 'community' | 'property'
 }
