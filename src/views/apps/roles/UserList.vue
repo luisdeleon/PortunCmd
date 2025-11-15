@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import AddNewUserDrawer from '@/views/apps/user/list/AddNewUserDrawer.vue'
-import type { UserProperties } from '@db/apps/users/types'
+import type { UserProperties } from '@/plugins/fake-api/handlers/apps/users/types'
+import { supabase } from '@/lib/supabase'
 
 // 👉 Store
 const searchQuery = ref('')
@@ -31,47 +32,120 @@ const headers = [
   { title: 'Actions', key: 'actions', sortable: false },
 ]
 
-// 👉 Fetching users
-const { data: usersData, execute: fetchUsers } = await useApi<any>(createUrl('/apps/users', {
-  query: {
-    q: searchQuery,
-    status: selectedStatus,
-    plan: selectedPlan,
-    role: selectedRole,
-    itemsPerPage,
-    page,
-    sortBy,
-    orderBy,
-  },
-}))
+// 👉 Fetching users from Supabase
+const users = ref<UserProperties[]>([])
+const totalUsers = ref(0)
+const isLoading = ref(false)
 
-const users = computed((): UserProperties[] => usersData.value.users)
-const totalUsers = computed(() => usersData.value.totalUsers)
+const fetchUsers = async () => {
+  try {
+    isLoading.value = true
+
+    // Build query for Supabase with role join
+    let query = supabase
+      .from('profile')
+      .select(`
+        id,
+        display_name,
+        email,
+        enabled,
+        profile_role!profile_role_profile_id_fkey(
+          role_id,
+          role!profile_role_role_id_fkey(role_name)
+        )
+      `, { count: 'exact' })
+
+    // Apply search filter
+    if (searchQuery.value) {
+      query = query.or(`display_name.ilike.%${searchQuery.value}%,email.ilike.%${searchQuery.value}%`)
+    }
+
+    // Apply enabled filter (status)
+    if (selectedStatus.value !== undefined && selectedStatus.value !== null) {
+      const isActive = selectedStatus.value === 'active'
+      query = query.eq('enabled', isActive)
+    }
+
+    // Apply pagination
+    const from = (page.value - 1) * itemsPerPage.value
+    const to = from + itemsPerPage.value - 1
+
+    if (itemsPerPage.value !== -1) {
+      query = query.range(from, to)
+    }
+
+    const { data, error, count } = await query
+
+    if (error) {
+      console.error('Error fetching users from Supabase:', error)
+      return
+    }
+
+    // Transform and filter Supabase data
+    let filteredData = data || []
+
+    // Client-side role filter
+    if (selectedRole.value) {
+      filteredData = filteredData.filter(profile =>
+        profile.profile_role?.[0]?.role?.role_name === selectedRole.value
+      )
+    }
+
+    // Transform Supabase data to match UserProperties format
+    users.value = filteredData.map((profile) => ({
+      id: profile.id,
+      fullName: profile.display_name || 'No Name',
+      email: profile.email || 'No Email',
+      currentPlan: profile.profile_role?.[0]?.role?.role_name || 'No Role',
+      enabled: profile.enabled ? 'Active' : 'Inactive',
+      avatar: null,
+      role: profile.profile_role?.[0]?.role?.role_name || 'No Role',
+      status: profile.enabled ? 'active' : 'inactive',
+      billing: 'Auto Debit',
+    }))
+
+    totalUsers.value = count || 0
+  } catch (err) {
+    console.error('Error in fetchUsers:', err)
+  } finally {
+    isLoading.value = false
+  }
+}
+
+// Fetch users on mount
+onMounted(() => {
+  fetchUsers()
+})
+
+// Watch for filter changes
+watch([searchQuery, selectedRole, selectedStatus, page, itemsPerPage], () => {
+  fetchUsers()
+})
 
 // 👉 search filters
 const roles = [
-  { title: 'Admin', value: 'admin' },
-  { title: 'Author', value: 'author' },
-  { title: 'Editor', value: 'editor' },
-  { title: 'Maintainer', value: 'maintainer' },
-  { title: 'Subscriber', value: 'subscriber' },
+  { title: 'Super Admin', value: 'Super Admin' },
+  { title: 'Administrator', value: 'Administrator' },
+  { title: 'Dealer', value: 'Dealer' },
+  { title: 'Guard', value: 'Guard' },
+  { title: 'Resident', value: 'Resident' },
 ]
 
 const resolveUserRoleVariant = (role: string) => {
   const roleLowerCase = role.toLowerCase()
 
-  if (roleLowerCase === 'subscriber')
-    return { color: 'primary', icon: 'tabler-user' }
-  if (roleLowerCase === 'author')
-    return { color: 'warning', icon: 'tabler-settings' }
-  if (roleLowerCase === 'maintainer')
-    return { color: 'success', icon: 'tabler-chart-donut' }
-  if (roleLowerCase === 'editor')
-    return { color: 'info', icon: 'tabler-pencil' }
-  if (roleLowerCase === 'admin')
-    return { color: 'error', icon: 'tabler-device-laptop' }
+  if (roleLowerCase === 'super admin' || roleLowerCase === 'superadmin')
+    return { color: 'error', icon: 'tabler-crown' }
+  if (roleLowerCase === 'administrator' || roleLowerCase === 'admin')
+    return { color: 'primary', icon: 'tabler-shield-check' }
+  if (roleLowerCase === 'dealer')
+    return { color: 'warning', icon: 'tabler-briefcase' }
+  if (roleLowerCase === 'guard')
+    return { color: 'info', icon: 'tabler-shield-lock' }
+  if (roleLowerCase === 'resident')
+    return { color: 'success', icon: 'tabler-home' }
 
-  return { color: 'primary', icon: 'tabler-user' }
+  return { color: 'secondary', icon: 'tabler-user' }
 }
 
 const resolveUserStatusVariant = (stat: string) => {
@@ -90,29 +164,38 @@ const isAddNewUserDrawerVisible = ref(false)
 
 // 👉 Add new user
 const addNewUser = async (userData: UserProperties) => {
-  await $api('/apps/users', {
-    method: 'POST',
-    body: userData,
-  })
+  // This would require creating user in Supabase auth
+  // and then creating profile record
+  // Commented out for now - needs proper implementation
+  console.log('Add user functionality needs to be implemented with Supabase Auth')
 
   // refetch User
   fetchUsers()
 }
 
 // 👉 Delete user
-const deleteUser = async (id: number) => {
-  await $api(`/apps/users/${id}`, {
-    method: 'DELETE',
-  })
+const deleteUser = async (id: number | string) => {
+  try {
+    const { error } = await supabase
+      .from('profile')
+      .delete()
+      .eq('id', id)
 
-  // Delete from selectedRows
-  const index = selectedRows.value.findIndex(row => row === id)
-  if (index !== -1)
-    selectedRows.value.splice(index, 1)
+    if (error) {
+      console.error('Error deleting user:', error)
+      return
+    }
 
-  // refetch User
-  // TODO: Make this async
-  fetchUsers()
+    // Delete from selectedRows
+    const index = selectedRows.value.findIndex(row => row === id)
+    if (index !== -1)
+      selectedRows.value.splice(index, 1)
+
+    // refetch User
+    fetchUsers()
+  } catch (err) {
+    console.error('Error in deleteUser:', err)
+  }
 }
 </script>
 
