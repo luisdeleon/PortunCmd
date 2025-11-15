@@ -179,27 +179,62 @@ watch(permissionGroups, () => {
   updateSelectAll()
 }, { deep: true })
 
-const onSubmit = () => {
-  // Collect all checked permissions
-  const checkedPermissions: Permission[] = []
-  permissionGroups.value.forEach(group => {
-    group.permissions.forEach(permission => {
-      if (permission.checked) {
-        checkedPermissions.push(permission)
-      }
-    })
-  })
+const isSaving = ref(false)
 
-  const rolePermissions = {
-    id: props.rolePermissions?.id,
-    name: role.value,
-    permissions: checkedPermissions,
+const onSubmit = async () => {
+  if (!props.rolePermissions?.id) {
+    alert('No role selected for editing')
+    return
   }
 
-  emit('update:rolePermissions', rolePermissions)
-  emit('update:isDialogVisible', false)
-  isSelectAll.value = false
-  refPermissionForm.value?.reset()
+  try {
+    isSaving.value = true
+
+    // Collect all checked permissions
+    const checkedPermissionIds: string[] = []
+    permissionGroups.value.forEach(group => {
+      group.permissions.forEach(permission => {
+        if (permission.checked) {
+          checkedPermissionIds.push(permission.id)
+        }
+      })
+    })
+
+    // Delete existing permissions for this role
+    const { error: deleteError } = await supabase
+      .from('role_permissions')
+      .delete()
+      .eq('role_id', props.rolePermissions.id)
+
+    if (deleteError) throw deleteError
+
+    // Insert new permissions
+    if (checkedPermissionIds.length > 0) {
+      const records = checkedPermissionIds.map(permId => ({
+        role_id: props.rolePermissions!.id,
+        permission_id: permId,
+      }))
+
+      const { error: insertError } = await supabase
+        .from('role_permissions')
+        .insert(records)
+
+      if (insertError) throw insertError
+    }
+
+    // Success - emit event and close dialog
+    emit('update:isDialogVisible', false)
+    isSelectAll.value = false
+    refPermissionForm.value?.reset()
+
+    // Reload parent component (role cards)
+    window.location.reload()
+  } catch (err) {
+    console.error('Error saving role permissions:', err)
+    alert('Failed to save role permissions. Please try again.')
+  } finally {
+    isSaving.value = false
+  }
 }
 
 const onReset = () => {
@@ -339,13 +374,18 @@ const onReset = () => {
 
           <!-- 👉 Actions button -->
           <div class="d-flex align-center justify-center gap-4">
-            <VBtn @click="onSubmit">
-              Submit
+            <VBtn
+              :loading="isSaving"
+              :disabled="isSaving"
+              @click="onSubmit"
+            >
+              {{ isSaving ? 'Saving...' : 'Submit' }}
             </VBtn>
 
             <VBtn
               color="secondary"
               variant="tonal"
+              :disabled="isSaving"
               @click="onReset"
             >
               Cancel

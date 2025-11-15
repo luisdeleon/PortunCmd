@@ -1,6 +1,9 @@
 <script setup lang="ts">
 import RoleCards from '@/views/apps/roles/RoleCards.vue'
+import PermissionMatrix from '@/views/apps/roles/PermissionMatrix.vue'
 import UserList from '@/views/apps/roles/UserList.vue'
+
+const currentTab = ref('roles')
 </script>
 
 <template>
@@ -14,23 +17,57 @@ import UserList from '@/views/apps/roles/UserList.vue'
       </p>
     </VCol>
 
-    <!-- 👉 Roles Cards -->
+    <!-- 👉 Tabs -->
     <VCol cols="12">
-      <RoleCards />
+      <VTabs v-model="currentTab">
+        <VTab value="roles">
+          <VIcon
+            start
+            icon="tabler-crown"
+          />
+          Role Cards
+        </VTab>
+        <VTab value="matrix">
+          <VIcon
+            start
+            icon="tabler-table"
+          />
+          Permission Matrix
+        </VTab>
+        <VTab value="users">
+          <VIcon
+            start
+            icon="tabler-users"
+          />
+          User Assignments
+        </VTab>
+      </VTabs>
     </VCol>
 
+    <!-- 👉 Tab Content -->
     <VCol cols="12">
-      <h4 class="text-h4 mb-1 mt-6">
-        Total users with their roles
-      </h4>
-      <p class="text-body-1 mb-0">
-        Find all of your company’s administrator accounts and their associate roles.
-      </p>
-    </VCol>
+      <VWindow v-model="currentTab">
+        <!-- Role Cards Tab -->
+        <VWindowItem value="roles">
+          <RoleCards />
+        </VWindowItem>
 
-    <VCol cols="12">
-      <!-- 👉 User List  -->
-      <UserList />
+        <!-- Permission Matrix Tab -->
+        <VWindowItem value="matrix">
+          <PermissionMatrix />
+        </VWindowItem>
+
+        <!-- Users Tab -->
+        <VWindowItem value="users">
+          <h4 class="text-h4 mb-1 mt-2">
+            Total users with their roles
+          </h4>
+          <p class="text-body-1 mb-6">
+            Find all of your company's administrator accounts and their associate roles.
+          </p>
+          <UserList />
+        </VWindowItem>
+      </VWindow>
     </VCol>
   </VRow>
 </template>
