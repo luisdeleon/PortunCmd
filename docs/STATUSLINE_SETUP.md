@@ -1,37 +1,30 @@
 # Claude CLI Statusline Setup Guide
 
-This guide documents the complete setup for displaying a custom statusline at the bottom of Claude CLI that shows:
+This guide documents the setup for displaying a custom statusline at the bottom of Claude CLI that shows:
 - Current AI model (Sonnet 4.5, Haiku 4.5, Opus 4.1)
 - Current directory
 - Git branch
-- Session usage percentage
-- Week usage percentage
 
 ## What You'll See
 
 ```
-🤖 Sonnet 4.5 | 📁 PortunCmd | 🌿 main | S: 32% | W: 4%
+🤖 Sonnet 4.5 | 📁 PortunCmd | 🌿 main
 ```
 
 ## Complete Setup Steps
 
-### 1. Create the Main Statusline Script
+### 1. Create the Statusline Script
 
 Create the file `~/.claude/statusline.sh`:
 
 ```bash
 #!/bin/bash
 
-# Debug log file (uncomment to enable debugging)
-LOG_FILE="$HOME/.claude/statusline.log"
-
 # Read JSON input from stdin
-# Use a non-blocking read to prevent hanging
 json=$(cat 2>/dev/null || echo '{}')
 
 # Fallback if no input or empty JSON
 if [ -z "$json" ] || [ "$json" = "{}" ]; then
-    # Use current working directory as fallback
     dir=$(basename "$PWD")
     if git rev-parse --git-dir > /dev/null 2>&1; then
         branch=$(git branch --show-current 2>/dev/null)
@@ -46,41 +39,12 @@ if [ -z "$json" ] || [ "$json" = "{}" ]; then
     exit 0
 fi
 
-# Debug: Log the JSON received (uncomment to debug)
-# echo "$(date): JSON received: $json" >> "$LOG_FILE"
-
-# Extract information with error handling
-# Note: Claude CLI uses snake_case: display_name, not displayName
+# Extract model name (Claude CLI uses snake_case: display_name)
 model=$(echo "$json" | jq -r '.model.display_name // .model.displayName // .model.name // "Claude"' 2>/dev/null || echo "Claude")
 
-# Debug: Log extracted model
-# echo "$(date): Extracted model: $model" >> "$LOG_FILE"
-
+# Extract directory paths
 work_dir=$(echo "$json" | jq -r '.workspace.current_dir // .workingDirectory // ""' 2>/dev/null)
 project_dir=$(echo "$json" | jq -r '.workspace.project_dir // .projectDirectory // ""' 2>/dev/null)
-
-# Extract usage data from cache file (updated by background script)
-CACHE_FILE="$HOME/.claude/usage-cache.txt"
-
-# Default values
-session_pct="0"
-week_pct="0"
-
-# Read from cache if it exists and is recent (less than 5 minutes old)
-if [ -f "$CACHE_FILE" ]; then
-    source "$CACHE_FILE" 2>/dev/null
-
-    # Check if cache is stale (older than 5 minutes = 300 seconds)
-    if [ -n "$last_update" ]; then
-        current_time=$(date +%s)
-        age=$((current_time - last_update))
-        if [ $age -gt 300 ]; then
-            # Cache is stale, reset to 0 but keep showing
-            session_pct="${session_pct:-0}"
-            week_pct="${week_pct:-0}"
-        fi
-    fi
-fi
 
 # Determine which directory to use
 if [ -n "$work_dir" ] && [ "$work_dir" != "null" ] && [ "$work_dir" != '""' ]; then
@@ -103,21 +67,11 @@ if [ -d "$target_dir" ]; then
 fi
 
 # Build status line with colors
-# Cyan for model, Yellow for directory, Magenta for branch, Green for usage
+# Cyan for model, Yellow for directory, Magenta for branch
 status_line="\033[36m🤖 $model\033[0m | \033[33m📁 $dir\033[0m"
 
 if [ -n "$git_branch" ]; then
     status_line="$status_line | \033[35m🌿 $git_branch\033[0m"
-fi
-
-# Add session usage if available (only show if > 0)
-if [ "$session_pct" != "0" ] && [ "$session_pct" != "0.0" ]; then
-    status_line="$status_line | \033[32mS: ${session_pct}%\033[0m"
-fi
-
-# Add week usage if available (only show if > 0)
-if [ "$week_pct" != "0" ] && [ "$week_pct" != "0.0" ]; then
-    status_line="$status_line | \033[32mW: ${week_pct}%\033[0m"
 fi
 
 echo -e "$status_line"
@@ -128,59 +82,7 @@ Make it executable:
 chmod +x ~/.claude/statusline.sh
 ```
 
-### 2. Create the Usage Update Script
-
-Create the file `~/.claude/update-usage-now.sh`:
-
-```bash
-#!/bin/bash
-
-# Manual usage update script
-# Run this anytime to update your usage cache
-# Usage: ~/.claude/update-usage-now.sh [session_pct] [week_pct]
-
-CACHE_FILE="$HOME/.claude/usage-cache.txt"
-
-# If percentages provided as arguments, use them
-if [ $# -eq 2 ]; then
-    session_pct=$1
-    week_pct=$2
-else
-    # Prompt user for input
-    echo "Enter current session usage % (from /usage command):"
-    read session_pct
-    echo "Enter current week usage % (from /usage command):"
-    read week_pct
-fi
-
-# Validate inputs are numbers
-if ! [[ "$session_pct" =~ ^[0-9]+$ ]]; then
-    echo "Error: Session percentage must be a number"
-    exit 1
-fi
-
-if ! [[ "$week_pct" =~ ^[0-9]+$ ]]; then
-    echo "Error: Week percentage must be a number"
-    exit 1
-fi
-
-# Write to cache file
-temp_file="${CACHE_FILE}.tmp"
-echo "session_pct=$session_pct" > "$temp_file"
-echo "week_pct=$week_pct" >> "$temp_file"
-echo "last_update=$(date +%s)" >> "$temp_file"
-mv "$temp_file" "$CACHE_FILE"
-
-echo "✅ Usage cache updated: Session ${session_pct}%, Week ${week_pct}%"
-echo "   Your statusline will now show these values!"
-```
-
-Make it executable:
-```bash
-chmod +x ~/.claude/update-usage-now.sh
-```
-
-### 3. Configure Claude CLI Settings
+### 2. Configure Claude CLI Settings
 
 #### Global Settings
 
@@ -198,7 +100,7 @@ Edit `~/.claude/settings.json`:
 
 #### Project-Specific Settings (Optional)
 
-Edit `<project>/.claude/settings.local.json` to include:
+Edit `<project>/.claude/settings.local.json`:
 
 ```json
 {
@@ -209,108 +111,39 @@ Edit `<project>/.claude/settings.local.json` to include:
   },
   "permissions": {
     "allow": [
-      "Bash(~/.claude/statusline.sh)",
-      "Bash(bc:*)"
+      "Bash(~/.claude/statusline.sh)"
     ]
   }
 }
 ```
 
-### 4. Add Shell Alias for Quick Updates
+### 3. Test the Setup
 
-Add to your `~/.zshrc` (or `~/.bashrc` if using bash):
-
-```bash
-# Claude CLI usage update alias
-# Quick update: cu [session%] [week%]
-# Example: cu 32 4
-alias cu='~/.claude/update-usage-now.sh'
-alias claude-update-usage='~/.claude/update-usage-now.sh'
-```
-
-Reload your shell configuration:
-```bash
-source ~/.zshrc
-```
-
-### 5. Initialize the Usage Cache
-
-After checking `/usage` in Claude CLI, initialize your cache:
+Test the script manually:
 
 ```bash
-cu 32 4
+echo '{"model":{"display_name":"Sonnet 4.5"},"workspace":{"current_dir":"'$PWD'"}}' | ~/.claude/statusline.sh
 ```
 
-Replace `32` and `4` with your actual session and week percentages.
-
-## Daily Usage
-
-1. **Check usage in Claude CLI**:
-   ```
-   /usage
-   ```
-
-2. **Update the statusline** (in terminal):
-   ```bash
-   cu 35 5
-   ```
-
-That's it! Your statusline will now show the updated percentages.
+You should see:
+```
+🤖 Sonnet 4.5 | 📁 <your-directory> | 🌿 <your-branch>
+```
 
 ## How It Works
 
-### Architecture
-
-1. **Statusline Script** (`~/.claude/statusline.sh`)
-   - Receives JSON data from Claude CLI
-   - Extracts model name, directory, git branch
-   - Reads usage data from cache file
-   - Displays formatted statusline
-
-2. **Usage Cache** (`~/.claude/usage-cache.txt`)
-   - Stores session and week percentages
-   - Updated manually via `cu` command
-   - Lightweight text file (instant reads)
-
-3. **Update Helper** (`~/.claude/update-usage-now.sh`)
-   - Takes percentages as arguments
-   - Writes to cache file with timestamp
-   - Validates input
-
-### Why This Approach?
-
-**Problem**: Claude CLI v2.0.42 doesn't expose usage data to the statusline JSON interface.
-
-**Solution**: Manual cache updates
-- ✅ Simple and lightweight
-- ✅ No background processes
-- ✅ No resource overhead
-- ✅ No API calls
-- ✅ Instant display
-- ✅ You control when to update
-
-### Data Flow
-
-```
-/usage command (in Claude CLI)
-    ↓
-You see: Session 35%, Week 5%
-    ↓
-Run: cu 35 5
-    ↓
-Updates: ~/.claude/usage-cache.txt
-    ↓
-Statusline reads cache
-    ↓
-Display: S: 35% | W: 5%
-```
+1. **Claude CLI** passes JSON data to the statusline script via stdin
+2. **Script extracts**:
+   - Model name from `.model.display_name`
+   - Directory from `.workspace.current_dir`
+   - Git branch by running `git branch --show-current`
+3. **Displays** formatted statusline with colors
 
 ## Color Coding
 
 - 🤖 **Cyan** - AI Model name (Sonnet 4.5, Haiku 4.5, Opus 4.1)
 - 📁 **Yellow** - Current directory
 - 🌿 **Magenta** - Git branch
-- **Green** - Usage percentages (S: X%, W: Y%)
 
 ## Troubleshooting
 
@@ -326,31 +159,13 @@ Display: S: 35% | W: 5%
    ls -la ~/.claude/statusline.sh
    ```
 
-3. **Test script manually**:
-   ```bash
-   echo '{"model":{"display_name":"Sonnet 4.5"},"workspace":{"current_dir":"'$PWD'"}}' | ~/.claude/statusline.sh
-   ```
-
-### Usage Percentages Not Showing
-
-1. **Check if cache file exists**:
-   ```bash
-   cat ~/.claude/usage-cache.txt
-   ```
-
-2. **Initialize cache**:
-   ```bash
-   cu 0 0
-   ```
-
-3. **Verify cache is being read**:
-   - The statusline should show `S: 0% | W: 0%` after initialization
+3. **Test script manually** (see step 3 above)
 
 ### Model Name Shows "Claude" Instead of Actual Model
 
-This is a fallback. It means:
+This is a fallback when:
 - JSON from Claude CLI is empty/malformed
-- Usually happens when not in an active Claude session
+- Not in an active Claude session
 - Will show correct model name when Claude CLI is running
 
 ### Git Branch Not Showing
@@ -365,32 +180,6 @@ This is a fallback. It means:
    git branch --show-current
    ```
 
-## Debugging
-
-### Enable Debug Logging
-
-Edit `~/.claude/statusline.sh` and uncomment these lines:
-
-```bash
-# Change from:
-# echo "$(date): JSON received: $json" >> "$LOG_FILE"
-
-# To:
-echo "$(date): JSON received: $json" >> "$LOG_FILE"
-```
-
-Then check the log:
-```bash
-tail -f ~/.claude/statusline.log
-```
-
-### Disable Debug Logging
-
-Re-comment the lines and remove the log file:
-```bash
-rm ~/.claude/statusline.log
-```
-
 ## Advanced Customization
 
 ### Change Colors
@@ -402,7 +191,6 @@ Edit `~/.claude/statusline.sh` and modify ANSI color codes:
 # \033[36m = Cyan
 # \033[33m = Yellow
 # \033[35m = Magenta
-# \033[32m = Green
 # \033[0m  = Reset
 
 # Available colors:
@@ -414,18 +202,6 @@ Edit `~/.claude/statusline.sh` and modify ANSI color codes:
 # \033[35m = Magenta
 # \033[36m = Cyan
 # \033[37m = White
-```
-
-### Add More Information
-
-You can add additional fields from the JSON:
-
-```bash
-# Example: Add session ID
-session_id=$(echo "$json" | jq -r '.session_id // ""' 2>/dev/null)
-if [ -n "$session_id" ]; then
-    status_line="$status_line | Session: ${session_id:0:8}"
-fi
 ```
 
 ### Change Icons
@@ -442,18 +218,29 @@ Replace emojis in the statusline:
 status_line="⚡ $model | 📂 $dir | ⎇ $git_branch"
 ```
 
+### Add More Information
+
+You can add additional fields from the JSON:
+
+```bash
+# Example: Add session ID
+session_id=$(echo "$json" | jq -r '.session_id // ""' 2>/dev/null)
+if [ -n "$session_id" ]; then
+    status_line="$status_line | Session: ${session_id:0:8}"
+fi
+```
+
 ## Files Created
 
-This setup creates the following files:
+This setup creates:
 
 ```
 ~/.claude/
 ├── statusline.sh              # Main statusline script
-├── update-usage-now.sh        # Usage update helper
-└── usage-cache.txt           # Usage data cache (created on first update)
+└── settings.json              # Global Claude CLI settings
 
-~/.claude/settings.json        # Global Claude CLI settings
-~/.zshrc                       # Shell configuration (alias added)
+<project>/.claude/
+└── settings.local.json        # Project-specific settings (optional)
 ```
 
 ## Uninstalling
@@ -465,28 +252,13 @@ To remove the statusline feature:
    # Edit ~/.claude/settings.json and remove the statusLine section
    ```
 
-2. **Remove scripts**:
+2. **Remove script**:
    ```bash
    rm ~/.claude/statusline.sh
-   rm ~/.claude/update-usage-now.sh
-   rm ~/.claude/usage-cache.txt
-   ```
-
-3. **Remove alias from shell**:
-   ```bash
-   # Edit ~/.zshrc and remove the cu alias lines
-   ```
-
-4. **Reload shell**:
-   ```bash
-   source ~/.zshrc
    ```
 
 ## Credits
 
-This statusline setup was created to provide at-a-glance visibility of:
-- Which AI model you're currently using
-- Your current working context (directory, git branch)
-- Session and weekly usage limits
-
-It works around the limitation that Claude CLI v2.0.42 doesn't expose usage data through the statusline JSON interface, using a simple, lightweight caching approach instead.
+This statusline setup provides at-a-glance visibility of:
+- Which AI model you're currently using (Sonnet 4.5, Haiku 4.5, Opus 4.1, etc.)
+- Your current working context (directory and git branch)
