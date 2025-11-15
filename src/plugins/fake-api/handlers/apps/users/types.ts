@@ -1,14 +1,17 @@
 export interface UserProperties {
-  id: number
+  id: number | string
   fullName: string
-  company: string
+  company?: string
   role: string
   username?: string
-  country: string
-  contact: string
+  country?: string
+  contact?: string
   email: string
   currentPlan: string
   status: string
-  avatar: string
+  avatar: string | null
   billing: string
+  community?: string
+  property?: string
+  enabled?: string
 }

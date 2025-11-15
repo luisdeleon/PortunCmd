@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import AddNewUserDrawer from '@/views/apps/user/list/AddNewUserDrawer.vue'
-import type { UserProperties } from '@db/apps/users/types'
+import type { UserProperties } from '@/plugins/fake-api/handlers/apps/users/types'
 import { supabase } from '@/lib/supabase'
 import { useI18n } from 'vue-i18n'
 
@@ -67,8 +67,9 @@ const fetchUsers = async () => {
         enabled,
         def_community_id,
         def_property_id,
-        profile_role(
-          role:role_id(role_name)
+        profile_role!profile_role_profile_id_fkey(
+          role_id,
+          role!profile_role_role_id_fkey(role_name)
         )
       `, { count: 'exact' })
 
@@ -193,8 +194,9 @@ const fetchResidentStats = async () => {
       .select(`
         id,
         created_at,
-        profile_role(
-          role:role_id(role_name)
+        profile_role!profile_role_profile_id_fkey(
+          role_id,
+          role!profile_role_role_id_fkey(role_name)
         )
       `)
 
