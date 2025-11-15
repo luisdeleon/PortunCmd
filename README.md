@@ -305,11 +305,16 @@ All project documentation is available in the [`/docs`](./docs/) directory:
 
 ### Security & Access Control
 
-- **[RBAC Guide](./docs/RBAC_GUIDE.md)** - Comprehensive role-based access control implementation guide
+- **[RBAC Guide](./docs/RBAC_GUIDE.md)** - Comprehensive role-based access control system design
   - Role hierarchy and permissions
   - Database schema enhancements
   - Implementation phases and migration
   - Code examples and best practices
+- **[RBAC Implementation](./docs/RBAC_IMPLEMENTATION.md)** - **NEW!** Phase-by-phase RBAC UI implementation
+  - Phase 1: Role management foundation with real-time data
+  - Phase 2: Advanced features (scope-based assignment, permission matrix)
+  - Component structure and API integration
+  - Complete changelog and troubleshooting guide
 
 ### Deployment
 
