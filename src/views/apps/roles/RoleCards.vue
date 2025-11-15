@@ -122,6 +122,9 @@ const fetchRoles = async () => {
   }
 }
 
+// Define role order
+const roleOrder = ['Super Admin', 'Dealer', 'Administrator', 'Guard', 'Resident']
+
 // Computed filtered roles
 const filteredRoles = computed(() => {
   let filtered = roles.value
@@ -130,6 +133,19 @@ const filteredRoles = computed(() => {
   if (selectedStatus.value !== null) {
     filtered = filtered.filter(role => role.enabled === selectedStatus.value)
   }
+
+  // Sort by custom order
+  filtered.sort((a, b) => {
+    const indexA = roleOrder.indexOf(a.role)
+    const indexB = roleOrder.indexOf(b.role)
+
+    // If role not in order list, put it at the end
+    if (indexA === -1 && indexB === -1) return 0
+    if (indexA === -1) return 1
+    if (indexB === -1) return -1
+
+    return indexA - indexB
+  })
 
   return filtered
 })
