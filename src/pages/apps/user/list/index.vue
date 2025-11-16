@@ -630,30 +630,15 @@ const widgetData = computed(() => {
 
         <!-- 👉 Role (Plan) -->
         <template #item.plan="{ item }">
-          <div class="d-flex flex-column gap-y-1">
-            <div class="d-flex align-center gap-x-2">
-              <VIcon
-                :size="22"
-                :icon="resolveUserRoleVariant(item.currentPlan).icon"
-                :color="resolveUserRoleVariant(item.currentPlan).color"
-              />
-              <div class="text-capitalize text-high-emphasis text-body-1">
-                {{ item.currentPlan }}
-              </div>
+          <div class="d-flex align-center gap-x-2">
+            <VIcon
+              :size="22"
+              :icon="resolveUserRoleVariant(item.currentPlan).icon"
+              :color="resolveUserRoleVariant(item.currentPlan).color"
+            />
+            <div class="text-capitalize text-high-emphasis text-body-1">
+              {{ item.currentPlan }}
             </div>
-            <VChip
-              v-if="item.scopeType && item.scopeType !== 'global'"
-              size="x-small"
-              :color="item.scopeType === 'dealer' ? 'warning' : item.scopeType === 'community' ? 'primary' : 'info'"
-              variant="tonal"
-            >
-              <VIcon
-                start
-                :icon="item.scopeType === 'dealer' ? 'tabler-briefcase' : item.scopeType === 'community' ? 'tabler-building-community' : 'tabler-home'"
-                size="14"
-              />
-              {{ item.scopeType }}
-            </VChip>
           </div>
         </template>
 

@@ -29,6 +29,12 @@ const { t } = useI18n({ useScope: 'global' })
         rel="noopener noreferrer"
         class="text-medium-emphasis"
       >{{ t('footer.privacyPolicy') }}</a>
+      <a
+        href="https://webzy.io/cookie-policy"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="text-medium-emphasis"
+      >{{ t('footer.cookiePolicy') }}</a>
     </span>
   </div>
 </template>

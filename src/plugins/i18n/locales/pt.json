@@ -454,7 +454,8 @@
     "copyright": "Copyright © {year} Webzy LLC. Todos os direitos reservados.",
     "termsAndConditions": "Termos e Condições",
     "termsOfService": "Termos de Serviço",
-    "privacyPolicy": "Política de Privacidade"
+    "privacyPolicy": "Política de Privacidade",
+    "cookiePolicy": "Política de Cookies"
   },
   "userView": {
     "loading": "Carregando dados do usuário...",
