@@ -6,6 +6,12 @@ import LogisticsOrderByCountries from '@/views/apps/logistics/LogisticsOrderByCo
 import LogisticsOverviewTable from '@/views/apps/logistics/LogisticsOverviewTable.vue'
 import LogisticsShipmentStatistics from '@/views/apps/logistics/LogisticsShipmentStatistics.vue'
 import LogisticsVehicleOverview from '@/views/apps/logistics/LogisticsVehicleOverview.vue'
+
+definePage({
+  meta: {
+    public: false, // Requires authentication
+  },
+})
 </script>
 
 <template>

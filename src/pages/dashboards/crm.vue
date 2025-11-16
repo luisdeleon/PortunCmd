@@ -10,6 +10,13 @@ import CrmRevenueGrowth from '@/views/dashboards/crm/CrmRevenueGrowth.vue'
 import CrmSalesAreaCharts from '@/views/dashboards/crm/CrmSalesAreaCharts.vue'
 import CrmSalesByCountries from '@/views/dashboards/crm/CrmSalesByCountries.vue'
 
+definePage({
+  meta: {
+    layout: 'default',
+    public: false, // Requires authentication
+  },
+})
+
 const simpleStatisticsDemoCards = [
   {
     icon: 'tabler-credit-card',

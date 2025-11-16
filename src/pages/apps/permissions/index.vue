@@ -1,6 +1,12 @@
 <script setup lang="ts">
 import type { Permission } from '@db/apps/permission/types'
 
+definePage({
+  meta: {
+    public: false, // Requires authentication
+  },
+})
+
 const headers = [
   { title: 'Name', key: 'name' },
   { title: 'Assigned To', key: 'assignedTo', sortable: false },

@@ -6,6 +6,12 @@ import { useCalendarStore } from '@/views/apps/calendar/useCalendarStore'
 // Components
 import CalendarEventHandler from '@/views/apps/calendar/CalendarEventHandler.vue'
 
+definePage({
+  meta: {
+    public: false, // Requires authentication
+  },
+})
+
 // 👉 Store
 const store = useCalendarStore()
 

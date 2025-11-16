@@ -9,6 +9,12 @@ import customCheck from '@images/svg/Check.svg'
 import customLaptop from '@images/svg/laptop.svg'
 import customLightbulb from '@images/svg/lightbulb.svg'
 
+definePage({
+  meta: {
+    public: false, // Requires authentication
+  },
+})
+
 // Donut Chart Colors
 const donutChartColors = {
   donut: {

@@ -16,6 +16,7 @@ const vuetifyDisplay = useDisplay()
 
 definePage({
   meta: {
+    public: false, // Requires authentication
     layoutWrapperClasses: 'layout-content-height-fixed',
   },
 })

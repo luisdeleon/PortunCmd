@@ -76,8 +76,19 @@ export const setupGuards = (router: _RouterTyped<RouteNamedMap & { [key: string]
           return { name: 'not-authorized' }
         }
       } catch (error) {
-        // If ability check fails (e.g., ability not initialized), allow navigation
-        console.warn('Ability check failed, allowing navigation:', error)
+        // If ability check fails (e.g., ability not initialized), redirect to login for security
+        console.error('Ability check failed, redirecting to login:', error)
+        // Clear potentially corrupted cookies
+        useCookie('userData').value = null
+        useCookie('accessToken').value = null
+        useCookie('userAbilityRules').value = null
+        return {
+          name: 'login',
+          query: {
+            ...to.query,
+            to: to.fullPath !== '/' ? to.path : undefined,
+          },
+        }
       }
     }
 

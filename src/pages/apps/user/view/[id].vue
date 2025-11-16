@@ -8,6 +8,12 @@ import UserTabSecurity from '@/views/apps/user/view/UserTabSecurity.vue'
 import { supabase } from '@/lib/supabase'
 import { useI18n } from 'vue-i18n'
 
+definePage({
+  meta: {
+    public: false, // Requires authentication
+  },
+})
+
 const route = useRoute('apps-user-view-id')
 const { t } = useI18n()
 

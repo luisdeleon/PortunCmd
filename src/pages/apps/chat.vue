@@ -12,6 +12,7 @@ import type { ChatContact as TypeChatContact } from '@db/apps/chat/types'
 
 definePage({
   meta: {
+    public: false, // Requires authentication
     layoutWrapperClasses: 'layout-content-height-fixed',
   },
 })

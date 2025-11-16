@@ -5,6 +5,12 @@ import type { UserProperties } from '@/plugins/fake-api/handlers/apps/users/type
 import { supabase } from '@/lib/supabase'
 import { useI18n } from 'vue-i18n'
 
+definePage({
+  meta: {
+    public: false, // Requires authentication
+  },
+})
+
 // 👉 i18n
 const { t } = useI18n()
 

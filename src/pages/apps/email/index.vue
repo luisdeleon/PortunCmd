@@ -9,6 +9,7 @@ import type { Email, EmailLabel } from '@db/apps/email/types'
 
 definePage({
   meta: {
+    public: false, // Requires authentication
     layoutWrapperClasses: 'layout-content-height-fixed',
   },
 })

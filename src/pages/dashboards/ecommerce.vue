@@ -10,6 +10,13 @@ import EcommerceRevenueReport from '@/views/dashboards/ecommerce/EcommerceRevenu
 import EcommerceStatistics from '@/views/dashboards/ecommerce/EcommerceStatistics.vue'
 import EcommerceTotalProfitLineCharts from '@/views/dashboards/ecommerce/EcommerceTotalProfitLineCharts.vue'
 import EcommerceTransactions from '@/views/dashboards/ecommerce/EcommerceTransactions.vue'
+
+definePage({
+  meta: {
+    layout: 'default',
+    public: false, // Requires authentication
+  },
+})
 </script>
 
 <template>

@@ -2,6 +2,12 @@
 import KanbanBoardComp from '@/views/apps/kanban/KanbanBoard.vue'
 import type { AddNewKanbanItem, EditKanbanItem, KanbanState, RenameKanbanBoard } from '@db/apps/kanban/types'
 
+definePage({
+  meta: {
+    public: false, // Requires authentication
+  },
+})
+
 // 👉 initial kanban data fetch
 const { data: kanban, execute: refetchKanban } = await useApi<any>('/apps/kanban')
 

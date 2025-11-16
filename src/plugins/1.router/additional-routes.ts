@@ -12,9 +12,16 @@ export const redirects: RouteRecordRaw[] = [
     meta: {
       public: true, // Mark as public so router guard doesn't block it
     },
-    redirect: to => {
+    redirect: () => {
       // TODO: Get type from backend
       const userData = useCookie<Record<string, unknown> | null | undefined>('userData')
+      const accessToken = useCookie('accessToken')
+
+      // If not logged in, redirect to login
+      if (!userData.value || !accessToken.value) {
+        return { name: 'login' }
+      }
+
       const userRole = (userData.value?.role as string || '').toLowerCase()
 
       // Check if role contains 'admin' (case-insensitive)

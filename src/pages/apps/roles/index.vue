@@ -3,6 +3,12 @@ import RoleCards from '@/views/apps/roles/RoleCards.vue'
 import PermissionMatrix from '@/views/apps/roles/PermissionMatrix.vue'
 import UserList from '@/views/apps/roles/UserList.vue'
 
+definePage({
+  meta: {
+    public: false, // Requires authentication
+  },
+})
+
 const currentTab = ref('roles')
 </script>
 

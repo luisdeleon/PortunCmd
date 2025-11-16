@@ -23,6 +23,7 @@ const tabs = [
 
 definePage({
   meta: {
+    public: false, // Requires authentication
     navActiveLink: 'pages-account-settings-tab',
   },
 })

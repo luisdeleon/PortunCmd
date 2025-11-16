@@ -1,6 +1,7 @@
 <script setup lang="ts">
 definePage({
   meta: {
+    public: false, // Requires authentication
     action: 'read',
     subject: 'AclDemo',
   },
