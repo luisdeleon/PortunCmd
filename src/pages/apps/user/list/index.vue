@@ -382,8 +382,12 @@ const isAddNewUserDrawerVisible = ref(false)
 const isAssignRoleDialogVisible = ref(false)
 const selectedUserForRole = ref<string | null>(null)
 const isDeleteDialogVisible = ref(false)
+const isBulkDeleteDialogVisible = ref(false)
 const userToDelete = ref<{ id: string; name: string } | null>(null)
 const snackbar = ref({ show: false, message: '', color: 'success' })
+
+// Computed property for bulk delete button visibility
+const hasSelectedRows = computed(() => selectedRows.value.length > 0)
 
 // Open assign role dialog
 const openAssignRoleDialog = (userId: string) => {
@@ -508,6 +512,106 @@ const deleteUser = async () => {
 const cancelDelete = () => {
   isDeleteDialogVisible.value = false
   userToDelete.value = null
+}
+
+// 👉 Open bulk delete dialog
+const openBulkDeleteDialog = () => {
+  isBulkDeleteDialogVisible.value = true
+}
+
+// 👉 Cancel bulk delete
+const cancelBulkDelete = () => {
+  isBulkDeleteDialogVisible.value = false
+}
+
+// 👉 Bulk delete users
+const bulkDeleteUsers = async () => {
+  if (selectedRows.value.length === 0) return
+
+  const totalToDelete = selectedRows.value.length
+
+  try {
+    let successCount = 0
+    let errorCount = 0
+    const errors: string[] = []
+
+    // Delete each selected user
+    for (const userId of selectedRows.value) {
+      try {
+        // Check for community manager relationships
+        const { data: communityManagers, error: cmError } = await supabase
+          .from('community_manager')
+          .select('id')
+          .eq('profile_id', userId)
+          .limit(1)
+
+        if (cmError) {
+          console.error('Error checking community managers:', cmError)
+        }
+
+        if (communityManagers && communityManagers.length > 0) {
+          errorCount++
+          errors.push(`User ${userId} is a community manager and cannot be deleted`)
+          continue
+        }
+
+        const { error } = await supabase
+          .from('profile')
+          .delete()
+          .eq('id', userId)
+
+        if (error) {
+          errorCount++
+          errors.push(`Failed to delete user ${userId}: ${error.message}`)
+        } else {
+          successCount++
+        }
+      } catch (err: any) {
+        errorCount++
+        errors.push(`Failed to delete user ${userId}: ${err.message}`)
+      }
+    }
+
+    // Show result message
+    if (errorCount === 0) {
+      snackbar.value = {
+        show: true,
+        message: t('userList.messages.bulkDeleteSuccess', { count: successCount }),
+        color: 'success',
+      }
+    } else if (successCount === 0) {
+      snackbar.value = {
+        show: true,
+        message: t('userList.messages.bulkDeleteFailed', { count: errorCount }),
+        color: 'error',
+      }
+    } else {
+      snackbar.value = {
+        show: true,
+        message: t('userList.messages.bulkDeletePartial', { success: successCount, failed: errorCount }),
+        color: 'warning',
+      }
+    }
+
+    // Clear selection
+    selectedRows.value = []
+
+    // Refetch users
+    fetchUsers()
+    fetchUserStats()
+
+    // Close dialog
+    isBulkDeleteDialogVisible.value = false
+  } catch (err) {
+    console.error('Error in bulkDeleteUsers:', err)
+    snackbar.value = {
+      show: true,
+      message: t('userList.messages.bulkDeleteError'),
+      color: 'error',
+    }
+
+    isBulkDeleteDialogVisible.value = false
+  }
 }
 
 const widgetData = computed(() => {
@@ -660,6 +764,17 @@ const widgetData = computed(() => {
             style="inline-size: 6.25rem;"
             @update:model-value="itemsPerPage = parseInt($event, 10)"
           />
+
+          <!-- 👉 Bulk Delete button (shown when items are selected) -->
+          <VBtn
+            v-if="hasSelectedRows"
+            variant="tonal"
+            color="error"
+            prepend-icon="tabler-trash"
+            @click="openBulkDeleteDialog"
+          >
+            Delete ({{ selectedRows.length }})
+          </VBtn>
         </div>
         <VSpacer />
 
@@ -889,6 +1004,63 @@ const widgetData = computed(() => {
               @click="cancelDelete"
             >
               {{ $t('userList.deleteDialog.cancel') }}
+            </VBtn>
+          </div>
+        </VCardText>
+      </VCard>
+    </VDialog>
+
+    <!-- 👉 Bulk Delete Confirmation Dialog -->
+    <VDialog
+      v-model="isBulkDeleteDialogVisible"
+      max-width="500"
+    >
+      <VCard>
+        <VCardText class="text-center px-10 py-6">
+          <VIcon
+            icon="tabler-trash"
+            color="error"
+            size="56"
+            class="my-4"
+          />
+
+          <h6 class="text-h6 mb-4">
+            Delete Multiple Users
+          </h6>
+
+          <p class="text-body-1 mb-6">
+            Are you sure you want to delete <strong>{{ selectedRows.length }}</strong>
+            {{ selectedRows.length === 1 ? 'user' : 'users' }}?
+            This action cannot be undone.
+          </p>
+
+          <VAlert
+            color="warning"
+            variant="tonal"
+            class="mb-6 text-start"
+          >
+            <div class="text-body-2">
+              You are about to permanently delete <strong>{{ selectedRows.length }}</strong>
+              {{ selectedRows.length === 1 ? 'user' : 'users' }}.
+              This will remove all associated data.
+            </div>
+          </VAlert>
+
+          <div class="d-flex gap-4 justify-center">
+            <VBtn
+              color="error"
+              variant="elevated"
+              @click="bulkDeleteUsers"
+            >
+              Delete All
+            </VBtn>
+
+            <VBtn
+              color="secondary"
+              variant="tonal"
+              @click="cancelBulkDelete"
+            >
+              Cancel
             </VBtn>
           </div>
         </VCardText>

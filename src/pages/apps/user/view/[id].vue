@@ -65,6 +65,18 @@ const fetchUserData = async () => {
       return
     }
 
+    // Fetch community count (from community_manager table)
+    const { count: communityCount, error: communityError } = await supabase
+      .from('community_manager')
+      .select('*', { count: 'exact', head: true })
+      .eq('profile_id', route.params.id)
+
+    // Fetch property count (from property_owner table)
+    const { count: propertyCount, error: propertyError } = await supabase
+      .from('property_owner')
+      .select('*', { count: 'exact', head: true })
+      .eq('profile_id', route.params.id)
+
     // Transform data to match expected format
     userData.value = {
       id: data.id,
@@ -79,9 +91,10 @@ const fetchUserData = async () => {
       email: data.email || 'No Email',
       currentPlan: data.profile_role?.[0]?.role?.role_name || 'No Role',
       status: data.enabled ? 'active' : 'inactive',
+      enabled: data.enabled || false,
       avatar: null,
-      taskDone: 0,
-      projectDone: 0,
+      communitiesCount: communityCount || 0,
+      propertiesCount: propertyCount || 0,
       taxId: 'N/A',
       language: 'English',
     }

@@ -241,9 +241,13 @@ const isAddCommunityDialogVisible = ref(false)
 const isEditCommunityDialogVisible = ref(false)
 const isViewCommunityDialogVisible = ref(false)
 const isDeleteDialogVisible = ref(false)
+const isBulkDeleteDialogVisible = ref(false)
 const selectedCommunity = ref<any>(null)
 const communityToDelete = ref<{ id: string; name: string } | null>(null)
 const snackbar = ref({ show: false, message: '', color: 'success' })
+
+// Computed property for bulk delete button visibility
+const hasSelectedRows = computed(() => selectedRows.value.length > 0)
 
 // 👉 Open add community dialog
 const openAddCommunityDialog = () => {
@@ -351,6 +355,84 @@ const deleteCommunity = async () => {
     }
     isDeleteDialogVisible.value = false
     communityToDelete.value = null
+  }
+}
+
+// 👉 Open bulk delete dialog
+const openBulkDeleteDialog = () => {
+  isBulkDeleteDialogVisible.value = true
+}
+
+// 👉 Cancel bulk delete
+const cancelBulkDelete = () => {
+  isBulkDeleteDialogVisible.value = false
+}
+
+// 👉 Bulk delete communities
+const bulkDeleteCommunities = async () => {
+  if (selectedRows.value.length === 0) return
+
+  try {
+    let successCount = 0
+    let errorCount = 0
+
+    // Delete each selected community
+    for (const communityId of selectedRows.value) {
+      try {
+        const { error } = await supabase
+          .from('community')
+          .delete()
+          .eq('id', communityId)
+
+        if (error) {
+          errorCount++
+        } else {
+          successCount++
+        }
+      } catch (err: any) {
+        errorCount++
+      }
+    }
+
+    // Show result message
+    if (errorCount === 0) {
+      snackbar.value = {
+        show: true,
+        message: `Successfully deleted ${successCount} ${successCount === 1 ? 'community' : 'communities'}`,
+        color: 'success',
+      }
+    } else if (successCount === 0) {
+      snackbar.value = {
+        show: true,
+        message: `Failed to delete ${errorCount} ${errorCount === 1 ? 'community' : 'communities'}`,
+        color: 'error',
+      }
+    } else {
+      snackbar.value = {
+        show: true,
+        message: `Deleted ${successCount} ${successCount === 1 ? 'community' : 'communities'}, ${errorCount} failed`,
+        color: 'warning',
+      }
+    }
+
+    // Clear selection
+    selectedRows.value = []
+
+    // Refetch communities
+    fetchCommunities()
+    fetchCommunityGrowth()
+
+    // Close dialog
+    isBulkDeleteDialogVisible.value = false
+  } catch (err) {
+    console.error('Error in bulkDeleteCommunities:', err)
+    snackbar.value = {
+      show: true,
+      message: 'Failed to delete communities',
+      color: 'error',
+    }
+
+    isBulkDeleteDialogVisible.value = false
   }
 }
 
@@ -493,6 +575,17 @@ const widgetData = computed(() => {
             style="inline-size: 6.25rem;"
             @update:model-value="itemsPerPage = parseInt($event, 10)"
           />
+
+          <!-- 👉 Bulk Delete button (shown when items are selected) -->
+          <VBtn
+            v-if="hasSelectedRows"
+            variant="tonal"
+            color="error"
+            prepend-icon="tabler-trash"
+            @click="openBulkDeleteDialog"
+          >
+            Delete ({{ selectedRows.length }})
+          </VBtn>
         </div>
         <VSpacer />
 
@@ -688,6 +781,63 @@ const widgetData = computed(() => {
               color="secondary"
               variant="tonal"
               @click="cancelDelete"
+            >
+              Cancel
+            </VBtn>
+          </div>
+        </VCardText>
+      </VCard>
+    </VDialog>
+
+    <!-- 👉 Bulk Delete Confirmation Dialog -->
+    <VDialog
+      v-model="isBulkDeleteDialogVisible"
+      max-width="500"
+    >
+      <VCard>
+        <VCardText class="text-center px-10 py-6">
+          <VIcon
+            icon="tabler-trash"
+            color="error"
+            size="56"
+            class="my-4"
+          />
+
+          <h6 class="text-h6 mb-4">
+            Delete Multiple Communities
+          </h6>
+
+          <p class="text-body-1 mb-6">
+            Are you sure you want to delete <strong>{{ selectedRows.length }}</strong>
+            {{ selectedRows.length === 1 ? 'community' : 'communities' }}?
+            This action cannot be undone.
+          </p>
+
+          <VAlert
+            color="warning"
+            variant="tonal"
+            class="mb-6 text-start"
+          >
+            <div class="text-body-2">
+              You are about to permanently delete <strong>{{ selectedRows.length }}</strong>
+              {{ selectedRows.length === 1 ? 'community' : 'communities' }}.
+              This will remove all associated data.
+            </div>
+          </VAlert>
+
+          <div class="d-flex gap-4 justify-center">
+            <VBtn
+              color="error"
+              variant="elevated"
+              @click="bulkDeleteCommunities"
+            >
+              Delete All
+            </VBtn>
+
+            <VBtn
+              color="secondary"
+              variant="tonal"
+              @click="cancelBulkDelete"
             >
               Cancel
             </VBtn>

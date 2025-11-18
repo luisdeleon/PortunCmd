@@ -1,9 +1,10 @@
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n'
+import { supabase } from '@/lib/supabase'
 
 interface Props {
   userData: {
-    id: number
+    id: string
     fullName: string
     firstName: string
     lastName: string
@@ -15,9 +16,10 @@ interface Props {
     email: string
     currentPlan: string
     status: string
+    enabled: boolean
     avatar: string
-    taskDone: number
-    projectDone: number
+    communitiesCount: number
+    propertiesCount: number
     taxId: string
     language: string
   }
@@ -38,6 +40,11 @@ const standardPlan = computed(() => ({
 
 const isUserInfoEditDialogVisible = ref(false)
 const isUpgradePlanDialogVisible = ref(false)
+const isDeleteDialogVisible = ref(false)
+const isToggleStatusDialogVisible = ref(false)
+
+// Router for navigation
+const router = useRouter()
 
 // 👉 Role variant resolver
 const resolveUserRoleVariant = (role: string) => {
@@ -53,6 +60,52 @@ const resolveUserRoleVariant = (role: string) => {
     return { color: 'secondary', icon: 'tabler-server-2' }
 
   return { color: 'primary', icon: 'tabler-user' }
+}
+
+// 👉 Delete user handler
+const deleteUser = async () => {
+  try {
+    const { error } = await supabase
+      .from('profile')
+      .delete()
+      .eq('id', props.userData.id)
+
+    if (error) {
+      console.error('Error deleting user:', error)
+      alert('Failed to delete user')
+      return
+    }
+
+    // Navigate back to user list
+    router.push({ name: 'apps-user-list' })
+  } catch (err) {
+    console.error('Error in deleteUser:', err)
+    alert('Failed to delete user')
+  }
+}
+
+// 👉 Toggle user status handler
+const toggleUserStatus = async () => {
+  try {
+    const newStatus = !props.userData.enabled
+
+    const { error } = await supabase
+      .from('profile')
+      .update({ enabled: newStatus })
+      .eq('id', props.userData.id)
+
+    if (error) {
+      console.error('Error updating user status:', error)
+      alert('Failed to update user status')
+      return
+    }
+
+    // Refresh page to show updated status
+    window.location.reload()
+  } catch (err) {
+    console.error('Error in toggleUserStatus:', err)
+    alert('Failed to update user status')
+  }
 }
 </script>
 
@@ -99,7 +152,7 @@ const resolveUserRoleVariant = (role: string) => {
 
         <VCardText>
           <div class="d-flex justify-space-around gap-x-6 gap-y-2 flex-wrap mb-6">
-            <!-- 👉 Done task -->
+            <!-- 👉 Communities Count -->
             <div class="d-flex align-center me-8">
               <VAvatar
                 :size="40"
@@ -109,20 +162,20 @@ const resolveUserRoleVariant = (role: string) => {
                 class="me-4"
               >
                 <VIcon
-                  icon="tabler-checkbox"
+                  icon="tabler-building-community"
                   size="24"
                 />
               </VAvatar>
               <div>
                 <h5 class="text-h5">
-                  {{ `${(props.userData.taskDone / 1000).toFixed(2)}k` }}
+                  {{ props.userData.communitiesCount }}
                 </h5>
 
-                <span class="text-sm">{{ $t('userView.bioPanel.taskDone') }}</span>
+                <span class="text-sm">Communities</span>
               </div>
             </div>
 
-            <!-- 👉 Done Project -->
+            <!-- 👉 Properties Count -->
             <div class="d-flex align-center me-4">
               <VAvatar
                 :size="38"
@@ -132,15 +185,15 @@ const resolveUserRoleVariant = (role: string) => {
                 class="me-4"
               >
                 <VIcon
-                  icon="tabler-briefcase"
+                  icon="tabler-home"
                   size="24"
                 />
               </VAvatar>
               <div>
                 <h5 class="text-h5">
-                  {{ kFormatter(props.userData.projectDone) }}
+                  {{ props.userData.propertiesCount }}
                 </h5>
-                <span class="text-sm">{{ $t('userView.bioPanel.projectDone') }}</span>
+                <span class="text-sm">Properties</span>
               </div>
             </div>
           </div>
@@ -157,6 +210,11 @@ const resolveUserRoleVariant = (role: string) => {
             <VListItem>
               <VListItemTitle>
                 <h6 class="text-h6">
+                  <VIcon
+                    icon="tabler-user"
+                    size="18"
+                    class="me-1"
+                  />
                   {{ $t('userView.bioPanel.username') }}:
                   <div class="d-inline-block text-body-1">
                     {{ props.userData.fullName }}
@@ -167,21 +225,15 @@ const resolveUserRoleVariant = (role: string) => {
 
             <VListItem>
               <VListItemTitle>
-                <span class="text-h6">
-                  {{ $t('userView.bioPanel.email') }}:
-                </span>
-                <span class="text-body-1">
-                  {{ props.userData.email }}
-                </span>
-              </VListItemTitle>
-            </VListItem>
-
-            <VListItem>
-              <VListItemTitle>
                 <h6 class="text-h6">
-                  {{ $t('userView.bioPanel.status') }}:
-                  <div class="d-inline-block text-body-1 text-capitalize">
-                    {{ props.userData.status }}
+                  <VIcon
+                    icon="tabler-key"
+                    size="18"
+                    class="me-1"
+                  />
+                  UUID:
+                  <div class="d-inline-block text-body-1 font-weight-light">
+                    {{ props.userData.id }}
                   </div>
                 </h6>
               </VListItemTitle>
@@ -190,6 +242,47 @@ const resolveUserRoleVariant = (role: string) => {
             <VListItem>
               <VListItemTitle>
                 <h6 class="text-h6">
+                  <VIcon
+                    icon="tabler-mail"
+                    size="18"
+                    class="me-1"
+                  />
+                  {{ $t('userView.bioPanel.email') }}:
+                  <span class="text-body-1">
+                    {{ props.userData.email }}
+                  </span>
+                </h6>
+              </VListItemTitle>
+            </VListItem>
+
+            <VListItem>
+              <VListItemTitle>
+                <h6 class="text-h6">
+                  <VIcon
+                    icon="tabler-circle-check"
+                    size="18"
+                    class="me-1"
+                  />
+                  {{ $t('userView.bioPanel.status') }}:
+                  <VChip
+                    :color="props.userData.enabled ? 'success' : 'error'"
+                    size="small"
+                    class="ms-2 text-capitalize"
+                  >
+                    {{ props.userData.status }}
+                  </VChip>
+                </h6>
+              </VListItemTitle>
+            </VListItem>
+
+            <VListItem>
+              <VListItemTitle>
+                <h6 class="text-h6">
+                  <VIcon
+                    icon="tabler-shield"
+                    size="18"
+                    class="me-1"
+                  />
                   {{ $t('userView.bioPanel.role') }}:
                   <div class="d-inline-block text-capitalize text-body-1">
                     {{ props.userData.role }}
@@ -201,6 +294,11 @@ const resolveUserRoleVariant = (role: string) => {
             <VListItem>
               <VListItemTitle>
                 <h6 class="text-h6">
+                  <VIcon
+                    icon="tabler-id"
+                    size="18"
+                    class="me-1"
+                  />
                   {{ $t('userView.bioPanel.taxId') }}:
                   <div class="d-inline-block text-body-1">
                     {{ props.userData.taxId }}
@@ -212,6 +310,11 @@ const resolveUserRoleVariant = (role: string) => {
             <VListItem>
               <VListItemTitle>
                 <h6 class="text-h6">
+                  <VIcon
+                    icon="tabler-phone"
+                    size="18"
+                    class="me-1"
+                  />
                   {{ $t('userView.bioPanel.contact') }}:
                   <div class="d-inline-block text-body-1">
                     {{ props.userData.contact }}
@@ -223,6 +326,11 @@ const resolveUserRoleVariant = (role: string) => {
             <VListItem>
               <VListItemTitle>
                 <h6 class="text-h6">
+                  <VIcon
+                    icon="tabler-language"
+                    size="18"
+                    class="me-1"
+                  />
                   {{ $t('userView.bioPanel.language') }}:
                   <div class="d-inline-block text-body-1">
                     {{ props.userData.language }}
@@ -234,6 +342,11 @@ const resolveUserRoleVariant = (role: string) => {
             <VListItem>
               <VListItemTitle>
                 <h6 class="text-h6">
+                  <VIcon
+                    icon="tabler-map-pin"
+                    size="18"
+                    class="me-1"
+                  />
                   {{ $t('userView.bioPanel.country') }}:
                   <div class="d-inline-block text-body-1">
                     {{ props.userData.country }}
@@ -244,7 +357,7 @@ const resolveUserRoleVariant = (role: string) => {
           </VList>
         </VCardText>
 
-        <!-- 👉 Edit and Suspend button -->
+        <!-- 👉 Action buttons -->
         <VCardText class="d-flex justify-center gap-x-4">
           <VBtn
             variant="elevated"
@@ -256,8 +369,17 @@ const resolveUserRoleVariant = (role: string) => {
           <VBtn
             variant="tonal"
             color="error"
+            @click="isDeleteDialogVisible = true"
           >
-            {{ $t('userView.bioPanel.suspend') }}
+            Delete
+          </VBtn>
+
+          <VBtn
+            variant="tonal"
+            :color="props.userData.enabled ? 'warning' : 'success'"
+            @click="isToggleStatusDialogVisible = true"
+          >
+            {{ props.userData.enabled ? 'Disable' : 'Enable' }}
           </VBtn>
         </VCardText>
       </VCard>
@@ -357,6 +479,118 @@ const resolveUserRoleVariant = (role: string) => {
 
   <!-- 👉 Upgrade plan dialog -->
   <UserUpgradePlanDialog v-model:is-dialog-visible="isUpgradePlanDialogVisible" />
+
+  <!-- 👉 Delete Confirmation Dialog -->
+  <VDialog
+    v-model="isDeleteDialogVisible"
+    max-width="500"
+  >
+    <VCard>
+      <VCardText class="text-center px-10 py-6">
+        <VIcon
+          icon="tabler-trash"
+          color="error"
+          size="56"
+          class="my-4"
+        />
+
+        <h6 class="text-h6 mb-4">
+          Delete User
+        </h6>
+
+        <p class="text-body-1 mb-6">
+          Are you sure you want to delete <strong>{{ props.userData.fullName }}</strong>?
+          This action cannot be undone and will permanently remove the user account.
+        </p>
+
+        <VAlert
+          color="error"
+          variant="tonal"
+          class="mb-6 text-start"
+        >
+          <div class="text-body-2">
+            <strong>Warning:</strong> Deleting this user will remove all associated data and cannot be reversed.
+          </div>
+        </VAlert>
+
+        <div class="d-flex gap-4 justify-center">
+          <VBtn
+            color="error"
+            variant="elevated"
+            @click="deleteUser(); isDeleteDialogVisible = false"
+          >
+            Delete User
+          </VBtn>
+
+          <VBtn
+            color="secondary"
+            variant="tonal"
+            @click="isDeleteDialogVisible = false"
+          >
+            Cancel
+          </VBtn>
+        </div>
+      </VCardText>
+    </VCard>
+  </VDialog>
+
+  <!-- 👉 Toggle Status Confirmation Dialog -->
+  <VDialog
+    v-model="isToggleStatusDialogVisible"
+    max-width="500"
+  >
+    <VCard>
+      <VCardText class="text-center px-10 py-6">
+        <VIcon
+          :icon="props.userData.enabled ? 'tabler-user-off' : 'tabler-user-check'"
+          :color="props.userData.enabled ? 'warning' : 'success'"
+          size="56"
+          class="my-4"
+        />
+
+        <h6 class="text-h6 mb-4">
+          {{ props.userData.enabled ? 'Disable User' : 'Enable User' }}
+        </h6>
+
+        <p class="text-body-1 mb-6">
+          Are you sure you want to {{ props.userData.enabled ? 'disable' : 'enable' }} <strong>{{ props.userData.fullName }}</strong>?
+        </p>
+
+        <VAlert
+          :color="props.userData.enabled ? 'warning' : 'info'"
+          variant="tonal"
+          class="mb-6 text-start"
+        >
+          <div class="text-body-2">
+            <template v-if="props.userData.enabled">
+              <strong>Disabling this user</strong> will prevent them from logging in and accessing the system.
+            </template>
+            <template v-else>
+              <strong>Enabling this user</strong> will allow them to log in and access the system again.
+            </template>
+          </div>
+        </VAlert>
+
+        <div class="d-flex gap-4 justify-center">
+          <VBtn
+            :color="props.userData.enabled ? 'warning' : 'success'"
+            variant="elevated"
+            @click="toggleUserStatus(); isToggleStatusDialogVisible = false"
+          >
+            {{ props.userData.enabled ? 'Disable' : 'Enable' }} User
+          </VBtn>
+
+          <VBtn
+            color="secondary"
+            variant="tonal"
+            @click="isToggleStatusDialogVisible = false"
+          >
+            Cancel
+          </VBtn>
+        </div>
+      </VCardText>
+    </VCard>
+  </VDialog>
 </template>
 
 <style lang="scss" scoped>
