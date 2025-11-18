@@ -1,0 +1,4 @@
+id,name,address,community_id
+PROP-001,Apartment 101,123 Main Street Unit 101,COMM-001
+PROP-002,House 5A,456 Oak Avenue,COMM-001
+PROP-003,Villa 12,789 Pine Road,COMM-002

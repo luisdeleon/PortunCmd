@@ -3,6 +3,7 @@ import { supabase } from '@/lib/supabase'
 import { useI18n } from 'vue-i18n'
 import AddEditPropertyDialog from '@/components/dialogs/AddEditPropertyDialog.vue'
 import ViewPropertyDialog from '@/components/dialogs/ViewPropertyDialog.vue'
+import ImportPropertyDialog from '@/components/dialogs/ImportPropertyDialog.vue'
 
 definePage({
   meta: {
@@ -29,9 +30,14 @@ const isAddPropertyDialogVisible = ref(false)
 const isEditPropertyDialogVisible = ref(false)
 const isViewPropertyDialogVisible = ref(false)
 const isDeleteDialogVisible = ref(false)
+const isBulkDeleteDialogVisible = ref(false)
+const isImportDialogVisible = ref(false)
 const selectedProperty = ref<any>(null)
 const propertyToDelete = ref<{ id: string; name: string } | null>(null)
 const snackbar = ref({ show: false, message: '', color: 'success' })
+
+// Computed property for bulk delete button visibility
+const hasSelectedRows = computed(() => selectedRows.value.length > 0)
 
 // Update data table options
 const updateOptions = (options: any) => {
@@ -195,9 +201,21 @@ const openDeleteDialog = (property: any) => {
   isDeleteDialogVisible.value = true
 }
 
+const openImportDialog = () => {
+  isImportDialogVisible.value = true
+}
+
+const openBulkDeleteDialog = () => {
+  isBulkDeleteDialogVisible.value = true
+}
+
 const cancelDelete = () => {
   propertyToDelete.value = null
   isDeleteDialogVisible.value = false
+}
+
+const cancelBulkDelete = () => {
+  isBulkDeleteDialogVisible.value = false
 }
 
 const handlePropertySaved = () => {
@@ -206,6 +224,16 @@ const handlePropertySaved = () => {
   snackbar.value = {
     show: true,
     message: 'Property saved successfully',
+    color: 'success',
+  }
+}
+
+const handleImportCompleted = () => {
+  fetchProperties()
+  fetchPropertyGrowth()
+  snackbar.value = {
+    show: true,
+    message: 'Properties imported successfully',
     color: 'success',
   }
 }
@@ -270,6 +298,79 @@ const deleteProperty = async () => {
 
     isDeleteDialogVisible.value = false
     propertyToDelete.value = null
+  }
+}
+
+// 👉 Bulk delete properties
+const bulkDeleteProperties = async () => {
+  if (selectedRows.value.length === 0) return
+
+  const totalToDelete = selectedRows.value.length
+
+  try {
+    let successCount = 0
+    let errorCount = 0
+    const errors: string[] = []
+
+    // Delete each selected property
+    for (const propertyId of selectedRows.value) {
+      try {
+        const { error } = await supabase
+          .from('property')
+          .delete()
+          .eq('id', propertyId)
+
+        if (error) {
+          errorCount++
+          errors.push(`Failed to delete property ${propertyId}: ${error.message}`)
+        } else {
+          successCount++
+        }
+      } catch (err: any) {
+        errorCount++
+        errors.push(`Failed to delete property ${propertyId}: ${err.message}`)
+      }
+    }
+
+    // Show result message
+    if (errorCount === 0) {
+      snackbar.value = {
+        show: true,
+        message: `Successfully deleted ${successCount} ${successCount === 1 ? 'property' : 'properties'}`,
+        color: 'success',
+      }
+    } else if (successCount === 0) {
+      snackbar.value = {
+        show: true,
+        message: `Failed to delete ${errorCount} ${errorCount === 1 ? 'property' : 'properties'}`,
+        color: 'error',
+      }
+    } else {
+      snackbar.value = {
+        show: true,
+        message: `Deleted ${successCount} ${successCount === 1 ? 'property' : 'properties'}, ${errorCount} failed`,
+        color: 'warning',
+      }
+    }
+
+    // Clear selection
+    selectedRows.value = []
+
+    // Refetch properties
+    fetchProperties()
+    fetchPropertyGrowth()
+
+    // Close dialog
+    isBulkDeleteDialogVisible.value = false
+  } catch (err) {
+    console.error('Error in bulkDeleteProperties:', err)
+    snackbar.value = {
+      show: true,
+      message: 'Failed to delete properties',
+      color: 'error',
+    }
+
+    isBulkDeleteDialogVisible.value = false
   }
 }
 
@@ -386,6 +487,17 @@ const widgetData = computed(() => {
             style="inline-size: 6.25rem;"
             @update:model-value="itemsPerPage = parseInt($event, 10)"
           />
+
+          <!-- 👉 Bulk Delete button (shown when items are selected) -->
+          <VBtn
+            v-if="hasSelectedRows"
+            variant="tonal"
+            color="error"
+            prepend-icon="tabler-trash"
+            @click="openBulkDeleteDialog"
+          >
+            Delete ({{ selectedRows.length }})
+          </VBtn>
         </div>
         <VSpacer />
 
@@ -405,6 +517,7 @@ const widgetData = computed(() => {
             variant="tonal"
             color="secondary"
             prepend-icon="tabler-download"
+            @click="openImportDialog"
           >
             Import
           </VBtn>
@@ -527,6 +640,12 @@ const widgetData = computed(() => {
       :property-data="selectedProperty"
     />
 
+    <!-- 👉 Import Property Dialog -->
+    <ImportPropertyDialog
+      v-model:is-dialog-visible="isImportDialogVisible"
+      @import-completed="handleImportCompleted"
+    />
+
     <!-- 👉 Delete Confirmation Dialog -->
     <VDialog
       v-model="isDeleteDialogVisible"
@@ -568,6 +687,63 @@ const widgetData = computed(() => {
               color="secondary"
               variant="tonal"
               @click="cancelDelete"
+            >
+              Cancel
+            </VBtn>
+          </div>
+        </VCardText>
+      </VCard>
+    </VDialog>
+
+    <!-- 👉 Bulk Delete Confirmation Dialog -->
+    <VDialog
+      v-model="isBulkDeleteDialogVisible"
+      max-width="500"
+    >
+      <VCard>
+        <VCardText class="text-center px-10 py-6">
+          <VIcon
+            icon="tabler-trash"
+            color="error"
+            size="56"
+            class="my-4"
+          />
+
+          <h6 class="text-h6 mb-4">
+            Delete Multiple Properties
+          </h6>
+
+          <p class="text-body-1 mb-6">
+            Are you sure you want to delete <strong>{{ selectedRows.length }}</strong>
+            {{ selectedRows.length === 1 ? 'property' : 'properties' }}?
+            This action cannot be undone.
+          </p>
+
+          <VAlert
+            color="warning"
+            variant="tonal"
+            class="mb-6 text-start"
+          >
+            <div class="text-body-2">
+              You are about to permanently delete <strong>{{ selectedRows.length }}</strong>
+              {{ selectedRows.length === 1 ? 'property' : 'properties' }}.
+              This will remove all associated data.
+            </div>
+          </VAlert>
+
+          <div class="d-flex gap-4 justify-center">
+            <VBtn
+              color="error"
+              variant="elevated"
+              @click="bulkDeleteProperties"
+            >
+              Delete All
+            </VBtn>
+
+            <VBtn
+              color="secondary"
+              variant="tonal"
+              @click="cancelBulkDelete"
             >
               Cancel
             </VBtn>
