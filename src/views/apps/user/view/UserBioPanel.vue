@@ -65,14 +65,20 @@ const resolveUserRoleVariant = (role: string) => {
 // 👉 Delete user handler
 const deleteUser = async () => {
   try {
-    const { error } = await supabase
-      .from('profile')
-      .delete()
-      .eq('id', props.userData.id)
+    // Call the database function to delete user from both auth.users and profile
+    const { data, error } = await supabase
+      .rpc('delete_user_completely', { user_id: props.userData.id })
 
     if (error) {
       console.error('Error deleting user:', error)
-      alert('Failed to delete user')
+      alert(`Failed to delete user: ${error.message}`)
+      return
+    }
+
+    // Check if the function returned an error
+    if (data && !data.success) {
+      console.error('Error deleting user:', data.message)
+      alert(`Failed to delete user: ${data.message}`)
       return
     }
 

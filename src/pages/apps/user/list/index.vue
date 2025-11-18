@@ -448,11 +448,9 @@ const deleteUser = async () => {
       return
     }
 
-    // Attempt to delete the user
-    const { error } = await supabase
-      .from('profile')
-      .delete()
-      .eq('id', id)
+    // Attempt to delete the user from both auth.users and profile
+    const { data, error } = await supabase
+      .rpc('delete_user_completely', { user_id: id })
 
     if (error) {
       console.error('Error deleting user:', error)
@@ -468,6 +466,19 @@ const deleteUser = async () => {
       snackbar.value = {
         show: true,
         message: errorMessage,
+        color: 'error',
+      }
+      isDeleteDialogVisible.value = false
+      userToDelete.value = null
+      return
+    }
+
+    // Check if the function returned an error
+    if (data && !data.success) {
+      console.error('Error deleting user:', data.message)
+      snackbar.value = {
+        show: true,
+        message: data.message || t('userList.messages.deleteFailed'),
         color: 'error',
       }
       isDeleteDialogVisible.value = false
@@ -555,14 +566,16 @@ const bulkDeleteUsers = async () => {
           continue
         }
 
-        const { error } = await supabase
-          .from('profile')
-          .delete()
-          .eq('id', userId)
+        // Call the database function to delete user from both auth.users and profile
+        const { data, error } = await supabase
+          .rpc('delete_user_completely', { user_id: userId })
 
         if (error) {
           errorCount++
           errors.push(`Failed to delete user ${userId}: ${error.message}`)
+        } else if (data && !data.success) {
+          errorCount++
+          errors.push(`Failed to delete user ${userId}: ${data.message}`)
         } else {
           successCount++
         }
