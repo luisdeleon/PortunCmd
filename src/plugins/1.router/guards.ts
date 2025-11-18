@@ -5,7 +5,7 @@ import { supabase } from '@/lib/supabase'
 export const setupGuards = (router: _RouterTyped<RouteNamedMap & { [key: string]: any }>) => {
   // 👉 router.beforeEach
   // Docs: https://router.vuejs.org/guide/advanced/navigation-guards.html#global-before-guards
-  router.beforeEach(to => {
+  router.beforeEach(async (to) => {
     /*
      * If it's a public route, continue navigation. This kind of pages are allowed to visited by login & non-login users. Basically, without any restrictions.
      * Examples of public routes are, 404, under maintenance, etc.
@@ -15,33 +15,39 @@ export const setupGuards = (router: _RouterTyped<RouteNamedMap & { [key: string]
     }
 
     /**
-     * Check if user is logged in by checking cookies
-     * For performance, we rely on cookies first. Session verification happens in background.
+     * Check if user is logged in by verifying both cookies AND Supabase session
+     * This prevents issues where cookies exist but session has expired
      */
     const userData = useCookie('userData').value
     const accessToken = useCookie('accessToken').value
     const hasCookies = !!(userData && accessToken)
-    
-    // Use cookies as primary indicator - session verification happens asynchronously
-    const isLoggedIn = hasCookies
-    
-    // Verify session in background (non-blocking) if cookies exist
+
+    let isLoggedIn = false
+
+    // If cookies exist, verify the Supabase session is still valid
     if (hasCookies) {
-      // Don't await - verify session asynchronously without blocking navigation
-      supabase.auth.getSession().then(({ data: { session }, error }) => {
+      try {
+        const { data: { session }, error } = await supabase.auth.getSession()
+
         if (error || !session) {
-          // Session invalid - clear cookies
+          // Session invalid - clear cookies immediately
+          console.warn('Session expired or invalid, clearing cookies')
           useCookie('userData').value = null
           useCookie('accessToken').value = null
           useCookie('userAbilityRules').value = null
+          isLoggedIn = false
+        } else {
+          // Session is valid
+          isLoggedIn = true
         }
-      }).catch((error) => {
+      } catch (error) {
         console.error('Session verification error:', error)
-        // On error, clear cookies
+        // On error, clear cookies and treat as logged out
         useCookie('userData').value = null
         useCookie('accessToken').value = null
         useCookie('userAbilityRules').value = null
-      })
+        isLoggedIn = false
+      }
     }
 
     /*
