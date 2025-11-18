@@ -29,8 +29,10 @@ const selectedRows = ref([])
 
 // Update data table options
 const updateOptions = (options: any) => {
+  console.log('updateOptions called with:', options)
   sortBy.value = options.sortBy[0]?.key
   orderBy.value = options.sortBy[0]?.order
+  console.log('sortBy:', sortBy.value, 'orderBy:', orderBy.value)
 }
 
 // Headers
@@ -116,9 +118,12 @@ const fetchUsers = async () => {
       }
 
       const dbColumn = columnMap[sortBy.value] || sortBy.value
-      query = query.order(dbColumn, { ascending: orderBy.value !== 'desc' })
+      const ascending = orderBy.value !== 'desc'
+      console.log(`Sorting by: ${dbColumn}, ascending: ${ascending}`)
+      query = query.order(dbColumn, { ascending })
     } else {
       // Default sorting by display_name
+      console.log('Using default sort: display_name ascending')
       query = query.order('display_name', { ascending: true })
     }
 
@@ -402,19 +407,37 @@ const addNewUser = async (userData: UserProperties) => {
 }
 
 // 👉 Delete user
-const deleteUser = async (id: number) => {
-  await $api(`/apps/users/${id}`, {
-    method: 'DELETE',
-  })
+const deleteUser = async (id: string) => {
+  if (!confirm('Are you sure you want to delete this user?')) {
+    return
+  }
 
-  // Delete from selectedRows
-  const index = selectedRows.value.findIndex(row => row === id)
-  if (index !== -1)
-    selectedRows.value.splice(index, 1)
+  try {
+    const { error } = await supabase
+      .from('profile')
+      .delete()
+      .eq('id', id)
 
-  // refetch User
-  // TODO: Make this async
-  fetchUsers()
+    if (error) {
+      console.error('Error deleting user:', error)
+      alert('Failed to delete user')
+      return
+    }
+
+    // Delete from selectedRows
+    const index = selectedRows.value.findIndex(row => row === id)
+    if (index !== -1)
+      selectedRows.value.splice(index, 1)
+
+    // Refetch users
+    fetchUsers()
+    fetchUserGrowth()
+    fetchResidentStats()
+    fetchActiveInactiveStats()
+  } catch (err) {
+    console.error('Error in deleteUser:', err)
+    alert('Failed to delete user')
+  }
 }
 
 const widgetData = computed(() => {
@@ -611,6 +634,7 @@ const widgetData = computed(() => {
         item-value="id"
         :items-length="totalUsers"
         :headers="headers"
+        :loading="isLoading"
         class="text-no-wrap"
         show-select
         @update:options="updateOptions"
