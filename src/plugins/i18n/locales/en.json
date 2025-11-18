@@ -448,6 +448,19 @@
       "view": "View",
       "edit": "Edit",
       "delete": "Delete"
+    },
+    "deleteDialog": {
+      "title": "Delete User",
+      "message": "Are you sure you want to delete {name}? This action cannot be undone.",
+      "confirm": "Delete",
+      "cancel": "Cancel"
+    },
+    "messages": {
+      "deleteSuccess": "User {name} has been deleted successfully",
+      "deleteFailed": "Failed to delete user. Please try again.",
+      "cannotDeleteManager": "Cannot delete this user because they are assigned as a community manager",
+      "cannotDeleteRelated": "Cannot delete this user because they have related records (visitors, properties, etc.)",
+      "deletePermissionDenied": "You don't have permission to delete this user"
     }
   },
   "footer": {

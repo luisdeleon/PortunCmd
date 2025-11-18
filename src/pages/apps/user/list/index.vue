@@ -381,6 +381,9 @@ const resolveUserStatusVariant = (stat: string) => {
 const isAddNewUserDrawerVisible = ref(false)
 const isAssignRoleDialogVisible = ref(false)
 const selectedUserForRole = ref<string | null>(null)
+const isDeleteDialogVisible = ref(false)
+const userToDelete = ref<{ id: string; name: string } | null>(null)
+const snackbar = ref({ show: false, message: '', color: 'success' })
 
 // Open assign role dialog
 const openAssignRoleDialog = (userId: string) => {
@@ -406,13 +409,42 @@ const addNewUser = async (userData: UserProperties) => {
   fetchUsers()
 }
 
+// 👉 Open delete confirmation dialog
+const openDeleteDialog = (user: UserProperties) => {
+  userToDelete.value = { id: user.id, name: user.fullName }
+  isDeleteDialogVisible.value = true
+}
+
 // 👉 Delete user
-const deleteUser = async (id: string) => {
-  if (!confirm('Are you sure you want to delete this user?')) {
-    return
-  }
+const deleteUser = async () => {
+  if (!userToDelete.value) return
+
+  const { id, name } = userToDelete.value
 
   try {
+    // First check if user has related records that might block deletion
+    const { data: communityManagers, error: cmError } = await supabase
+      .from('community_manager')
+      .select('id')
+      .eq('profile_id', id)
+      .limit(1)
+
+    if (cmError) {
+      console.error('Error checking community managers:', cmError)
+    }
+
+    if (communityManagers && communityManagers.length > 0) {
+      snackbar.value = {
+        show: true,
+        message: t('userList.messages.cannotDeleteManager'),
+        color: 'error',
+      }
+      isDeleteDialogVisible.value = false
+      userToDelete.value = null
+      return
+    }
+
+    // Attempt to delete the user
     const { error } = await supabase
       .from('profile')
       .delete()
@@ -420,14 +452,40 @@ const deleteUser = async (id: string) => {
 
     if (error) {
       console.error('Error deleting user:', error)
-      alert('Failed to delete user')
+
+      // Check for specific error codes
+      let errorMessage = t('userList.messages.deleteFailed')
+      if (error.code === '23503') {
+        errorMessage = t('userList.messages.cannotDeleteRelated')
+      } else if (error.code === 'PGRST116') {
+        errorMessage = t('userList.messages.deletePermissionDenied')
+      }
+
+      snackbar.value = {
+        show: true,
+        message: errorMessage,
+        color: 'error',
+      }
+      isDeleteDialogVisible.value = false
+      userToDelete.value = null
       return
+    }
+
+    // Success
+    snackbar.value = {
+      show: true,
+      message: t('userList.messages.deleteSuccess', { name }),
+      color: 'success',
     }
 
     // Delete from selectedRows
     const index = selectedRows.value.findIndex(row => row === id)
     if (index !== -1)
       selectedRows.value.splice(index, 1)
+
+    // Close dialog and clear selection
+    isDeleteDialogVisible.value = false
+    userToDelete.value = null
 
     // Refetch users
     fetchUsers()
@@ -436,8 +494,20 @@ const deleteUser = async (id: string) => {
     fetchActiveInactiveStats()
   } catch (err) {
     console.error('Error in deleteUser:', err)
-    alert('Failed to delete user')
+    snackbar.value = {
+      show: true,
+      message: t('userList.messages.deleteFailed'),
+      color: 'error',
+    }
+    isDeleteDialogVisible.value = false
+    userToDelete.value = null
   }
+}
+
+// 👉 Cancel delete
+const cancelDelete = () => {
+  isDeleteDialogVisible.value = false
+  userToDelete.value = null
 }
 
 const widgetData = computed(() => {
@@ -616,7 +686,7 @@ const widgetData = computed(() => {
           <!-- 👉 Add user button -->
           <VBtn
             prepend-icon="tabler-plus"
-            @click="isAddNewUserDrawerVisible = true"
+            :to="{ name: 'apps-user-add' }"
           >
             {{ $t('userList.buttons.addNewUser') }}
           </VBtn>
@@ -731,7 +801,7 @@ const widgetData = computed(() => {
             </VTooltip>
           </IconBtn>
 
-          <IconBtn>
+          <IconBtn :to="{ name: 'apps-user-view-id', params: { id: item.id } }">
             <VIcon icon="tabler-pencil" />
             <VTooltip
               activator="parent"
@@ -741,7 +811,7 @@ const widgetData = computed(() => {
             </VTooltip>
           </IconBtn>
 
-          <IconBtn @click="deleteUser(item.id)">
+          <IconBtn @click="openDeleteDialog(item)">
             <VIcon icon="tabler-trash" />
             <VTooltip
               activator="parent"
@@ -775,5 +845,64 @@ const widgetData = computed(() => {
       :user-id="selectedUserForRole"
       @role-assigned="handleRoleAssigned"
     />
+
+    <!-- 👉 Delete Confirmation Dialog -->
+    <VDialog
+      v-model="isDeleteDialogVisible"
+      max-width="500"
+    >
+      <VCard>
+        <VCardText class="text-center px-10 py-6">
+          <VBtn
+            icon
+            variant="outlined"
+            color="warning"
+            class="my-4"
+            style="block-size: 88px; inline-size: 88px; pointer-events: none;"
+          >
+            <VIcon
+              icon="tabler-exclamation-circle"
+              size="56"
+            />
+          </VBtn>
+
+          <h6 class="text-h6 mb-4">
+            {{ $t('userList.deleteDialog.title') }}
+          </h6>
+
+          <p class="text-body-1 mb-6">
+            {{ $t('userList.deleteDialog.message', { name: userToDelete?.name || '' }) }}
+          </p>
+
+          <div class="d-flex gap-4 justify-center">
+            <VBtn
+              color="error"
+              variant="elevated"
+              @click="deleteUser"
+            >
+              {{ $t('userList.deleteDialog.confirm') }}
+            </VBtn>
+
+            <VBtn
+              color="secondary"
+              variant="tonal"
+              @click="cancelDelete"
+            >
+              {{ $t('userList.deleteDialog.cancel') }}
+            </VBtn>
+          </div>
+        </VCardText>
+      </VCard>
+    </VDialog>
+
+    <!-- 👉 Snackbar for notifications -->
+    <VSnackbar
+      v-model="snackbar.show"
+      :color="snackbar.color"
+      location="top end"
+      :timeout="4000"
+    >
+      {{ snackbar.message }}
+    </VSnackbar>
   </section>
 </template>

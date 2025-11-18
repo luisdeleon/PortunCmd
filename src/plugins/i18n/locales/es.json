@@ -448,6 +448,19 @@
       "view": "Ver",
       "edit": "Editar",
       "delete": "Eliminar"
+    },
+    "deleteDialog": {
+      "title": "Eliminar Usuario",
+      "message": "¿Está seguro de que desea eliminar a {name}? Esta acción no se puede deshacer.",
+      "confirm": "Eliminar",
+      "cancel": "Cancelar"
+    },
+    "messages": {
+      "deleteSuccess": "El usuario {name} ha sido eliminado exitosamente",
+      "deleteFailed": "Error al eliminar el usuario. Por favor, intente nuevamente.",
+      "cannotDeleteManager": "No se puede eliminar este usuario porque está asignado como administrador de comunidad",
+      "cannotDeleteRelated": "No se puede eliminar este usuario porque tiene registros relacionados (visitantes, propiedades, etc.)",
+      "deletePermissionDenied": "No tiene permiso para eliminar este usuario"
     }
   },
   "footer": {

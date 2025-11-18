@@ -87,6 +87,9 @@ Comprehensive guides are available in the [`/docs`](./docs/) folder:
 - 🗄️ [Supabase Schema](./docs/SUPABASE_SCHEMA.md) - Complete database schema
 - 💻 [Supabase Usage](./docs/SUPABASE_USAGE.md) - Code examples and patterns
 - 🔐 [RBAC Guide](./docs/RBAC_GUIDE.md) - Role-based access control implementation guide
+- 🏢 [Community-User-Property Guide](./docs/COMMUNITY_USER_PROPERTY_GUIDE.md) - Understanding the database design
+- 📊 [Data Model Workflows](./docs/DATA_MODEL_WORKFLOWS.md) - Visual workflows and practical examples
+- 🎨 [Database Visual Reference](./docs/DATABASE_VISUAL_REFERENCE.md) - Quick visual reference with diagrams
 
 ### Development Tools
 
@@ -302,6 +305,24 @@ All project documentation is available in the [`/docs`](./docs/) directory:
 - **[Supabase Schema](./docs/SUPABASE_SCHEMA.md)** - Complete database schema documentation
 - **[Supabase Usage](./docs/SUPABASE_USAGE.md)** - Code examples and usage patterns
 - **[Database Backup](./docs/DATABASE_BACKUP.md)** - Backup procedures, restoration guides, and migration safety
+- **[Community-User-Property Guide](./docs/COMMUNITY_USER_PROPERTY_GUIDE.md)** - **NEW!** Comprehensive guide to understanding the database design
+  - Entity relationships and core concepts
+  - Database schema diagrams with Mermaid visualizations
+  - Step-by-step creation workflows for Communities → Users → Properties
+  - Common scenarios and best practices
+  - Complete walkthrough with examples
+- **[Data Model Workflows](./docs/DATA_MODEL_WORKFLOWS.md)** - **NEW!** Visual workflows and practical implementation
+  - Data flow architecture diagrams
+  - Sequence diagrams for common operations
+  - Bulk operations and query examples
+  - Troubleshooting guide with solutions
+  - Role-based access patterns
+- **[Database Visual Reference](./docs/DATABASE_VISUAL_REFERENCE.md)** - **NEW!** Quick visual reference guide
+  - Simple entity relationship diagrams
+  - Visual glossary with icons and symbols
+  - Quick start checklist
+  - Decision trees and common patterns
+  - ASCII art diagrams for quick understanding
 
 ### Security & Access Control
 

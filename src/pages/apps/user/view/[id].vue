@@ -20,11 +20,11 @@ const { t } = useI18n()
 const userTab = ref(null)
 
 const tabs = computed(() => [
-  { icon: 'tabler-users', title: t('userView.tabs.account') },
-  { icon: 'tabler-lock', title: t('userView.tabs.security') },
-  { icon: 'tabler-bookmark', title: t('userView.tabs.billingPlan') },
-  { icon: 'tabler-bell', title: t('userView.tabs.notifications') },
-  { icon: 'tabler-link', title: t('userView.tabs.connections') },
+  { icon: 'tabler-building-community', title: 'Community' },
+  { icon: 'tabler-home', title: 'Property' },
+  { icon: 'tabler-bookmark', title: 'Billing & Plan' },
+  { icon: 'tabler-bell', title: 'Notifications' },
+  { icon: 'tabler-link', title: 'Connections' },
 ])
 
 // Fetch user data from Supabase

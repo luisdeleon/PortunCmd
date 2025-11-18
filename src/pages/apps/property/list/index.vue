@@ -1,0 +1,588 @@
+<script setup lang="ts">
+import { supabase } from '@/lib/supabase'
+import { useI18n } from 'vue-i18n'
+import AddEditPropertyDialog from '@/components/dialogs/AddEditPropertyDialog.vue'
+import ViewPropertyDialog from '@/components/dialogs/ViewPropertyDialog.vue'
+
+definePage({
+  meta: {
+    public: false, // Requires authentication
+  },
+})
+
+// 👉 i18n
+const { t } = useI18n()
+
+// 👉 Store
+const searchQuery = ref('')
+const selectedCommunity = ref()
+
+// Data table options
+const itemsPerPage = ref(10)
+const page = ref(1)
+const sortBy = ref()
+const orderBy = ref()
+const selectedRows = ref([])
+
+// Dialog state
+const isAddPropertyDialogVisible = ref(false)
+const isEditPropertyDialogVisible = ref(false)
+const isViewPropertyDialogVisible = ref(false)
+const isDeleteDialogVisible = ref(false)
+const selectedProperty = ref<any>(null)
+const propertyToDelete = ref<{ id: string; name: string } | null>(null)
+const snackbar = ref({ show: false, message: '', color: 'success' })
+
+// Update data table options
+const updateOptions = (options: any) => {
+  sortBy.value = options.sortBy[0]?.key
+  orderBy.value = options.sortBy[0]?.order
+}
+
+// Headers
+const headers = [
+  { title: 'Community', key: 'community_id' },
+  { title: 'Property ID', key: 'id' },
+  { title: 'Name', key: 'name' },
+  { title: 'Address', key: 'address' },
+  { title: 'Actions', key: 'actions', sortable: false },
+]
+
+// 👉 Fetching properties from Supabase
+const properties = ref([])
+const totalProperties = ref(0)
+const propertiesLast30Days = ref(0)
+const isLoading = ref(false)
+
+const fetchProperties = async () => {
+  try {
+    isLoading.value = true
+
+    // Build query for Supabase with community join for view dialog
+    let query = supabase
+      .from('property')
+      .select(`
+        id,
+        name,
+        address,
+        community_id,
+        created_at,
+        updated_at,
+        community:community_id (
+          id,
+          name,
+          city,
+          country
+        )
+      `, { count: 'exact' })
+
+    // Apply search filter
+    if (searchQuery.value) {
+      query = query.or(`id.ilike.%${searchQuery.value}%,name.ilike.%${searchQuery.value}%,address.ilike.%${searchQuery.value}%,community_id.ilike.%${searchQuery.value}%`)
+    }
+
+    // Apply community filter
+    if (selectedCommunity.value) {
+      query = query.eq('community_id', selectedCommunity.value)
+    }
+
+    // Apply sorting
+    if (sortBy.value) {
+      query = query.order(sortBy.value, { ascending: orderBy.value !== 'desc' })
+    } else {
+      query = query.order('created_at', { ascending: false })
+    }
+
+    // Apply pagination
+    const from = (page.value - 1) * itemsPerPage.value
+    const to = from + itemsPerPage.value - 1
+
+    if (itemsPerPage.value !== -1) {
+      query = query.range(from, to)
+    }
+
+    const { data, error, count } = await query
+
+    if (error) {
+      console.error('Error fetching properties from Supabase:', error)
+      return
+    }
+
+    properties.value = data || []
+    totalProperties.value = count || 0
+  } catch (err) {
+    console.error('Error in fetchProperties:', err)
+  } finally {
+    isLoading.value = false
+  }
+}
+
+// Fetch properties created in last 30 days for growth calculation
+const fetchPropertyGrowth = async () => {
+  try {
+    const thirtyDaysAgo = new Date()
+    thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30)
+
+    const { count, error } = await supabase
+      .from('property')
+      .select('*', { count: 'exact', head: true })
+      .gte('created_at', thirtyDaysAgo.toISOString())
+
+    if (error) {
+      console.error('Error fetching property growth:', error)
+      return
+    }
+
+    propertiesLast30Days.value = count || 0
+  } catch (err) {
+    console.error('Error in fetchPropertyGrowth:', err)
+  }
+}
+
+// Fetch communities for filter
+const communities = ref([])
+const fetchCommunities = async () => {
+  try {
+    const { data, error } = await supabase
+      .from('community')
+      .select('id, name')
+      .order('name')
+
+    if (error) {
+      console.error('Error fetching communities:', error)
+      return
+    }
+
+    communities.value = data?.map(community => ({
+      title: `${community.id}${community.name ? ' - ' + community.name : ''}`,
+      value: community.id,
+    })) || []
+  } catch (err) {
+    console.error('Error in fetchCommunities:', err)
+  }
+}
+
+// Fetch properties on mount
+onMounted(() => {
+  fetchProperties()
+  fetchPropertyGrowth()
+  fetchCommunities()
+})
+
+// Watch for filter changes
+watch([searchQuery, selectedCommunity, page, itemsPerPage, sortBy, orderBy], () => {
+  fetchProperties()
+})
+
+// 👉 Dialog handlers
+const openAddPropertyDialog = () => {
+  selectedProperty.value = null
+  isAddPropertyDialogVisible.value = true
+}
+
+const openViewPropertyDialog = (property: any) => {
+  selectedProperty.value = { ...property }
+  isViewPropertyDialogVisible.value = true
+}
+
+const openEditPropertyDialog = (property: any) => {
+  selectedProperty.value = { ...property }
+  isEditPropertyDialogVisible.value = true
+}
+
+const openDeleteDialog = (property: any) => {
+  propertyToDelete.value = { id: property.id, name: property.name || property.id }
+  isDeleteDialogVisible.value = true
+}
+
+const cancelDelete = () => {
+  propertyToDelete.value = null
+  isDeleteDialogVisible.value = false
+}
+
+const handlePropertySaved = () => {
+  fetchProperties()
+  fetchPropertyGrowth()
+  snackbar.value = {
+    show: true,
+    message: 'Property saved successfully',
+    color: 'success',
+  }
+}
+
+// 👉 Delete property
+const deleteProperty = async () => {
+  if (!propertyToDelete.value) return
+
+  const { id, name } = propertyToDelete.value
+
+  try {
+    const { error } = await supabase
+      .from('property')
+      .delete()
+      .eq('id', id)
+
+    if (error) {
+      let errorMessage = 'Failed to delete property'
+      if (error.code === '23503') {
+        errorMessage = 'Cannot delete this property because it has related records'
+      } else if (error.code === 'PGRST116') {
+        errorMessage = 'You don\'t have permission to delete this property'
+      }
+
+      snackbar.value = {
+        show: true,
+        message: errorMessage,
+        color: 'error',
+      }
+
+      isDeleteDialogVisible.value = false
+      propertyToDelete.value = null
+      return
+    }
+
+    // Success
+    snackbar.value = {
+      show: true,
+      message: `Property "${name}" has been deleted successfully`,
+      color: 'success',
+    }
+
+    // Delete from selectedRows
+    const index = selectedRows.value.findIndex(row => row === id)
+    if (index !== -1)
+      selectedRows.value.splice(index, 1)
+
+    // Refetch properties
+    fetchProperties()
+    fetchPropertyGrowth()
+
+    // Close dialog
+    isDeleteDialogVisible.value = false
+    propertyToDelete.value = null
+  } catch (err) {
+    console.error('Error in deleteProperty:', err)
+    snackbar.value = {
+      show: true,
+      message: 'Failed to delete property',
+      color: 'error',
+    }
+
+    isDeleteDialogVisible.value = false
+    propertyToDelete.value = null
+  }
+}
+
+const widgetData = computed(() => {
+  // Calculate growth percentage based on properties created in last 30 days
+  const growthPercentage = totalProperties.value > 0 && propertiesLast30Days.value > 0
+    ? Math.round((propertiesLast30Days.value / totalProperties.value) * 100)
+    : 0
+
+  return [
+    {
+      title: 'Total Properties',
+      value: totalProperties.value.toLocaleString(),
+      change: growthPercentage,
+      desc: 'Last 30 days growth',
+      icon: 'tabler-home',
+      iconColor: 'success'
+    },
+  ]
+})
+</script>
+
+<template>
+  <section>
+    <!-- 👉 Widgets -->
+    <div class="d-flex mb-6">
+      <VRow>
+        <template
+          v-for="(data, id) in widgetData"
+          :key="id"
+        >
+          <VCol
+            cols="12"
+            md="3"
+            sm="6"
+          >
+            <VCard>
+              <VCardText>
+                <div class="d-flex justify-space-between">
+                  <div class="d-flex flex-column gap-y-1">
+                    <div class="text-body-1 text-high-emphasis">
+                      {{ data.title }}
+                    </div>
+                    <div class="d-flex gap-x-2 align-center">
+                      <h4 class="text-h4">
+                        {{ data.value }}
+                      </h4>
+                      <div
+                        class="text-base"
+                        :class="data.change > 0 ? 'text-success' : 'text-error'"
+                      >
+                        ({{ prefixWithPlus(data.change) }}%)
+                      </div>
+                    </div>
+                    <div class="text-sm">
+                      {{ data.desc }}
+                    </div>
+                  </div>
+                  <VAvatar
+                    :color="data.iconColor"
+                    variant="tonal"
+                    rounded
+                    size="42"
+                  >
+                    <VIcon
+                      :icon="data.icon"
+                      size="26"
+                    />
+                  </VAvatar>
+                </div>
+              </VCardText>
+            </VCard>
+          </VCol>
+        </template>
+      </VRow>
+    </div>
+
+    <VCard class="mb-6">
+      <VCardItem class="pb-4">
+        <VCardTitle>Properties</VCardTitle>
+      </VCardItem>
+
+      <VCardText>
+        <VRow>
+          <!-- 👉 Filter by Community -->
+          <VCol
+            cols="12"
+            sm="4"
+          >
+            <AppSelect
+              v-model="selectedCommunity"
+              placeholder="Filter by Community"
+              :items="communities"
+              clearable
+              clear-icon="tabler-x"
+            />
+          </VCol>
+        </VRow>
+      </VCardText>
+
+      <VDivider />
+
+      <VCardText class="d-flex flex-wrap gap-4">
+        <div class="me-3 d-flex gap-3">
+          <AppSelect
+            :model-value="itemsPerPage"
+            :items="[
+              { value: 10, title: '10' },
+              { value: 25, title: '25' },
+              { value: 50, title: '50' },
+              { value: 100, title: '100' },
+              { value: -1, title: 'All' },
+            ]"
+            style="inline-size: 6.25rem;"
+            @update:model-value="itemsPerPage = parseInt($event, 10)"
+          />
+        </div>
+        <VSpacer />
+
+        <div class="app-user-search-filter d-flex align-center flex-wrap gap-4">
+          <!-- 👉 Search  -->
+          <div style="inline-size: 15.625rem;">
+            <AppTextField
+              v-model="searchQuery"
+              placeholder="Search properties..."
+              clearable
+              clear-icon="tabler-x"
+            />
+          </div>
+
+          <!-- 👉 Import button -->
+          <VBtn
+            variant="tonal"
+            color="secondary"
+            prepend-icon="tabler-download"
+          >
+            Import
+          </VBtn>
+
+          <!-- 👉 Add property button -->
+          <VBtn
+            prepend-icon="tabler-plus"
+            @click="openAddPropertyDialog"
+          >
+            Add Property
+          </VBtn>
+        </div>
+      </VCardText>
+
+      <VDivider />
+
+      <!-- SECTION datatable -->
+      <VDataTableServer
+        v-model:items-per-page="itemsPerPage"
+        v-model:model-value="selectedRows"
+        v-model:page="page"
+        :items="properties"
+        item-value="id"
+        :items-length="totalProperties"
+        :headers="headers"
+        :loading="isLoading"
+        class="text-no-wrap"
+        show-select
+        @update:options="updateOptions"
+      >
+        <!-- Community -->
+        <template #item.community_id="{ item }">
+          <div class="text-body-1 text-high-emphasis font-weight-medium">
+            {{ item.community_id || 'N/A' }}
+          </div>
+        </template>
+
+        <!-- Property ID -->
+        <template #item.id="{ item }">
+          <div class="text-body-1 text-high-emphasis">
+            {{ item.id }}
+          </div>
+        </template>
+
+        <!-- Name -->
+        <template #item.name="{ item }">
+          <div class="text-body-1 text-high-emphasis">
+            {{ item.name || 'N/A' }}
+          </div>
+        </template>
+
+        <!-- Address -->
+        <template #item.address="{ item }">
+          <div class="text-body-1">
+            {{ item.address || 'N/A' }}
+          </div>
+        </template>
+
+        <!-- Actions -->
+        <template #item.actions="{ item }">
+          <IconBtn @click="openViewPropertyDialog(item)">
+            <VIcon icon="tabler-eye" />
+            <VTooltip
+              activator="parent"
+              location="top"
+            >
+              View Property
+            </VTooltip>
+          </IconBtn>
+
+          <IconBtn @click="openEditPropertyDialog(item)">
+            <VIcon icon="tabler-pencil" />
+            <VTooltip
+              activator="parent"
+              location="top"
+            >
+              Edit Property
+            </VTooltip>
+          </IconBtn>
+
+          <IconBtn @click="openDeleteDialog(item)">
+            <VIcon icon="tabler-trash" />
+            <VTooltip
+              activator="parent"
+              location="top"
+            >
+              Delete Property
+            </VTooltip>
+          </IconBtn>
+        </template>
+
+        <!-- pagination -->
+        <template #bottom>
+          <TablePagination
+            v-model:page="page"
+            :items-per-page="itemsPerPage"
+            :total-items="totalProperties"
+          />
+        </template>
+      </VDataTableServer>
+      <!-- SECTION -->
+    </VCard>
+
+    <!-- 👉 Add Property Dialog -->
+    <AddEditPropertyDialog
+      v-model:is-dialog-visible="isAddPropertyDialogVisible"
+      @property-saved="handlePropertySaved"
+    />
+
+    <!-- 👉 Edit Property Dialog -->
+    <AddEditPropertyDialog
+      v-model:is-dialog-visible="isEditPropertyDialogVisible"
+      :property-data="selectedProperty"
+      @property-saved="handlePropertySaved"
+    />
+
+    <!-- 👉 View Property Dialog -->
+    <ViewPropertyDialog
+      v-model:is-dialog-visible="isViewPropertyDialogVisible"
+      :property-data="selectedProperty"
+    />
+
+    <!-- 👉 Delete Confirmation Dialog -->
+    <VDialog
+      v-model="isDeleteDialogVisible"
+      max-width="500"
+    >
+      <VCard>
+        <VCardText class="text-center px-10 py-6">
+          <VBtn
+            icon
+            variant="outlined"
+            color="warning"
+            class="my-4"
+          >
+            <VIcon
+              icon="tabler-exclamation-circle"
+              size="56"
+            />
+          </VBtn>
+
+          <h6 class="text-h6 mb-4">
+            Delete Property
+          </h6>
+
+          <p class="text-body-1 mb-6">
+            Are you sure you want to delete <strong>{{ propertyToDelete?.name }}</strong>?
+            This action cannot be undone.
+          </p>
+
+          <div class="d-flex gap-4 justify-center">
+            <VBtn
+              color="error"
+              variant="elevated"
+              @click="deleteProperty"
+            >
+              Delete
+            </VBtn>
+
+            <VBtn
+              color="secondary"
+              variant="tonal"
+              @click="cancelDelete"
+            >
+              Cancel
+            </VBtn>
+          </div>
+        </VCardText>
+      </VCard>
+    </VDialog>
+
+    <!-- 👉 Snackbar -->
+    <VSnackbar
+      v-model="snackbar.show"
+      :color="snackbar.color"
+      location="top end"
+    >
+      {{ snackbar.message }}
+    </VSnackbar>
+  </section>
+</template>

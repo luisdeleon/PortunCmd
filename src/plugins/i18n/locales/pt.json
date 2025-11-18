@@ -448,6 +448,19 @@
       "view": "Visualizar",
       "edit": "Editar",
       "delete": "Excluir"
+    },
+    "deleteDialog": {
+      "title": "Excluir Usuário",
+      "message": "Tem certeza de que deseja excluir {name}? Esta ação não pode ser desfeita.",
+      "confirm": "Excluir",
+      "cancel": "Cancelar"
+    },
+    "messages": {
+      "deleteSuccess": "Usuário {name} foi excluído com sucesso",
+      "deleteFailed": "Falha ao excluir usuário. Por favor, tente novamente.",
+      "cannotDeleteManager": "Não é possível excluir este usuário porque está atribuído como administrador de comunidade",
+      "cannotDeleteRelated": "Não é possível excluir este usuário porque possui registros relacionados (visitantes, propriedades, etc.)",
+      "deletePermissionDenied": "Você não tem permissão para excluir este usuário"
     }
   },
   "footer": {
