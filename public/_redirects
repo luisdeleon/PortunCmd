@@ -1,5 +1,3 @@
-# Cloudflare Pages - SPA fallback
-# Serve index.html for all non-existent routes (SPA routing)
-# Static files (JS, CSS, images) are served automatically by Cloudflare
-
+# SPA fallback for Cloudflare Pages
+# All non-file routes go to index.html
 /*    /index.html   200
