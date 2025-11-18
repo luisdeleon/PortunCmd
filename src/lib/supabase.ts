@@ -13,7 +13,18 @@ if (!supabaseUrl || !supabaseAnonKey) {
   // Create a dummy client to prevent errors
   supabase = createClient<Database>('https://placeholder.supabase.co', 'placeholder-key')
 } else {
-  supabase = createClient<Database>(supabaseUrl, supabaseAnonKey)
+  supabase = createClient<Database>(supabaseUrl, supabaseAnonKey, {
+    auth: {
+      // Persist session in localStorage for "Remember me" functionality
+      persistSession: true,
+      // Automatically refresh session when access token expires
+      autoRefreshToken: true,
+      // Detect session in URL (for magic links, OAuth, etc.)
+      detectSessionInUrl: true,
+      // Use localStorage for session storage (persists across browser sessions)
+      storage: typeof window !== 'undefined' ? window.localStorage : undefined,
+    },
+  })
 }
 
 export { supabase }
