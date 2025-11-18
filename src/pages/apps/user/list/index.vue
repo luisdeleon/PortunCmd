@@ -576,19 +576,19 @@ const bulkDeleteUsers = async () => {
     if (errorCount === 0) {
       snackbar.value = {
         show: true,
-        message: t('userList.messages.bulkDeleteSuccess', { count: successCount }),
+        message: `Successfully deleted ${successCount} ${successCount === 1 ? 'user' : 'users'}`,
         color: 'success',
       }
     } else if (successCount === 0) {
       snackbar.value = {
         show: true,
-        message: t('userList.messages.bulkDeleteFailed', { count: errorCount }),
+        message: `Failed to delete ${errorCount} ${errorCount === 1 ? 'user' : 'users'}`,
         color: 'error',
       }
     } else {
       snackbar.value = {
         show: true,
-        message: t('userList.messages.bulkDeletePartial', { success: successCount, failed: errorCount }),
+        message: `Deleted ${successCount} ${successCount === 1 ? 'user' : 'users'}, ${errorCount} failed`,
         color: 'warning',
       }
     }
@@ -598,7 +598,9 @@ const bulkDeleteUsers = async () => {
 
     // Refetch users
     fetchUsers()
-    fetchUserStats()
+    fetchUserGrowth()
+    fetchResidentStats()
+    fetchActiveInactiveStats()
 
     // Close dialog
     isBulkDeleteDialogVisible.value = false
@@ -606,7 +608,7 @@ const bulkDeleteUsers = async () => {
     console.error('Error in bulkDeleteUsers:', err)
     snackbar.value = {
       show: true,
-      message: t('userList.messages.bulkDeleteError'),
+      message: 'Failed to delete users',
       color: 'error',
     }
 
