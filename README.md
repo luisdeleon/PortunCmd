@@ -80,6 +80,7 @@ Comprehensive guides are available in the [`/docs`](./docs/) folder:
 - 📘 [Setup Guide](./docs/SETUP_GUIDE.md) - **Start here!** Complete setup instructions
 - 🚀 [Getting Started](./docs/GETTING_STARTED.md) - Development environment setup
 - 🔒 [Authentication](./docs/AUTHENTICATION.md) - User management and auth configuration
+- 👥 [User Management](./docs/USER_MANAGEMENT.md) - User CRUD, bulk operations, and deletion workflows
 - 🌐 [Cloudflare Setup](./docs/CLOUDFLARE_SETUP.md) - Production deployment guide
 
 ### Technical Reference
@@ -302,6 +303,14 @@ All project documentation is available in the [`/docs`](./docs/) directory:
 - **[Setup Guide](./docs/SETUP_GUIDE.md)** - Complete setup instructions for new developers
 - **[Getting Started](./docs/GETTING_STARTED.md)** - Development environment setup and workflow
 - **[Authentication](./docs/AUTHENTICATION.md)** - User management, auth configuration, and demo accounts
+- **[User Management](./docs/USER_MANAGEMENT.md)** - **NEW!** Comprehensive user management guide
+  - User view page with statistics and icons
+  - Single and bulk delete operations
+  - Bulk import from CSV files
+  - Enable/Disable user accounts
+  - Complete database cleanup with `delete_user_completely()` function
+  - Deletion across auth.users and all related tables
+  - Code examples and best practices
 
 ### Database & Backend
 

@@ -189,6 +189,20 @@ const { data, error } = await supabase.rpc('func_count_table_rows', {
   p_compare_date: '2024-01-01',
   p_compare_operator: '>=',
 })
+
+// Delete user completely (from auth.users and all related tables)
+const { data, error } = await supabase.rpc('delete_user_completely', {
+  user_id: 'uuid-here'
+})
+
+// Check both error and function result
+if (error) {
+  console.error('Supabase error:', error)
+} else if (data && !data.success) {
+  console.error('Function error:', data.message)
+} else {
+  console.log('User deleted successfully')
+}
 ```
 
 ## Error Handling
