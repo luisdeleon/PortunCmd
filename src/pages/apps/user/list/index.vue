@@ -104,6 +104,24 @@ const fetchUsers = async () => {
       query = query.eq('enabled', selectedEnabled.value)
     }
 
+    // Apply sorting
+    if (sortBy.value) {
+      // Map table column keys to actual database columns
+      const columnMap: Record<string, string> = {
+        'user': 'display_name',
+        'plan': 'display_name', // Will sort client-side for role
+        'community': 'def_community_id',
+        'property': 'def_property_id',
+        'enabled': 'enabled',
+      }
+
+      const dbColumn = columnMap[sortBy.value] || sortBy.value
+      query = query.order(dbColumn, { ascending: orderBy.value !== 'desc' })
+    } else {
+      // Default sorting by display_name
+      query = query.order('display_name', { ascending: true })
+    }
+
     // Apply pagination
     const from = (page.value - 1) * itemsPerPage.value
     const to = from + itemsPerPage.value - 1
@@ -306,7 +324,7 @@ onMounted(() => {
 })
 
 // Watch for filter changes
-watch([searchQuery, selectedRole, selectedCommunity, selectedEnabled, page, itemsPerPage], () => {
+watch([searchQuery, selectedRole, selectedCommunity, selectedEnabled, page, itemsPerPage, sortBy, orderBy], () => {
   fetchUsers()
 })
 
@@ -563,13 +581,13 @@ const widgetData = computed(() => {
             />
           </div>
 
-          <!-- 👉 Export button -->
+          <!-- 👉 Import button -->
           <VBtn
             variant="tonal"
             color="secondary"
-            prepend-icon="tabler-upload"
+            prepend-icon="tabler-download"
           >
-            {{ $t('userList.buttons.export') }}
+            Import
           </VBtn>
 
           <!-- 👉 Add user button -->
