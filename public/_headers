@@ -1,0 +1,25 @@
+# Cloudflare Pages - Headers Configuration
+# Ensure proper MIME types for assets
+
+/assets/*.js
+  Content-Type: application/javascript; charset=utf-8
+  Cache-Control: public, max-age=31536000, immutable
+
+/assets/*.css
+  Content-Type: text/css; charset=utf-8
+  Cache-Control: public, max-age=31536000, immutable
+
+/assets/*.woff2
+  Content-Type: font/woff2
+  Cache-Control: public, max-age=31536000, immutable
+
+/assets/*.woff
+  Content-Type: font/woff
+  Cache-Control: public, max-age=31536000, immutable
+
+/assets/*.svg
+  Content-Type: image/svg+xml
+  Cache-Control: public, max-age=31536000, immutable
+
+/index.html
+  Cache-Control: public, max-age=0, must-revalidate

@@ -1,0 +1,11 @@
+# Cloudflare Pages - SPA Routing Configuration
+# This ensures assets are served correctly and all other routes go to index.html
+
+# Serve static assets directly (don't redirect to index.html)
+/assets/*  200
+/favicon.ico  200
+/loader.css  200
+/mockServiceWorker.js  200
+
+# All other routes should go to index.html for SPA routing
+/*  /index.html  200
