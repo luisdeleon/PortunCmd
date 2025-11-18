@@ -87,9 +87,12 @@ Comprehensive guides are available in the [`/docs`](./docs/) folder:
 - 🗄️ [Supabase Schema](./docs/SUPABASE_SCHEMA.md) - Complete database schema
 - 💻 [Supabase Usage](./docs/SUPABASE_USAGE.md) - Code examples and patterns
 - 🔐 [RBAC Guide](./docs/RBAC_GUIDE.md) - Role-based access control implementation guide
+- 🔒 **[Scope Visual Reference](./docs/SCOPE_VISUAL_REFERENCE.md)** - **ALL 4 scopes explained visually**
+- 🔒 [Scope System Guide](./docs/SCOPE_SYSTEM_GUIDE.md) - Complete scope-based access control reference
 - 🏢 [Community-User-Property Guide](./docs/COMMUNITY_USER_PROPERTY_GUIDE.md) - Understanding the database design
 - 📊 [Data Model Workflows](./docs/DATA_MODEL_WORKFLOWS.md) - Visual workflows and practical examples
 - 🎨 [Database Visual Reference](./docs/DATABASE_VISUAL_REFERENCE.md) - Quick visual reference with diagrams
+- 📖 [Database Complete Guide](./docs/DATABASE_COMPLETE_GUIDE.md) - Executive summary tying everything together
 
 ### Development Tools
 
@@ -331,6 +334,24 @@ All project documentation is available in the [`/docs`](./docs/) directory:
   - Database schema enhancements
   - Implementation phases and migration
   - Code examples and best practices
+- **[Scope Visual Reference](./docs/SCOPE_VISUAL_REFERENCE.md)** - ⭐ **START HERE!** Visual guide to ALL 4 scopes
+  - **1️⃣ Global Scope** - Super Admin (entire system)
+  - **2️⃣ Dealer Scope** - Dealer (their communities)
+  - **3️⃣ Community Scope** - Administrator/Guard (specific communities)
+  - **4️⃣ Property Scope** - Resident (their properties)
+  - Visual diagrams for each scope showing exactly what users can access
+  - Database structure and SQL examples for every scope
+  - Scope hierarchy and inheritance explained
+  - Complete comparison table and troubleshooting guide
+- **[Scope System Guide](./docs/SCOPE_SYSTEM_GUIDE.md)** - Complete technical scope reference
+  - Detailed explanation of all 4 scope types
+  - How scopes work and are enforced via RLS policies
+  - Database structure for scope management
+  - Complete SQL examples for each scope type
+  - Multi-scope scenarios (users with multiple roles)
+  - Scope resolution flow diagrams
+  - Best practices and troubleshooting
+  - Real-world scope assignment patterns
 - **[RBAC Implementation](./docs/RBAC_IMPLEMENTATION.md)** - **NEW!** Phase-by-phase RBAC UI implementation
   - Phase 1: Role management foundation with real-time data
   - Phase 2: Advanced features (scope-based assignment, permission matrix)
