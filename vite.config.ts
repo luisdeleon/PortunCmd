@@ -43,9 +43,7 @@ export default defineConfig({
     vuetify({
       styles: {
         configFile: 'src/assets/styles/variables/_vuetify.scss',
-        exposeClasses: false,
       },
-      autoImport: true,
     }),
 
     // Docs: https://github.com/dishait/vite-plugin-vue-meta-layouts?tab=readme-ov-file
