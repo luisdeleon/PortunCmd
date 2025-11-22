@@ -173,7 +173,7 @@ const login = async () => {
       ? redirectQuery
       : Array.isArray(redirectQuery) && redirectQuery.length
         ? redirectQuery[0]
-        : '/dashboards/crm'
+        : '/dashboard'
 
     console.log('Login successful, redirecting to:', redirectTo)
 

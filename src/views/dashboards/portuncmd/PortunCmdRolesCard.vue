@@ -1,0 +1,209 @@
+<script setup lang="ts">
+import { useTheme } from 'vuetify'
+import { supabase } from '@/lib/supabase'
+
+const vuetifyTheme = useTheme()
+const currentTheme = vuetifyTheme.current.value.colors
+
+const totalRoleAssignments = ref(0)
+const growthPercentage = ref(0)
+const weeklyData = ref<number[]>([0, 0, 0, 0, 0, 0, 0])
+
+// Fetch role assignments data
+const fetchRolesData = async () => {
+  try {
+    // Get total role assignments (profile_role entries)
+    const { count: total } = await supabase
+      .from('profile_role')
+      .select('*', { count: 'exact', head: true })
+
+    totalRoleAssignments.value = total || 0
+
+    // Get last 7 days of data for the chart
+    const today = new Date()
+    const sevenDaysAgo = new Date(today)
+    sevenDaysAgo.setDate(today.getDate() - 7)
+
+    const { data: roleAssignments } = await supabase
+      .from('profile_role')
+      .select('created_at')
+      .gte('created_at', sevenDaysAgo.toISOString())
+      .order('created_at', { ascending: true })
+
+    // Group by day of week
+    const dailyCounts = [0, 0, 0, 0, 0, 0, 0]
+    roleAssignments?.forEach(assignment => {
+      const date = new Date(assignment.created_at)
+      const dayIndex = date.getDay()
+      dailyCounts[dayIndex]++
+    })
+
+    // Reorder to start from Monday
+    weeklyData.value = [
+      dailyCounts[1], // Monday
+      dailyCounts[2], // Tuesday
+      dailyCounts[3], // Wednesday
+      dailyCounts[4], // Thursday
+      dailyCounts[5], // Friday
+      dailyCounts[6], // Saturday
+      dailyCounts[0], // Sunday
+    ]
+
+    // Calculate growth percentage
+    const twoWeeksAgo = new Date(sevenDaysAgo)
+    twoWeeksAgo.setDate(sevenDaysAgo.getDate() - 7)
+
+    const { count: lastWeekCount } = await supabase
+      .from('profile_role')
+      .select('*', { count: 'exact', head: true })
+      .gte('created_at', sevenDaysAgo.toISOString())
+
+    const { count: previousWeekCount } = await supabase
+      .from('profile_role')
+      .select('*', { count: 'exact', head: true })
+      .gte('created_at', twoWeeksAgo.toISOString())
+      .lt('created_at', sevenDaysAgo.toISOString())
+
+    if (previousWeekCount && previousWeekCount > 0) {
+      growthPercentage.value = Number((((lastWeekCount || 0) - previousWeekCount) / previousWeekCount * 100).toFixed(1))
+    } else {
+      growthPercentage.value = lastWeekCount ? 100 : 0
+    }
+  } catch (error) {
+    console.error('Error fetching roles data:', error)
+  }
+}
+
+onMounted(() => {
+  fetchRolesData()
+})
+
+const series = computed(() => [
+  {
+    name: 'Role Assignments',
+    data: weeklyData.value,
+  },
+])
+
+const chartOptions = computed(() => ({
+  chart: {
+    type: 'area',
+    parentHeightOffset: 0,
+    toolbar: {
+      show: false,
+    },
+    sparkline: {
+      enabled: true,
+    },
+  },
+  markers: {
+    colors: 'transparent',
+    strokeColors: 'transparent',
+  },
+  grid: {
+    show: false,
+  },
+  colors: [currentTheme.warning],
+  fill: {
+    type: 'gradient',
+    gradient: {
+      shadeIntensity: 0.9,
+      opacityFrom: 0.5,
+      opacityTo: 0.07,
+      stops: [0, 80, 100],
+    },
+  },
+  dataLabels: {
+    enabled: false,
+  },
+  stroke: {
+    width: 2,
+    curve: 'smooth',
+  },
+  xaxis: {
+    show: true,
+    lines: {
+      show: false,
+    },
+    labels: {
+      show: false,
+    },
+    stroke: {
+      width: 0,
+    },
+    axisBorder: {
+      show: false,
+    },
+  },
+  yaxis: {
+    stroke: {
+      width: 0,
+    },
+    show: false,
+  },
+  tooltip: {
+    enabled: false,
+  },
+}))
+</script>
+
+<template>
+  <VCard>
+    <VCardItem class="pb-3">
+      <template #prepend>
+        <VAvatar
+          color="warning"
+          variant="tonal"
+          rounded
+          size="44"
+        >
+          <VIcon
+            icon="tabler-shield-lock"
+            size="28"
+          />
+        </VAvatar>
+      </template>
+
+      <VCardTitle>Role Assignments</VCardTitle>
+      <VCardSubtitle>Last Week</VCardSubtitle>
+    </VCardItem>
+
+    <VueApexCharts
+      :options="chartOptions"
+      :series="series"
+      :height="68"
+    />
+
+    <VCardText class="pt-1">
+      <div class="d-flex align-center justify-space-between gap-x-2">
+        <h4 class="text-h4 text-center">
+          {{ totalRoleAssignments }}
+        </h4>
+        <span
+          class="text-sm"
+          :class="growthPercentage >= 0 ? 'text-success' : 'text-error'"
+        >
+          {{ growthPercentage >= 0 ? '+' : '' }}{{ growthPercentage }}%
+        </span>
+      </div>
+
+      <VDivider class="my-3" />
+
+      <div class="d-flex align-center justify-center">
+        <VBtn
+          :to="{ name: 'apps-roles' }"
+          variant="text"
+          color="warning"
+          size="small"
+        >
+          View All Roles
+          <VIcon
+            end
+            icon="tabler-chevron-right"
+            size="18"
+          />
+        </VBtn>
+      </div>
+    </VCardText>
+  </VCard>
+</template>

@@ -81,6 +81,7 @@ Comprehensive guides are available in the [`/docs`](./docs/) folder:
 - 🚀 [Getting Started](./docs/GETTING_STARTED.md) - Development environment setup
 - 🔒 [Authentication](./docs/AUTHENTICATION.md) - User management and auth configuration
 - 👥 [User Management](./docs/USER_MANAGEMENT.md) - User CRUD, bulk operations, and deletion workflows
+- 🧭 [Navigation Menu Guide](./docs/NAVIGATION_MENU_GUIDE.md) - **NEW!** Complete navigation structure and implementation roadmap
 - 🌐 [Cloudflare Setup](./docs/CLOUDFLARE_SETUP.md) - Production deployment guide
 
 ### Technical Reference
@@ -94,6 +95,8 @@ Comprehensive guides are available in the [`/docs`](./docs/) folder:
 - 📊 [Data Model Workflows](./docs/DATA_MODEL_WORKFLOWS.md) - Visual workflows and practical examples
 - 🎨 [Database Visual Reference](./docs/DATABASE_VISUAL_REFERENCE.md) - Quick visual reference with diagrams
 - 📖 [Database Complete Guide](./docs/DATABASE_COMPLETE_GUIDE.md) - Executive summary tying everything together
+- 🏷️ [Status System Design](./docs/STATUS_SYSTEM_DESIGN.md) - Status lifecycle management for Users, Communities, and Properties
+- ⚙️ [Status System Implementation](./docs/STATUS_SYSTEM_IMPLEMENTATION.md) - Step-by-step implementation guide with SQL scripts
 
 ### Development Tools
 
@@ -317,6 +320,23 @@ All project documentation is available in the [`/docs`](./docs/) directory:
 - **[Supabase Schema](./docs/SUPABASE_SCHEMA.md)** - Complete database schema documentation
 - **[Supabase Usage](./docs/SUPABASE_USAGE.md)** - Code examples and usage patterns
 - **[Database Backup](./docs/DATABASE_BACKUP.md)** - Backup procedures, restoration guides, and migration safety
+- **[Status System Design](./docs/STATUS_SYSTEM_DESIGN.md)** - **NEW!** Comprehensive status lifecycle management
+  - 5 user statuses (Active, Pending, Suspended, Inactive, Archived)
+  - 8 community statuses (Active, Under Construction, Pre-Launch, Full Capacity, etc.)
+  - 9 property statuses (Active, Vacant, Access Restricted, Emergency Lockdown, etc.)
+  - Status transition diagrams and business rules
+  - Visitor access control by property status
+  - Database schema additions and audit trail
+  - Implementation phases and best practices
+  - Color coding and UI component examples
+- **[Status System Implementation Plan](./docs/STATUS_SYSTEM_IMPLEMENTATION.md)** - **NEW!** Step-by-step implementation guide
+  - Complete SQL migration scripts for all tables
+  - Database functions for status changes with validation
+  - Audit trail implementation
+  - Frontend composables and components (useStatus, StatusBadge, StatusChangeDialog)
+  - UI integration examples for list pages and dashboard
+  - Testing checklist and validation queries
+  - Production deployment strategy with rollback plan
 - **[Community-User-Property Guide](./docs/COMMUNITY_USER_PROPERTY_GUIDE.md)** - **NEW!** Comprehensive guide to understanding the database design
   - Entity relationships and core concepts
   - Database schema diagrams with Mermaid visualizations
@@ -370,6 +390,17 @@ All project documentation is available in the [`/docs`](./docs/) directory:
 ### Deployment
 
 - **[Cloudflare Setup](./docs/CLOUDFLARE_SETUP.md)** - Production deployment guide for Cloudflare Pages
+
+### UI & User Experience
+
+- **[Navigation Menu Guide](./docs/NAVIGATION_MENU_GUIDE.md)** - **NEW!** Comprehensive navigation structure and implementation roadmap
+  - Current navigation state and gaps analysis
+  - Complete recommended navigation structure for all features
+  - Role-based navigation menus (Super Admin, Dealer, Administrator, Resident, Guard, Client)
+  - 10-phase implementation roadmap with detailed todos
+  - Design principles and best practices
+  - Technical implementation guide with code examples
+  - Icon reference and route meta configuration
 
 ### Development & Tooling
 

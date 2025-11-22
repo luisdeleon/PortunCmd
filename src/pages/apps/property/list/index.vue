@@ -512,6 +512,14 @@ const widgetData = computed(() => {
             />
           </div>
 
+          <!-- 👉 Refresh button -->
+          <VBtn
+            variant="tonal"
+            color="default"
+            icon="tabler-refresh"
+            @click="fetchProperties"
+          />
+
           <!-- 👉 Import button -->
           <VBtn
             variant="tonal"
