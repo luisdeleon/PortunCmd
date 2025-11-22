@@ -97,6 +97,7 @@ Comprehensive guides are available in the [`/docs`](./docs/) folder:
 - 📖 [Database Complete Guide](./docs/DATABASE_COMPLETE_GUIDE.md) - Executive summary tying everything together
 - 🏷️ [Status System Design](./docs/STATUS_SYSTEM_DESIGN.md) - Status lifecycle management for Users, Communities, and Properties
 - ⚙️ [Status System Implementation](./docs/STATUS_SYSTEM_IMPLEMENTATION.md) - Step-by-step implementation guide with SQL scripts
+- 🌍 [Status System i18n Guide](./docs/STATUS_I18N_GUIDE.md) - Multilingual translations (EN/ES/PT)
 
 ### Development Tools
 
@@ -337,6 +338,12 @@ All project documentation is available in the [`/docs`](./docs/) directory:
   - UI integration examples for list pages and dashboard
   - Testing checklist and validation queries
   - Production deployment strategy with rollback plan
+- **[Status System i18n Guide](./docs/STATUS_I18N_GUIDE.md)** - **NEW!** Multilingual status translations
+  - Complete translations in English, Spanish, and Portuguese
+  - Database best practices (store English only)
+  - Frontend usage with vue-i18n
+  - Component examples with i18n integration
+  - Translation key reference and quick lookup table
 - **[Community-User-Property Guide](./docs/COMMUNITY_USER_PROPERTY_GUIDE.md)** - **NEW!** Comprehensive guide to understanding the database design
   - Entity relationships and core concepts
   - Database schema diagrams with Mermaid visualizations
