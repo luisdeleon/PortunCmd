@@ -18,6 +18,7 @@
 8. [Phase 6: Testing & Validation](#phase-6-testing--validation)
 9. [Migration Strategy](#migration-strategy)
 10. [Rollback Plan](#rollback-plan)
+11. [Multilingual Support](#multilingual-support)
 
 ---
 
@@ -29,9 +30,14 @@ This implementation plan adds comprehensive status management to Users (profile)
 - Database functions for status changes
 - Frontend components and composables
 - Status-based filtering and display
+- **Multilingual support** (English, Spanish, Portuguese)
 
 **Estimated Time:** 2-3 days
 **Risk Level:** Medium (database schema changes)
+
+**Related Documentation:**
+- [STATUS_SYSTEM_DESIGN.md](./STATUS_SYSTEM_DESIGN.md) - Status system design and business rules
+- [STATUS_I18N_GUIDE.md](./STATUS_I18N_GUIDE.md) - Multilingual translation guide
 
 ---
 
@@ -898,9 +904,19 @@ export const useStatus = () => {
   }
 
   /**
-   * Format status for display
+   * Format status for display with i18n translation
+   * NOTE: For multilingual apps, use i18n instead of this function
+   * See STATUS_I18N_GUIDE.md for translation implementation
    */
-  const formatStatus = (status: string): string => {
+  const formatStatus = (
+    status: string,
+    entityType: 'user' | 'community' | 'property' = 'user'
+  ): string => {
+    // For multilingual support, use:
+    // const { t } = useI18n()
+    // return t(`status.${entityType}.${status}`)
+
+    // Fallback: Simple English formatting
     return status
       .split('-')
       .map(word => word.charAt(0).toUpperCase() + word.slice(1))
@@ -959,20 +975,31 @@ export const useStatus = () => {
 
 **File:** `src/components/StatusBadge.vue`
 
+**Note:** For multilingual apps, see the i18n version in [STATUS_I18N_GUIDE.md](./STATUS_I18N_GUIDE.md)
+
 ```vue
 <script setup lang="ts">
+// For multilingual support, add:
+// import { useI18n } from 'vue-i18n'
+// const { t } = useI18n()
+
 interface Props {
   status: string
+  entityType?: 'user' | 'community' | 'property'
   size?: 'x-small' | 'small' | 'default' | 'large' | 'x-large'
   showIcon?: boolean
 }
 
 const props = withDefaults(defineProps<Props>(), {
+  entityType: 'user',
   size: 'small',
   showIcon: true,
 })
 
 const { getStatusColor, getStatusIcon, formatStatus } = useStatus()
+
+// For i18n, use instead:
+// const translatedStatus = computed(() => t(`status.${props.entityType}.${props.status}`))
 </script>
 
 <template>
@@ -982,7 +1009,8 @@ const { getStatusColor, getStatusIcon, formatStatus } = useStatus()
     :size="size"
     variant="tonal"
   >
-    {{ formatStatus(status) }}
+    {{ formatStatus(status, entityType) }}
+    <!-- For i18n, use: {{ $t(`status.${entityType}.${status}`) }} -->
   </VChip>
 </template>
 ```
@@ -991,8 +1019,14 @@ const { getStatusColor, getStatusIcon, formatStatus } = useStatus()
 
 **File:** `src/components/StatusChangeDialog.vue`
 
+**Note:** For multilingual apps with i18n, see the complete example in [STATUS_I18N_GUIDE.md](./STATUS_I18N_GUIDE.md)
+
 ```vue
 <script setup lang="ts">
+// For multilingual support, add:
+// import { useI18n } from 'vue-i18n'
+// const { t } = useI18n()
+
 interface Props {
   isOpen: boolean
   entityType: 'user' | 'community' | 'property'
@@ -1018,6 +1052,8 @@ const completionDate = ref('')
 const isLoading = ref(false)
 
 // Status options based on entity type
+// NOTE: For i18n, map titles to translation keys like:
+// { value: 'active', title: t('status.user.active') }
 const statusOptions = computed(() => {
   if (props.entityType === 'user') {
     return [
@@ -1404,18 +1440,51 @@ DROP TABLE IF EXISTS status_history CASCADE;
 4. **Implement status-based permissions** in RLS policies
 5. **Add status dashboard widgets**
 6. **Create admin tools** for bulk status operations
+7. **Implement multilingual support** - See [STATUS_I18N_GUIDE.md](./STATUS_I18N_GUIDE.md)
+
+---
+
+## Multilingual Support
+
+This implementation includes **English-only** status values in the database. For multilingual applications:
+
+### Translation Files Available
+
+Complete translations are available in:
+- 🇺🇸 English (en)
+- 🇪🇸 Spanish (es)
+- 🇧🇷 Portuguese (pt)
+
+All translation files are located in `src/plugins/i18n/locales/` and include:
+- User statuses (5)
+- Community statuses (8)
+- Property statuses (9)
+- Status descriptions for tooltips
+- Dialog labels and validation messages
+
+### Implementation Guide
+
+See [STATUS_I18N_GUIDE.md](./STATUS_I18N_GUIDE.md) for:
+- Complete translation key reference
+- Component examples with i18n
+- Best practices for multilingual apps
+- Database storage recommendations
+
+**Key Principle:** Database stores English slugs (`'active'`, `'pending'`), UI displays translated labels via `$t('status.user.active')`.
 
 ---
 
 ## Support & Questions
 
 - Review [STATUS_SYSTEM_DESIGN.md](./STATUS_SYSTEM_DESIGN.md) for business rules
+- Review [STATUS_I18N_GUIDE.md](./STATUS_I18N_GUIDE.md) for multilingual support
 - Check [DATABASE_BACKUP.md](./DATABASE_BACKUP.md) for backup procedures
 - Review Supabase logs for error details
 - Contact development team for assistance
 
 ---
 
-**Document Version:** 1.0
+**Document Version:** 1.1
 **Last Updated:** 2025-11-21
 **Ready for Implementation:** ✅
+**Multilingual Support:** ✅ (EN/ES/PT)
