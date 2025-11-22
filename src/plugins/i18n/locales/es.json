@@ -508,5 +508,95 @@
         "support": "Soporte Básico"
       }
     }
+  },
+  "status": {
+    "label": "Estado",
+    "filterByStatus": "Filtrar por Estado",
+    "changeStatus": "Cambiar Estado",
+    "currentStatus": "Estado Actual",
+    "newStatus": "Nuevo Estado",
+    "statusReason": "Motivo",
+    "statusReasonHint": "Explique por qué se está cambiando este estado",
+    "statusReasonRequired": "El motivo es obligatorio para este estado",
+    "statusChanged": "Estado cambiado exitosamente",
+    "statusChangeFailed": "Error al cambiar el estado",
+    "user": {
+      "active": "Activo",
+      "pending": "Pendiente",
+      "suspended": "Suspendido",
+      "inactive": "Inactivo",
+      "archived": "Archivado"
+    },
+    "community": {
+      "active": "Activo",
+      "under-construction": "En Construcción",
+      "pre-launch": "Pre-Lanzamiento",
+      "full-capacity": "Capacidad Completa",
+      "maintenance": "Mantenimiento",
+      "seasonal-closure": "Cierre Temporal",
+      "inactive": "Inactivo",
+      "archived": "Archivado"
+    },
+    "property": {
+      "active": "Activo",
+      "vacant": "Vacante",
+      "access-restricted": "Acceso Restringido",
+      "maintenance": "Mantenimiento",
+      "emergency-lockdown": "Bloqueo de Emergencia",
+      "guest-mode": "Modo Invitado",
+      "out-of-service": "Fuera de Servicio",
+      "deactivated": "Desactivado",
+      "archived": "Archivado"
+    },
+    "descriptions": {
+      "user": {
+        "active": "El usuario puede iniciar sesión y usar el sistema normalmente",
+        "pending": "Esperando verificación o aprobación",
+        "suspended": "Bloqueado temporalmente por el administrador",
+        "inactive": "Autodesactivado o desactivado automáticamente",
+        "archived": "Solo registro histórico"
+      },
+      "community": {
+        "active": "Completamente operativo con todas las funciones habilitadas",
+        "under-construction": "En proceso de construcción o desarrollo",
+        "pre-launch": "Listo pero aún no abierto",
+        "full-capacity": "Todas las propiedades están ocupadas",
+        "maintenance": "Interrupción temporal del servicio",
+        "seasonal-closure": "Cerrado temporalmente",
+        "inactive": "No administrado actualmente",
+        "archived": "Solo registro histórico"
+      },
+      "property": {
+        "active": "Operaciones normales, acceso de visitantes permitido",
+        "vacant": "Sin residentes asignados, acceso de visitantes bloqueado",
+        "access-restricted": "Acceso limitado, requiere aprobación",
+        "maintenance": "Solo acceso de personal de servicio",
+        "emergency-lockdown": "Incidente de seguridad, sin entrada",
+        "guest-mode": "Ocupación temporal, acceso de visitantes permitido",
+        "out-of-service": "Sistema de seguridad fuera de línea",
+        "deactivated": "Removido del sistema activo",
+        "archived": "Solo registro histórico"
+      }
+    },
+    "dialog": {
+      "title": {
+        "user": "Cambiar Estado de Usuario",
+        "community": "Cambiar Estado de Comunidad",
+        "property": "Cambiar Estado de Propiedad"
+      },
+      "entity": {
+        "user": "Usuario",
+        "community": "Comunidad",
+        "property": "Propiedad"
+      },
+      "fields": {
+        "reopeningDate": "Fecha de Reapertura",
+        "reopeningDateRequired": "La fecha de reapertura es obligatoria para cierre temporal",
+        "completionDate": "Fecha de Finalización Esperada",
+        "completionDateHint": "¿Cuándo se espera que se complete el mantenimiento?"
+      },
+      "confirm": "Cambiar Estado",
+      "cancel": "Cancelar"
+    }
   }
 }

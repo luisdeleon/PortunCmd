@@ -508,5 +508,95 @@
         "support": "Basic Support"
       }
     }
+  },
+  "status": {
+    "label": "Status",
+    "filterByStatus": "Filter by Status",
+    "changeStatus": "Change Status",
+    "currentStatus": "Current Status",
+    "newStatus": "New Status",
+    "statusReason": "Reason",
+    "statusReasonHint": "Explain why this status is being changed",
+    "statusReasonRequired": "Reason is required for this status",
+    "statusChanged": "Status changed successfully",
+    "statusChangeFailed": "Failed to change status",
+    "user": {
+      "active": "Active",
+      "pending": "Pending",
+      "suspended": "Suspended",
+      "inactive": "Inactive",
+      "archived": "Archived"
+    },
+    "community": {
+      "active": "Active",
+      "under-construction": "Under Construction",
+      "pre-launch": "Pre-Launch",
+      "full-capacity": "Full Capacity",
+      "maintenance": "Maintenance",
+      "seasonal-closure": "Seasonal Closure",
+      "inactive": "Inactive",
+      "archived": "Archived"
+    },
+    "property": {
+      "active": "Active",
+      "vacant": "Vacant",
+      "access-restricted": "Access Restricted",
+      "maintenance": "Maintenance",
+      "emergency-lockdown": "Emergency Lockdown",
+      "guest-mode": "Guest Mode",
+      "out-of-service": "Out of Service",
+      "deactivated": "Deactivated",
+      "archived": "Archived"
+    },
+    "descriptions": {
+      "user": {
+        "active": "User can log in and use the system normally",
+        "pending": "Awaiting verification or approval",
+        "suspended": "Temporarily blocked by administrator",
+        "inactive": "Self-deactivated or auto-deactivated",
+        "archived": "Historical record only"
+      },
+      "community": {
+        "active": "Fully operational with all features enabled",
+        "under-construction": "Being built or developed",
+        "pre-launch": "Ready but not open yet",
+        "full-capacity": "All properties are occupied",
+        "maintenance": "Temporary service disruption",
+        "seasonal-closure": "Temporarily closed",
+        "inactive": "Not currently managed",
+        "archived": "Historical record only"
+      },
+      "property": {
+        "active": "Normal operations, visitor access allowed",
+        "vacant": "No residents assigned, visitor access blocked",
+        "access-restricted": "Limited access, approval required",
+        "maintenance": "Service access only",
+        "emergency-lockdown": "Security incident, no entry",
+        "guest-mode": "Temporary occupancy, visitor access allowed",
+        "out-of-service": "Security system offline",
+        "deactivated": "Removed from active system",
+        "archived": "Historical record only"
+      }
+    },
+    "dialog": {
+      "title": {
+        "user": "Change User Status",
+        "community": "Change Community Status",
+        "property": "Change Property Status"
+      },
+      "entity": {
+        "user": "User",
+        "community": "Community",
+        "property": "Property"
+      },
+      "fields": {
+        "reopeningDate": "Reopening Date",
+        "reopeningDateRequired": "Reopening date is required for seasonal closure",
+        "completionDate": "Expected Completion Date",
+        "completionDateHint": "When is maintenance expected to complete?"
+      },
+      "confirm": "Change Status",
+      "cancel": "Cancel"
+    }
   }
 }
