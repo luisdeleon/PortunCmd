@@ -4,6 +4,8 @@ import AssignRoleDialog from '@/components/dialogs/AssignRoleDialog.vue'
 import type { UserProperties } from '@/plugins/fake-api/handlers/apps/users/types'
 import { supabase } from '@/lib/supabase'
 import { useI18n } from 'vue-i18n'
+import StatusBadge from '@/components/StatusBadge.vue'
+import StatusChangeDialog from '@/components/StatusChangeDialog.vue'
 
 definePage({
   meta: {
@@ -18,7 +20,7 @@ const { t } = useI18n()
 const searchQuery = ref('')
 const selectedRole = ref()
 const selectedCommunity = ref()
-const selectedEnabled = ref()
+const selectedStatus = ref()
 
 // Data table options
 const itemsPerPage = ref(10)
@@ -41,7 +43,7 @@ const headers = computed(() => [
   { title: t('userList.table.role'), key: 'plan' },
   { title: t('userList.table.community'), key: 'community' },
   { title: t('userList.table.property'), key: 'property' },
-  { title: t('userList.table.enabled'), key: 'enabled' },
+  { title: 'Status', key: 'status' },
   { title: t('userList.table.actions'), key: 'actions', sortable: false },
 ])
 
@@ -73,9 +75,12 @@ const fetchUsers = async () => {
         id,
         display_name,
         email,
-        enabled,
         def_community_id,
         def_property_id,
+        status,
+        status_changed_at,
+        status_changed_by,
+        status_reason,
         profile_role!profile_role_profile_id_fkey(
           role_id,
           scope_type,
@@ -101,9 +106,9 @@ const fetchUsers = async () => {
       query = query.eq('def_community_id', selectedCommunity.value)
     }
 
-    // Apply enabled filter
-    if (selectedEnabled.value !== undefined && selectedEnabled.value !== null) {
-      query = query.eq('enabled', selectedEnabled.value)
+    // Apply status filter
+    if (selectedStatus.value) {
+      query = query.eq('status', selectedStatus.value)
     }
 
     // Apply sorting
@@ -160,11 +165,10 @@ const fetchUsers = async () => {
       currentPlan: profile.profile_role?.[0]?.role?.role_name || 'No Role',
       community: profile.def_community_id || 'N/A',
       property: profile.def_property_id || 'N/A',
-      enabled: profile.enabled ? 'Active' : 'Inactive',
       avatar: null,
       role: profile.profile_role?.[0]?.role?.role_name || 'No Role',
       scopeType: profile.profile_role?.[0]?.scope_type || 'global',
-      status: profile.enabled ? 'active' : 'inactive',
+      status: profile.status || 'active',
       billing: 'Auto Debit',
     }))
 
@@ -329,7 +333,7 @@ onMounted(() => {
 })
 
 // Watch for filter changes
-watch([searchQuery, selectedRole, selectedCommunity, selectedEnabled, page, itemsPerPage, sortBy, orderBy], () => {
+watch([searchQuery, selectedRole, selectedCommunity, selectedStatus, page, itemsPerPage, sortBy, orderBy], () => {
   fetchUsers()
 })
 
@@ -343,11 +347,6 @@ const roles = computed(() => [
 ])
 
 const communities = ref([])
-
-const enabledOptions = computed(() => [
-  { title: t('userList.filters.active'), value: true },
-  { title: t('userList.filters.inactive'), value: false },
-])
 
 const resolveUserRoleVariant = (role: string) => {
   const roleLowerCase = role.toLowerCase()
@@ -383,8 +382,19 @@ const isAssignRoleDialogVisible = ref(false)
 const selectedUserForRole = ref<string | null>(null)
 const isDeleteDialogVisible = ref(false)
 const isBulkDeleteDialogVisible = ref(false)
+const isStatusChangeDialogVisible = ref(false)
+const selectedUser = ref<any>(null)
 const userToDelete = ref<{ id: string; name: string } | null>(null)
 const snackbar = ref({ show: false, message: '', color: 'success' })
+
+// Status filter options
+const statusOptions = [
+  { title: 'Active', value: 'active' },
+  { title: 'Pending', value: 'pending' },
+  { title: 'Suspended', value: 'suspended' },
+  { title: 'Inactive', value: 'inactive' },
+  { title: 'Archived', value: 'archived' },
+]
 
 // Computed property for bulk delete button visibility
 const hasSelectedRows = computed(() => selectedRows.value.length > 0)
@@ -400,6 +410,23 @@ const handleRoleAssigned = () => {
   isAssignRoleDialogVisible.value = false
   selectedUserForRole.value = null
   fetchUsers() // Refresh user list
+}
+
+// Open status change dialog
+const openStatusChangeDialog = (user: any) => {
+  selectedUser.value = user
+  isStatusChangeDialogVisible.value = true
+}
+
+// Handle status changed
+const handleStatusChanged = () => {
+  fetchUsers()
+  fetchActiveInactiveStats()
+  snackbar.value = {
+    show: true,
+    message: 'User status updated successfully',
+    color: 'success',
+  }
 }
 
 // 👉 Add new user
@@ -747,15 +774,15 @@ const widgetData = computed(() => {
               clear-icon="tabler-x"
             />
           </VCol>
-          <!-- 👉 Filter by Enabled -->
+          <!-- 👉 Filter by Status -->
           <VCol
             cols="12"
             sm="4"
           >
             <AppSelect
-              v-model="selectedEnabled"
-              :placeholder="$t('userList.filters.filterByEnabled')"
-              :items="enabledOptions"
+              v-model="selectedStatus"
+              placeholder="Filter by Status"
+              :items="statusOptions"
               clearable
               clear-icon="tabler-x"
             />
@@ -905,16 +932,13 @@ const widgetData = computed(() => {
           </div>
         </template>
 
-        <!-- 👉 Enabled -->
-        <template #item.enabled="{ item }">
-          <VChip
-            :color="item.enabled === 'Active' ? 'success' : 'error'"
-            size="small"
-            label
-            class="text-capitalize"
-          >
-            {{ item.enabled }}
-          </VChip>
+        <!-- 👉 Status -->
+        <template #item.status="{ item }">
+          <StatusBadge
+            :status="item.status"
+            entity-type="user"
+            @click="openStatusChangeDialog(item)"
+          />
         </template>
 
         <!-- Actions -->
@@ -946,6 +970,16 @@ const widgetData = computed(() => {
               location="top"
             >
               Edit User
+            </VTooltip>
+          </IconBtn>
+
+          <IconBtn @click="openStatusChangeDialog(item)">
+            <VIcon icon="tabler-replace" />
+            <VTooltip
+              activator="parent"
+              location="top"
+            >
+              Change Status
             </VTooltip>
           </IconBtn>
 
@@ -984,6 +1018,16 @@ const widgetData = computed(() => {
       @role-assigned="handleRoleAssigned"
     />
 
+    <!-- 👉 Status Change Dialog -->
+    <StatusChangeDialog
+      v-model:is-open="isStatusChangeDialogVisible"
+      entity-type="user"
+      :entity-id="selectedUser?.id"
+      :current-status="selectedUser?.status"
+      :entity-name="selectedUser?.fullName"
+      @status-changed="handleStatusChanged"
+    />
+
     <!-- 👉 Delete Confirmation Dialog -->
     <VDialog
       v-model="isDeleteDialogVisible"
@@ -1014,19 +1058,19 @@ const widgetData = computed(() => {
 
           <div class="d-flex gap-4 justify-center">
             <VBtn
-              color="error"
-              variant="elevated"
-              @click="deleteUser"
-            >
-              {{ $t('userList.deleteDialog.confirm') }}
-            </VBtn>
-
-            <VBtn
               color="secondary"
               variant="tonal"
               @click="cancelDelete"
             >
               {{ $t('userList.deleteDialog.cancel') }}
+            </VBtn>
+
+            <VBtn
+              color="error"
+              variant="elevated"
+              @click="deleteUser"
+            >
+              {{ $t('userList.deleteDialog.confirm') }}
             </VBtn>
           </div>
         </VCardText>

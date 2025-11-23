@@ -526,19 +526,19 @@ const requiredRule = (v: any) => !!v || 'This field is required'
               class="d-flex flex-wrap justify-center gap-4"
             >
               <VBtn
-                type="submit"
-                :loading="isSaving"
-                :disabled="isSaving"
-              >
-                Assign Role
-              </VBtn>
-
-              <VBtn
                 color="secondary"
                 variant="tonal"
                 @click="onReset"
               >
                 Cancel
+              </VBtn>
+
+              <VBtn
+                type="submit"
+                :loading="isSaving"
+                :disabled="isSaving"
+              >
+                Assign Role
               </VBtn>
             </VCol>
           </VRow>

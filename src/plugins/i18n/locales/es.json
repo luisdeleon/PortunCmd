@@ -365,6 +365,10 @@
       "nextPage": "Next Page",
       "lastPage": "Last Page"
     },
+    "dataIterator": {
+      "noResultsText": "No se encontraron registros coincidentes",
+      "loadingText": "Cargando elementos..."
+    },
     "pagination": {
       "ariaLabel": {
         "root": "root",

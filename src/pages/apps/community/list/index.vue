@@ -3,6 +3,8 @@ import { supabase } from '@/lib/supabase'
 import { useI18n } from 'vue-i18n'
 import AddEditCommunityDialog from '@/components/dialogs/AddEditCommunityDialog.vue'
 import ViewCommunityDialog from '@/components/dialogs/ViewCommunityDialog.vue'
+import StatusBadge from '@/components/StatusBadge.vue'
+import StatusChangeDialog from '@/components/StatusChangeDialog.vue'
 
 definePage({
   meta: {
@@ -18,6 +20,7 @@ const searchQuery = ref('')
 const selectedId = ref()
 const selectedCity = ref()
 const selectedCountry = ref()
+const selectedStatus = ref()
 
 // Data table options
 const itemsPerPage = ref(10)
@@ -39,6 +42,7 @@ const headers = [
   { title: 'Name', key: 'name' },
   { title: 'City', key: 'city' },
   { title: 'Country', key: 'country' },
+  { title: 'Status', key: 'status' },
   { title: 'Actions', key: 'actions', sortable: false },
 ]
 
@@ -67,6 +71,12 @@ const fetchCommunities = async () => {
         googlemaps,
         created_at,
         updated_at,
+        status,
+        status_changed_at,
+        status_changed_by,
+        status_reason,
+        seasonal_reopening_date,
+        maintenance_expected_completion,
         property:property(count)
       `, { count: 'exact' })
 
@@ -88,6 +98,11 @@ const fetchCommunities = async () => {
     // Apply country filter
     if (selectedCountry.value) {
       query = query.eq('country', selectedCountry.value)
+    }
+
+    // Apply status filter
+    if (selectedStatus.value) {
+      query = query.eq('status', selectedStatus.value)
     }
 
     // Apply sorting
@@ -232,7 +247,7 @@ onMounted(() => {
 })
 
 // Watch for filter changes
-watch([searchQuery, selectedId, selectedCity, selectedCountry, page, itemsPerPage, sortBy, orderBy], () => {
+watch([searchQuery, selectedId, selectedCity, selectedCountry, selectedStatus, page, itemsPerPage, sortBy, orderBy], () => {
   fetchCommunities()
 })
 
@@ -242,9 +257,22 @@ const isEditCommunityDialogVisible = ref(false)
 const isViewCommunityDialogVisible = ref(false)
 const isDeleteDialogVisible = ref(false)
 const isBulkDeleteDialogVisible = ref(false)
+const isStatusChangeDialogVisible = ref(false)
 const selectedCommunity = ref<any>(null)
 const communityToDelete = ref<{ id: string; name: string } | null>(null)
 const snackbar = ref({ show: false, message: '', color: 'success' })
+
+// Status filter options
+const statusOptions = [
+  { title: 'Active', value: 'active' },
+  { title: 'Under Construction', value: 'under-construction' },
+  { title: 'Pre-Launch', value: 'pre-launch' },
+  { title: 'Full Capacity', value: 'full-capacity' },
+  { title: 'Maintenance', value: 'maintenance' },
+  { title: 'Seasonal Closure', value: 'seasonal-closure' },
+  { title: 'Inactive', value: 'inactive' },
+  { title: 'Archived', value: 'archived' },
+]
 
 // Computed property for bulk delete button visibility
 const hasSelectedRows = computed(() => selectedRows.value.length > 0)
@@ -265,6 +293,22 @@ const openViewCommunityDialog = (community: any) => {
 const openEditCommunityDialog = (community: any) => {
   selectedCommunity.value = { ...community }
   isEditCommunityDialogVisible.value = true
+}
+
+// 👉 Open status change dialog
+const openStatusChangeDialog = (community: any) => {
+  selectedCommunity.value = { ...community }
+  isStatusChangeDialogVisible.value = true
+}
+
+// 👉 Handle status changed
+const handleStatusChanged = () => {
+  fetchCommunities()
+  snackbar.value = {
+    show: true,
+    message: 'Community status updated successfully',
+    color: 'success',
+  }
 }
 
 // 👉 Open delete confirmation dialog
@@ -520,7 +564,7 @@ const widgetData = computed(() => {
           <!-- 👉 Filter by ID -->
           <VCol
             cols="12"
-            sm="4"
+            sm="3"
           >
             <AppSelect
               v-model="selectedId"
@@ -533,7 +577,7 @@ const widgetData = computed(() => {
           <!-- 👉 Filter by City -->
           <VCol
             cols="12"
-            sm="4"
+            sm="3"
           >
             <AppSelect
               v-model="selectedCity"
@@ -546,12 +590,25 @@ const widgetData = computed(() => {
           <!-- 👉 Filter by Country -->
           <VCol
             cols="12"
-            sm="4"
+            sm="3"
           >
             <AppSelect
               v-model="selectedCountry"
               placeholder="Filter by Country"
               :items="countries"
+              clearable
+              clear-icon="tabler-x"
+            />
+          </VCol>
+          <!-- 👉 Filter by Status -->
+          <VCol
+            cols="12"
+            sm="3"
+          >
+            <AppSelect
+              v-model="selectedStatus"
+              placeholder="Filter by Status"
+              :items="statusOptions"
               clearable
               clear-icon="tabler-x"
             />
@@ -684,6 +741,15 @@ const widgetData = computed(() => {
           </div>
         </template>
 
+        <!-- Status -->
+        <template #item.status="{ item }">
+          <StatusBadge
+            :status="item.status"
+            entity-type="community"
+            @click="openStatusChangeDialog(item)"
+          />
+        </template>
+
         <!-- Actions -->
         <template #item.actions="{ item }">
           <IconBtn @click="openViewCommunityDialog(item)">
@@ -703,6 +769,16 @@ const widgetData = computed(() => {
               location="top"
             >
               Edit Community
+            </VTooltip>
+          </IconBtn>
+
+          <IconBtn @click="openStatusChangeDialog(item)">
+            <VIcon icon="tabler-replace" />
+            <VTooltip
+              activator="parent"
+              location="top"
+            >
+              Change Status
             </VTooltip>
           </IconBtn>
 
@@ -748,6 +824,16 @@ const widgetData = computed(() => {
       :community-data="selectedCommunity"
     />
 
+    <!-- 👉 Status Change Dialog -->
+    <StatusChangeDialog
+      v-model:is-open="isStatusChangeDialogVisible"
+      entity-type="community"
+      :entity-id="selectedCommunity?.id"
+      :current-status="selectedCommunity?.status"
+      :entity-name="selectedCommunity?.name"
+      @status-changed="handleStatusChanged"
+    />
+
     <!-- 👉 Delete Confirmation Dialog -->
     <VDialog
       v-model="isDeleteDialogVisible"
@@ -778,19 +864,19 @@ const widgetData = computed(() => {
 
           <div class="d-flex gap-4 justify-center">
             <VBtn
-              color="error"
-              variant="elevated"
-              @click="deleteCommunity"
-            >
-              Delete
-            </VBtn>
-
-            <VBtn
               color="secondary"
               variant="tonal"
               @click="cancelDelete"
             >
               Cancel
+            </VBtn>
+
+            <VBtn
+              color="error"
+              variant="elevated"
+              @click="deleteCommunity"
+            >
+              Delete
             </VBtn>
           </div>
         </VCardText>

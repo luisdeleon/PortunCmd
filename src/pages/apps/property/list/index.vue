@@ -4,6 +4,8 @@ import { useI18n } from 'vue-i18n'
 import AddEditPropertyDialog from '@/components/dialogs/AddEditPropertyDialog.vue'
 import ViewPropertyDialog from '@/components/dialogs/ViewPropertyDialog.vue'
 import ImportPropertyDialog from '@/components/dialogs/ImportPropertyDialog.vue'
+import StatusBadge from '@/components/StatusBadge.vue'
+import StatusChangeDialog from '@/components/StatusChangeDialog.vue'
 
 definePage({
   meta: {
@@ -17,6 +19,7 @@ const { t } = useI18n()
 // 👉 Store
 const searchQuery = ref('')
 const selectedCommunity = ref()
+const selectedStatus = ref()
 
 // Data table options
 const itemsPerPage = ref(10)
@@ -32,9 +35,23 @@ const isViewPropertyDialogVisible = ref(false)
 const isDeleteDialogVisible = ref(false)
 const isBulkDeleteDialogVisible = ref(false)
 const isImportDialogVisible = ref(false)
+const isStatusChangeDialogVisible = ref(false)
 const selectedProperty = ref<any>(null)
 const propertyToDelete = ref<{ id: string; name: string } | null>(null)
 const snackbar = ref({ show: false, message: '', color: 'success' })
+
+// Status filter options
+const statusOptions = [
+  { title: 'Active', value: 'active' },
+  { title: 'Vacant', value: 'vacant' },
+  { title: 'Access Restricted', value: 'access-restricted' },
+  { title: 'Maintenance', value: 'maintenance' },
+  { title: 'Emergency Lockdown', value: 'emergency-lockdown' },
+  { title: 'Guest Mode', value: 'guest-mode' },
+  { title: 'Out of Service', value: 'out-of-service' },
+  { title: 'Deactivated', value: 'deactivated' },
+  { title: 'Archived', value: 'archived' },
+]
 
 // Computed property for bulk delete button visibility
 const hasSelectedRows = computed(() => selectedRows.value.length > 0)
@@ -51,6 +68,7 @@ const headers = [
   { title: 'Property ID', key: 'id' },
   { title: 'Name', key: 'name' },
   { title: 'Address', key: 'address' },
+  { title: 'Status', key: 'status' },
   { title: 'Actions', key: 'actions', sortable: false },
 ]
 
@@ -74,6 +92,10 @@ const fetchProperties = async () => {
         community_id,
         created_at,
         updated_at,
+        status,
+        status_changed_at,
+        status_changed_by,
+        status_reason,
         community:community_id (
           id,
           name,
@@ -90,6 +112,11 @@ const fetchProperties = async () => {
     // Apply community filter
     if (selectedCommunity.value) {
       query = query.eq('community_id', selectedCommunity.value)
+    }
+
+    // Apply status filter
+    if (selectedStatus.value) {
+      query = query.eq('status', selectedStatus.value)
     }
 
     // Apply sorting
@@ -176,7 +203,7 @@ onMounted(() => {
 })
 
 // Watch for filter changes
-watch([searchQuery, selectedCommunity, page, itemsPerPage, sortBy, orderBy], () => {
+watch([searchQuery, selectedCommunity, selectedStatus, page, itemsPerPage, sortBy, orderBy], () => {
   fetchProperties()
 })
 
@@ -194,6 +221,20 @@ const openViewPropertyDialog = (property: any) => {
 const openEditPropertyDialog = (property: any) => {
   selectedProperty.value = { ...property }
   isEditPropertyDialogVisible.value = true
+}
+
+const openStatusChangeDialog = (property: any) => {
+  selectedProperty.value = { ...property }
+  isStatusChangeDialogVisible.value = true
+}
+
+const handleStatusChanged = () => {
+  fetchProperties()
+  snackbar.value = {
+    show: true,
+    message: 'Property status updated successfully',
+    color: 'success',
+  }
 }
 
 const openDeleteDialog = (property: any) => {
@@ -458,12 +499,25 @@ const widgetData = computed(() => {
           <!-- 👉 Filter by Community -->
           <VCol
             cols="12"
-            sm="4"
+            sm="6"
           >
             <AppSelect
               v-model="selectedCommunity"
               placeholder="Filter by Community"
               :items="communities"
+              clearable
+              clear-icon="tabler-x"
+            />
+          </VCol>
+          <!-- 👉 Filter by Status -->
+          <VCol
+            cols="12"
+            sm="6"
+          >
+            <AppSelect
+              v-model="selectedStatus"
+              placeholder="Filter by Status"
+              :items="statusOptions"
               clearable
               clear-icon="tabler-x"
             />
@@ -579,9 +633,38 @@ const widgetData = computed(() => {
 
         <!-- Address -->
         <template #item.address="{ item }">
-          <div class="text-body-1">
+          <div
+            v-if="item.address && item.address.length > 40"
+            class="text-body-1 d-flex align-center gap-2"
+          >
+            <span>{{ item.address.substring(0, 40) }}...</span>
+            <VTooltip
+              activator="parent"
+              location="top"
+            >
+              {{ item.address }}
+            </VTooltip>
+            <VIcon
+              icon="tabler-info-circle"
+              size="16"
+              color="info"
+            />
+          </div>
+          <div
+            v-else
+            class="text-body-1"
+          >
             {{ item.address || 'N/A' }}
           </div>
+        </template>
+
+        <!-- Status -->
+        <template #item.status="{ item }">
+          <StatusBadge
+            :status="item.status"
+            entity-type="property"
+            @click="openStatusChangeDialog(item)"
+          />
         </template>
 
         <!-- Actions -->
@@ -603,6 +686,16 @@ const widgetData = computed(() => {
               location="top"
             >
               Edit Property
+            </VTooltip>
+          </IconBtn>
+
+          <IconBtn @click="openStatusChangeDialog(item)">
+            <VIcon icon="tabler-replace" />
+            <VTooltip
+              activator="parent"
+              location="top"
+            >
+              Change Status
             </VTooltip>
           </IconBtn>
 
@@ -654,6 +747,16 @@ const widgetData = computed(() => {
       @import-completed="handleImportCompleted"
     />
 
+    <!-- 👉 Status Change Dialog -->
+    <StatusChangeDialog
+      v-model:is-open="isStatusChangeDialogVisible"
+      entity-type="property"
+      :entity-id="selectedProperty?.id"
+      :current-status="selectedProperty?.status"
+      :entity-name="selectedProperty?.name"
+      @status-changed="handleStatusChanged"
+    />
+
     <!-- 👉 Delete Confirmation Dialog -->
     <VDialog
       v-model="isDeleteDialogVisible"
@@ -666,6 +769,7 @@ const widgetData = computed(() => {
             variant="outlined"
             color="warning"
             class="my-4"
+            style="block-size: 88px; inline-size: 88px; pointer-events: none;"
           >
             <VIcon
               icon="tabler-exclamation-circle"
@@ -684,19 +788,19 @@ const widgetData = computed(() => {
 
           <div class="d-flex gap-4 justify-center">
             <VBtn
-              color="error"
-              variant="elevated"
-              @click="deleteProperty"
-            >
-              Delete
-            </VBtn>
-
-            <VBtn
               color="secondary"
               variant="tonal"
               @click="cancelDelete"
             >
               Cancel
+            </VBtn>
+
+            <VBtn
+              color="error"
+              variant="elevated"
+              @click="deleteProperty"
+            >
+              Delete
             </VBtn>
           </div>
         </VCardText>
@@ -741,19 +845,19 @@ const widgetData = computed(() => {
 
           <div class="d-flex gap-4 justify-center">
             <VBtn
-              color="error"
-              variant="elevated"
-              @click="bulkDeleteProperties"
-            >
-              Delete All
-            </VBtn>
-
-            <VBtn
               color="secondary"
               variant="tonal"
               @click="cancelBulkDelete"
             >
               Cancel
+            </VBtn>
+
+            <VBtn
+              color="error"
+              variant="elevated"
+              @click="bulkDeleteProperties"
+            >
+              Delete All
             </VBtn>
           </div>
         </VCardText>

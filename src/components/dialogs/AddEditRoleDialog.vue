@@ -375,20 +375,20 @@ const onReset = () => {
           <!-- 👉 Actions button -->
           <div class="d-flex align-center justify-center gap-4">
             <VBtn
-              :loading="isSaving"
-              :disabled="isSaving"
-              @click="onSubmit"
-            >
-              {{ isSaving ? 'Saving...' : 'Submit' }}
-            </VBtn>
-
-            <VBtn
               color="secondary"
               variant="tonal"
               :disabled="isSaving"
               @click="onReset"
             >
               Cancel
+            </VBtn>
+
+            <VBtn
+              :loading="isSaving"
+              :disabled="isSaving"
+              @click="onSubmit"
+            >
+              {{ isSaving ? 'Saving...' : 'Submit' }}
             </VBtn>
           </div>
         </VForm>

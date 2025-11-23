@@ -65,18 +65,18 @@ const onCancel = () => {
 
       <VCardText class="d-flex align-center justify-center gap-2">
         <VBtn
-          variant="elevated"
-          @click="onConfirmation"
-        >
-          {{ t('Confirm') }}
-        </VBtn>
-
-        <VBtn
           color="secondary"
           variant="tonal"
           @click="onCancel"
         >
           {{ t('Cancel') }}
+        </VBtn>
+
+        <VBtn
+          variant="elevated"
+          @click="onConfirmation"
+        >
+          {{ t('Confirm') }}
         </VBtn>
       </VCardText>
     </VCard>
