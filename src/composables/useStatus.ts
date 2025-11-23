@@ -81,26 +81,26 @@ export const useStatus = () => {
   const getStatusColor = (status: string): string => {
     const colorMap: Record<string, string> = {
       // User Statuses
-      'active': 'success',              // Green - Active/Operational
-      'pending': 'warning',              // Yellow - Awaiting Action
-      'suspended': 'error',              // Red - Critical/Blocked
-      'inactive': 'blue-grey',           // Blue-Grey - Not Active
-      'archived': 'blue-grey-darken-2',  // Dark Blue-Grey - Archived/Historical
+      'active': 'success',        // Green - Active/Operational
+      'pending': 'warning',        // Amber - Awaiting Action
+      'suspended': 'error',        // Red - Critical/Blocked
+      'inactive': 'secondary',     // Grey - Not Active
+      'archived': 'grey',          // Grey - Archived/Historical
 
       // Community Statuses
-      'under-construction': 'info',      // Blue - In Progress
-      'pre-launch': 'amber-darken-1',    // Dark Amber - Coming Soon
-      'full-capacity': 'deep-orange',    // Deep Orange - At Limit
-      'seasonal-closure': 'purple',      // Purple - Temporary Closed
+      'under-construction': 'info',    // Blue - In Progress
+      'pre-launch': 'amber',           // Amber - Coming Soon
+      'full-capacity': 'deep-orange',  // Deep Orange - At Limit
+      'seasonal-closure': 'purple',    // Purple - Temporary Closed
 
       // Property Statuses
-      'vacant': 'cyan',                  // Cyan - Available/Empty
-      'access-restricted': 'orange-darken-3', // Dark Orange - Limited Access
-      'maintenance': 'orange',           // Orange - Under Maintenance
-      'emergency-lockdown': 'red-darken-3',   // Dark Red - Emergency
-      'guest-mode': 'indigo',            // Indigo - Guest/Temporary
-      'out-of-service': 'brown',         // Brown - Not Functioning
-      'deactivated': 'grey-darken-1',    // Medium Grey - Deactivated
+      'vacant': 'cyan',            // Cyan - Available/Empty
+      'access-restricted': 'orange',    // Orange - Limited Access
+      'maintenance': 'deep-orange',     // Deep Orange - Under Maintenance
+      'emergency-lockdown': 'error',    // Red - Emergency
+      'guest-mode': 'indigo',      // Indigo - Guest/Temporary
+      'out-of-service': 'brown',   // Brown - Not Functioning
+      'deactivated': 'secondary',  // Grey - Deactivated
     }
 
     return colorMap[status] || 'grey'

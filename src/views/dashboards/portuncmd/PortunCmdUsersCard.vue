@@ -34,15 +34,15 @@ const fetchUsersData = async () => {
       dailyCounts[dayIndex]++
     })
 
-    // Reorder to start from Monday
+    // Keep original order starting from Sunday (S, M, T, W, T, F, S)
     weeklyData.value = [
+      dailyCounts[0], // Sunday
       dailyCounts[1], // Monday
       dailyCounts[2], // Tuesday
       dailyCounts[3], // Wednesday
       dailyCounts[4], // Thursday
       dailyCounts[5], // Friday
       dailyCounts[6], // Saturday
-      dailyCounts[0], // Sunday
     ]
 
     // Calculate growth percentage
@@ -132,7 +132,7 @@ const chartOptions = computed(() => {
       show: false,
     },
     xaxis: {
-      categories: ['M', 'T', 'W', 'T', 'F', 'S', 'S'],
+      categories: ['S', 'M', 'T', 'W', 'T', 'F', 'S'],
       axisBorder: {
         show: false,
       },
@@ -140,7 +140,11 @@ const chartOptions = computed(() => {
         show: false,
       },
       labels: {
-        show: false,
+        show: true,
+        style: {
+          colors: 'rgba(var(--v-theme-on-surface), 0.38)',
+          fontSize: '13px',
+        },
       },
     },
     yaxis: {

@@ -6,7 +6,7 @@ const vuetifyTheme = useTheme()
 
 const series = [
   {
-    data: [25, 40, 55, 70, 85, 70, 55],
+    data: [55, 25, 40, 55, 70, 85, 70],
   },
 ]
 
@@ -53,8 +53,8 @@ const chartOptions = computed(() => {
       labelSuccessColor,
       labelSuccessColor,
       labelSuccessColor,
-      currentTheme.success,
       labelSuccessColor,
+      currentTheme.success,
       labelSuccessColor,
     ],
     dataLabels: {
@@ -64,7 +64,7 @@ const chartOptions = computed(() => {
       show: false,
     },
     xaxis: {
-      categories: ['M', 'T', 'W', 'T', 'F', 'S', 'S'],
+      categories: ['S', 'M', 'T', 'W', 'T', 'F', 'S'],
       axisBorder: {
         show: false,
       },
