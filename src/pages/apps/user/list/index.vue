@@ -132,11 +132,11 @@ const fetchUsers = async () => {
       query = query.order('display_name', { ascending: true })
     }
 
-    // Apply pagination
+    // Apply pagination (skip if role filter is active since we need to filter client-side)
     const from = (page.value - 1) * itemsPerPage.value
     const to = from + itemsPerPage.value - 1
 
-    if (itemsPerPage.value !== -1) {
+    if (itemsPerPage.value !== -1 && !selectedRole.value) {
       query = query.range(from, to)
     }
 
@@ -147,28 +147,8 @@ const fetchUsers = async () => {
       return
     }
 
-    // Transform and filter Supabase data
-    let filteredData = data || []
-
-    // Client-side role filter
-    if (selectedRole.value) {
-      filteredData = filteredData.filter(profile =>
-        profile.profile_role?.[0]?.role?.role_name === selectedRole.value
-      )
-    }
-
-    // Role hierarchy order for sorting
-    const roleOrder: Record<string, number> = {
-      'Super Admin': 1,
-      'Mega Dealer': 2,
-      'Dealer': 3,
-      'Administrator': 4,
-      'Guard': 5,
-      'Resident': 6,
-    }
-
-    // Transform Supabase data to match UserProperties format
-    const transformedUsers = filteredData.map((profile, index) => ({
+    // Transform Supabase data first
+    let allData = (data || []).map(profile => ({
       id: profile.id,
       fullName: profile.display_name || 'No Name',
       email: profile.email || 'No Email',
@@ -182,14 +162,39 @@ const fetchUsers = async () => {
       billing: 'Auto Debit',
     }))
 
+    // Client-side role filter
+    if (selectedRole.value) {
+      allData = allData.filter(user => user.role === selectedRole.value)
+    }
+
+    // Role hierarchy order for sorting
+    const roleOrder: Record<string, number> = {
+      'Super Admin': 1,
+      'Mega Dealer': 2,
+      'Dealer': 3,
+      'Administrator': 4,
+      'Guard': 5,
+      'Resident': 6,
+    }
+
     // Sort by role hierarchy
-    users.value = transformedUsers.sort((a, b) => {
+    const sortedData = allData.sort((a, b) => {
       const orderA = roleOrder[a.role] || 999
       const orderB = roleOrder[b.role] || 999
       return orderA - orderB
     })
 
-    totalUsers.value = count || 0
+    // Apply client-side pagination if role filter is active
+    if (selectedRole.value && itemsPerPage.value !== -1) {
+      const start = (page.value - 1) * itemsPerPage.value
+      const end = start + itemsPerPage.value
+      users.value = sortedData.slice(start, end)
+    } else {
+      users.value = sortedData
+    }
+
+    // Update total count based on filtered results
+    totalUsers.value = selectedRole.value ? allData.length : (count || 0)
   } catch (err) {
     console.error('Error in fetchUsers:', err)
   } finally {
