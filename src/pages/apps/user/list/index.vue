@@ -157,8 +157,18 @@ const fetchUsers = async () => {
       )
     }
 
+    // Role hierarchy order for sorting
+    const roleOrder: Record<string, number> = {
+      'Super Admin': 1,
+      'Mega Dealer': 2,
+      'Dealer': 3,
+      'Administrator': 4,
+      'Guard': 5,
+      'Resident': 6,
+    }
+
     // Transform Supabase data to match UserProperties format
-    users.value = filteredData.map((profile, index) => ({
+    const transformedUsers = filteredData.map((profile, index) => ({
       id: profile.id,
       fullName: profile.display_name || 'No Name',
       email: profile.email || 'No Email',
@@ -171,6 +181,13 @@ const fetchUsers = async () => {
       status: profile.status || 'active',
       billing: 'Auto Debit',
     }))
+
+    // Sort by role hierarchy
+    users.value = transformedUsers.sort((a, b) => {
+      const orderA = roleOrder[a.role] || 999
+      const orderB = roleOrder[b.role] || 999
+      return orderA - orderB
+    })
 
     totalUsers.value = count || 0
   } catch (err) {
@@ -340,8 +357,9 @@ watch([searchQuery, selectedRole, selectedCommunity, selectedStatus, page, items
 // 👉 search filters
 const roles = computed(() => [
   { title: t('userList.roles.superAdmin'), value: 'Super Admin' },
-  { title: t('userList.roles.administrator'), value: 'Administrator' },
+  { title: 'Mega Dealer', value: 'Mega Dealer' },
   { title: t('userList.roles.dealer'), value: 'Dealer' },
+  { title: t('userList.roles.administrator'), value: 'Administrator' },
   { title: t('userList.roles.guard'), value: 'Guard' },
   { title: t('userList.roles.resident'), value: 'Resident' },
 ])
@@ -353,10 +371,12 @@ const resolveUserRoleVariant = (role: string) => {
 
   if (roleLowerCase === 'super admin' || roleLowerCase === 'superadmin')
     return { color: 'error', icon: 'tabler-crown' }
-  if (roleLowerCase === 'administrator' || roleLowerCase === 'admin')
-    return { color: 'primary', icon: 'tabler-shield-check' }
+  if (roleLowerCase === 'mega dealer')
+    return { color: 'purple', icon: 'tabler-building-store' }
   if (roleLowerCase === 'dealer')
     return { color: 'warning', icon: 'tabler-briefcase' }
+  if (roleLowerCase === 'administrator' || roleLowerCase === 'admin')
+    return { color: 'primary', icon: 'tabler-shield-check' }
   if (roleLowerCase === 'guard')
     return { color: 'info', icon: 'tabler-shield-lock' }
   if (roleLowerCase === 'resident')
@@ -382,10 +402,17 @@ const isAssignRoleDialogVisible = ref(false)
 const selectedUserForRole = ref<string | null>(null)
 const isDeleteDialogVisible = ref(false)
 const isBulkDeleteDialogVisible = ref(false)
+const isBulkStatusUpdateDialogVisible = ref(false)
 const isStatusChangeDialogVisible = ref(false)
 const selectedUser = ref<any>(null)
 const userToDelete = ref<{ id: string; name: string } | null>(null)
 const snackbar = ref({ show: false, message: '', color: 'success' })
+
+// Bulk status update state
+const bulkStatusForm = ref({
+  newStatus: '',
+  reason: '',
+})
 
 // Status filter options
 const statusOptions = [
@@ -557,9 +584,25 @@ const openBulkDeleteDialog = () => {
   isBulkDeleteDialogVisible.value = true
 }
 
+const openBulkStatusUpdateDialog = () => {
+  bulkStatusForm.value = {
+    newStatus: '',
+    reason: '',
+  }
+  isBulkStatusUpdateDialogVisible.value = true
+}
+
 // 👉 Cancel bulk delete
 const cancelBulkDelete = () => {
   isBulkDeleteDialogVisible.value = false
+}
+
+const cancelBulkStatusUpdate = () => {
+  bulkStatusForm.value = {
+    newStatus: '',
+    reason: '',
+  }
+  isBulkStatusUpdateDialogVisible.value = false
 }
 
 // 👉 Bulk delete users
@@ -653,6 +696,89 @@ const bulkDeleteUsers = async () => {
     }
 
     isBulkDeleteDialogVisible.value = false
+  }
+}
+
+// 👉 Bulk status update
+const bulkUpdateStatus = async () => {
+  if (selectedRows.value.length === 0 || !bulkStatusForm.value.newStatus) return
+
+  try {
+    let successCount = 0
+    let errorCount = 0
+
+    // Get current user id for status_changed_by
+    const { data: { user } } = await supabase.auth.getUser()
+    const userId = user?.id
+
+    // Update each selected user
+    for (const profileId of selectedRows.value) {
+      try {
+        const { error } = await supabase
+          .from('profile')
+          .update({
+            status: bulkStatusForm.value.newStatus,
+            status_changed_at: new Date().toISOString(),
+            status_changed_by: userId,
+            status_reason: bulkStatusForm.value.reason || null,
+          })
+          .eq('id', profileId)
+
+        if (error) {
+          errorCount++
+          console.error(`Failed to update user ${profileId}:`, error)
+        } else {
+          successCount++
+        }
+      } catch (err: any) {
+        errorCount++
+        console.error(`Failed to update user ${profileId}:`, err)
+      }
+    }
+
+    // Show result message
+    if (errorCount === 0) {
+      snackbar.value = {
+        show: true,
+        message: `Successfully updated status for ${successCount} ${successCount === 1 ? 'user' : 'users'}`,
+        color: 'success',
+      }
+    } else if (successCount === 0) {
+      snackbar.value = {
+        show: true,
+        message: `Failed to update status for ${errorCount} ${errorCount === 1 ? 'user' : 'users'}`,
+        color: 'error',
+      }
+    } else {
+      snackbar.value = {
+        show: true,
+        message: `Updated ${successCount} ${successCount === 1 ? 'user' : 'users'}, ${errorCount} failed`,
+        color: 'warning',
+      }
+    }
+
+    // Clear selection
+    selectedRows.value = []
+
+    // Refetch users
+    fetchUsers()
+    fetchActiveInactiveStats()
+
+    // Close dialog
+    isBulkStatusUpdateDialogVisible.value = false
+    bulkStatusForm.value = {
+      newStatus: '',
+      reason: '',
+    }
+  } catch (err) {
+    console.error('Error in bulkUpdateStatus:', err)
+    snackbar.value = {
+      show: true,
+      message: 'Failed to update user statuses',
+      color: 'error',
+    }
+
+    isBulkStatusUpdateDialogVisible.value = false
   }
 }
 
@@ -806,6 +932,17 @@ const widgetData = computed(() => {
             style="inline-size: 6.25rem;"
             @update:model-value="itemsPerPage = parseInt($event, 10)"
           />
+
+          <!-- 👉 Bulk Status Update button (shown when items are selected) -->
+          <VBtn
+            v-if="hasSelectedRows"
+            variant="tonal"
+            color="warning"
+            prepend-icon="tabler-replace"
+            @click="openBulkStatusUpdateDialog"
+          >
+            Update Status ({{ selectedRows.length }})
+          </VBtn>
 
           <!-- 👉 Bulk Delete button (shown when items are selected) -->
           <VBtn
@@ -1131,6 +1268,93 @@ const widgetData = computed(() => {
             </VBtn>
           </div>
         </VCardText>
+      </VCard>
+    </VDialog>
+
+    <!-- 👉 Bulk Status Update Dialog -->
+    <VDialog
+      v-model="isBulkStatusUpdateDialogVisible"
+      max-width="600"
+    >
+      <VCard>
+        <VCardTitle class="text-h5 pa-6">
+          <div class="d-flex align-center gap-2">
+            <VIcon
+              icon="tabler-replace"
+              size="24"
+              color="warning"
+            />
+            Update Status for {{ selectedRows.length }} {{ selectedRows.length === 1 ? 'User' : 'Users' }}
+          </div>
+        </VCardTitle>
+
+        <VDivider />
+
+        <VCardText class="pa-6">
+          <VRow>
+            <VCol cols="12">
+              <VAlert
+                color="info"
+                variant="tonal"
+                class="mb-4"
+              >
+                <div class="text-body-2">
+                  You are about to update the status for <strong>{{ selectedRows.length }}</strong>
+                  {{ selectedRows.length === 1 ? 'user' : 'users' }}.
+                </div>
+              </VAlert>
+            </VCol>
+
+            <!-- New Status -->
+            <VCol cols="12">
+              <AppSelect
+                v-model="bulkStatusForm.newStatus"
+                label="New Status *"
+                placeholder="Select new status"
+                :items="statusOptions"
+              >
+                <template #prepend-inner>
+                  <VIcon icon="tabler-flag" />
+                </template>
+              </AppSelect>
+            </VCol>
+
+            <!-- Reason -->
+            <VCol cols="12">
+              <AppTextarea
+                v-model="bulkStatusForm.reason"
+                label="Reason (Optional)"
+                placeholder="Enter reason for status change"
+                rows="3"
+              >
+                <template #prepend-inner>
+                  <VIcon icon="tabler-message-circle" />
+                </template>
+              </AppTextarea>
+            </VCol>
+          </VRow>
+        </VCardText>
+
+        <VDivider />
+
+        <VCardActions class="pa-6">
+          <VSpacer />
+          <VBtn
+            color="secondary"
+            variant="tonal"
+            @click="cancelBulkStatusUpdate"
+          >
+            Cancel
+          </VBtn>
+          <VBtn
+            color="warning"
+            variant="elevated"
+            :disabled="!bulkStatusForm.newStatus"
+            @click="bulkUpdateStatus"
+          >
+            Update All
+          </VBtn>
+        </VCardActions>
       </VCard>
     </VDialog>
 

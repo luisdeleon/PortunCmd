@@ -417,6 +417,44 @@ All project documentation is available in the [`/docs`](./docs/) directory:
   - Quick update commands and automation
   - Troubleshooting and customization options
 
+### Ideas & Planning Documents
+
+Planning documents and design specifications are available in the [`/ideas`](./ideas/) directory:
+
+- **[Status System Design](./ideas/STATUS_SYSTEM_DESIGN.md)** - Initial draft design for status lifecycle management
+  - Status options for Users (5), Communities (8), and Properties (9)
+  - Status transition diagrams and business rules
+  - Color coding standards for UI consistency
+  - Database schema additions and audit trail
+  - Visitor access control by property status
+  - **Note:** This was the initial brainstorming document. For implementation, see [Status System Implementation](./docs/STATUS_SYSTEM_IMPLEMENTATION.md) in `/docs`
+
+- **[RBAC Hierarchy](./ideas/RBAC_HIERARCHY.md)** - Complete 7-role hierarchy specification with transfer capabilities
+  - 7-level role hierarchy: Super Admin → Mega Dealer → Dealer → Administrator → Guard/Client → Community → Resident
+  - Detailed role definitions and permission matrix (34 existing + 18 new permissions)
+  - Transfer operations (dealer, administrator, community) with cascading logic
+  - Database schema enhancements and migration strategy
+  - SQL stored procedures for complex transfer operations
+  - 8-phase implementation roadmap
+  - Real-world examples and testing checklist
+  - **Status:** Design Phase - Implementation Pending
+
+- **[Test Data Management](./ideas/TEST_DATA_MANAGEMENT.md)** - Guide for creating and managing test data safely
+  - Understanding database hierarchy and foreign key dependencies
+  - Step-by-step SQL scripts for creating test communities, properties, and users
+  - Naming conventions for test data (DEMO1, TEST1, SAND1)
+  - Safe deletion procedures in correct dependency order
+  - Common errors and solutions for FK constraint violations
+  - Quick cleanup scripts
+
+- **[Demo Users Setup](./ideas/DEMO_USERS_SETUP.md)** - Complete guide for creating test users
+  - 6 demo users representing all hierarchy levels (Super, Mega, Dealer, Admin, Guard, Resident)
+  - Auth user creation via Supabase Admin API
+  - Profile and role assignment SQL scripts
+  - Test user credentials and relationships
+  - Community and property assignments for testing
+  - Complete hierarchy visualization
+
 ---
 
 ## Need Help?

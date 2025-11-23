@@ -34,11 +34,18 @@ const isEditPropertyDialogVisible = ref(false)
 const isViewPropertyDialogVisible = ref(false)
 const isDeleteDialogVisible = ref(false)
 const isBulkDeleteDialogVisible = ref(false)
+const isBulkStatusUpdateDialogVisible = ref(false)
 const isImportDialogVisible = ref(false)
 const isStatusChangeDialogVisible = ref(false)
 const selectedProperty = ref<any>(null)
 const propertyToDelete = ref<{ id: string; name: string } | null>(null)
 const snackbar = ref({ show: false, message: '', color: 'success' })
+
+// Bulk status update state
+const bulkStatusForm = ref({
+  newStatus: '',
+  reason: '',
+})
 
 // Status filter options
 const statusOptions = [
@@ -250,6 +257,14 @@ const openBulkDeleteDialog = () => {
   isBulkDeleteDialogVisible.value = true
 }
 
+const openBulkStatusUpdateDialog = () => {
+  bulkStatusForm.value = {
+    newStatus: '',
+    reason: '',
+  }
+  isBulkStatusUpdateDialogVisible.value = true
+}
+
 const cancelDelete = () => {
   propertyToDelete.value = null
   isDeleteDialogVisible.value = false
@@ -257,6 +272,14 @@ const cancelDelete = () => {
 
 const cancelBulkDelete = () => {
   isBulkDeleteDialogVisible.value = false
+}
+
+const cancelBulkStatusUpdate = () => {
+  bulkStatusForm.value = {
+    newStatus: '',
+    reason: '',
+  }
+  isBulkStatusUpdateDialogVisible.value = false
 }
 
 const handlePropertySaved = () => {
@@ -415,6 +438,88 @@ const bulkDeleteProperties = async () => {
   }
 }
 
+// 👉 Bulk status update
+const bulkUpdateStatus = async () => {
+  if (selectedRows.value.length === 0 || !bulkStatusForm.value.newStatus) return
+
+  try {
+    let successCount = 0
+    let errorCount = 0
+
+    // Get current user id for status_changed_by
+    const { data: { user } } = await supabase.auth.getUser()
+    const userId = user?.id
+
+    // Update each selected property
+    for (const propertyId of selectedRows.value) {
+      try {
+        const { error } = await supabase
+          .from('property')
+          .update({
+            status: bulkStatusForm.value.newStatus,
+            status_changed_at: new Date().toISOString(),
+            status_changed_by: userId,
+            status_reason: bulkStatusForm.value.reason || null,
+          })
+          .eq('id', propertyId)
+
+        if (error) {
+          errorCount++
+          console.error(`Failed to update property ${propertyId}:`, error)
+        } else {
+          successCount++
+        }
+      } catch (err: any) {
+        errorCount++
+        console.error(`Failed to update property ${propertyId}:`, err)
+      }
+    }
+
+    // Show result message
+    if (errorCount === 0) {
+      snackbar.value = {
+        show: true,
+        message: `Successfully updated status for ${successCount} ${successCount === 1 ? 'property' : 'properties'}`,
+        color: 'success',
+      }
+    } else if (successCount === 0) {
+      snackbar.value = {
+        show: true,
+        message: `Failed to update status for ${errorCount} ${errorCount === 1 ? 'property' : 'properties'}`,
+        color: 'error',
+      }
+    } else {
+      snackbar.value = {
+        show: true,
+        message: `Updated ${successCount} ${successCount === 1 ? 'property' : 'properties'}, ${errorCount} failed`,
+        color: 'warning',
+      }
+    }
+
+    // Clear selection
+    selectedRows.value = []
+
+    // Refetch properties
+    fetchProperties()
+
+    // Close dialog
+    isBulkStatusUpdateDialogVisible.value = false
+    bulkStatusForm.value = {
+      newStatus: '',
+      reason: '',
+    }
+  } catch (err) {
+    console.error('Error in bulkUpdateStatus:', err)
+    snackbar.value = {
+      show: true,
+      message: 'Failed to update property statuses',
+      color: 'error',
+    }
+
+    isBulkStatusUpdateDialogVisible.value = false
+  }
+}
+
 const widgetData = computed(() => {
   // Calculate growth percentage based on properties created in last 30 days
   const growthPercentage = totalProperties.value > 0 && propertiesLast30Days.value > 0
@@ -541,6 +646,17 @@ const widgetData = computed(() => {
             style="inline-size: 6.25rem;"
             @update:model-value="itemsPerPage = parseInt($event, 10)"
           />
+
+          <!-- 👉 Bulk Status Update button (shown when items are selected) -->
+          <VBtn
+            v-if="hasSelectedRows"
+            variant="tonal"
+            color="warning"
+            prepend-icon="tabler-replace"
+            @click="openBulkStatusUpdateDialog"
+          >
+            Update Status ({{ selectedRows.length }})
+          </VBtn>
 
           <!-- 👉 Bulk Delete button (shown when items are selected) -->
           <VBtn
@@ -861,6 +977,93 @@ const widgetData = computed(() => {
             </VBtn>
           </div>
         </VCardText>
+      </VCard>
+    </VDialog>
+
+    <!-- 👉 Bulk Status Update Dialog -->
+    <VDialog
+      v-model="isBulkStatusUpdateDialogVisible"
+      max-width="600"
+    >
+      <VCard>
+        <VCardTitle class="text-h5 pa-6">
+          <div class="d-flex align-center gap-2">
+            <VIcon
+              icon="tabler-replace"
+              size="24"
+              color="warning"
+            />
+            Update Status for {{ selectedRows.length }} {{ selectedRows.length === 1 ? 'Property' : 'Properties' }}
+          </div>
+        </VCardTitle>
+
+        <VDivider />
+
+        <VCardText class="pa-6">
+          <VRow>
+            <VCol cols="12">
+              <VAlert
+                color="info"
+                variant="tonal"
+                class="mb-4"
+              >
+                <div class="text-body-2">
+                  You are about to update the status for <strong>{{ selectedRows.length }}</strong>
+                  {{ selectedRows.length === 1 ? 'property' : 'properties' }}.
+                </div>
+              </VAlert>
+            </VCol>
+
+            <!-- New Status -->
+            <VCol cols="12">
+              <AppSelect
+                v-model="bulkStatusForm.newStatus"
+                label="New Status *"
+                placeholder="Select new status"
+                :items="statusOptions"
+              >
+                <template #prepend-inner>
+                  <VIcon icon="tabler-flag" />
+                </template>
+              </AppSelect>
+            </VCol>
+
+            <!-- Reason -->
+            <VCol cols="12">
+              <AppTextarea
+                v-model="bulkStatusForm.reason"
+                label="Reason (Optional)"
+                placeholder="Enter reason for status change"
+                rows="3"
+              >
+                <template #prepend-inner>
+                  <VIcon icon="tabler-message-circle" />
+                </template>
+              </AppTextarea>
+            </VCol>
+          </VRow>
+        </VCardText>
+
+        <VDivider />
+
+        <VCardActions class="pa-6">
+          <VSpacer />
+          <VBtn
+            color="secondary"
+            variant="tonal"
+            @click="cancelBulkStatusUpdate"
+          >
+            Cancel
+          </VBtn>
+          <VBtn
+            color="warning"
+            variant="elevated"
+            :disabled="!bulkStatusForm.newStatus"
+            @click="bulkUpdateStatus"
+          >
+            Update All
+          </VBtn>
+        </VCardActions>
       </VCard>
     </VDialog>
 

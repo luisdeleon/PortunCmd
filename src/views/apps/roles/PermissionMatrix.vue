@@ -194,7 +194,7 @@ const groupedPermissions = computed(() => {
 })
 
 // Role ordering
-const roleOrder = ['Super Admin', 'Dealer', 'Administrator', 'Guard', 'Resident']
+const roleOrder = ['Super Admin', 'Mega Dealer', 'Dealer', 'Administrator', 'Guard', 'Resident']
 const sortedRoles = computed(() => {
   return [...roles.value].sort((a, b) => {
     const indexA = roleOrder.indexOf(a.role_name)

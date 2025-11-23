@@ -151,7 +151,7 @@ const onSubmit = async () => {
       password: userForm.value.password,
       options: {
         data: {
-          display_name: userForm.value.display_name,
+          full_name: userForm.value.display_name,
         },
       },
     })

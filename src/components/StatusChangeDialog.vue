@@ -22,6 +22,7 @@ const reason = ref('')
 const reopeningDate = ref('')
 const completionDate = ref('')
 const isLoading = ref(false)
+const errorSnackbar = ref({ show: false, message: '' })
 
 // Status options based on entity type
 const statusOptions = computed(() => {
@@ -93,7 +94,10 @@ const handleSubmit = async () => {
   }
   catch (error: any) {
     console.error('Error changing status:', error)
-    alert(error.message || 'Failed to change status')
+    errorSnackbar.value = {
+      show: true,
+      message: error.message || 'Failed to change status'
+    }
   }
   finally {
     isLoading.value = false
@@ -115,6 +119,27 @@ const showMaintenanceFields = computed(() => {
 const entityTypeLabel = computed(() => {
   return props.entityType === 'user' ? 'User' : props.entityType === 'community' ? 'Community' : 'Property'
 })
+
+// Validate that all required fields are filled and status has changed
+const isFormValid = computed(() => {
+  // Must have a new status selected
+  if (!newStatus.value)
+    return false
+
+  // Status must be different from current status
+  if (newStatus.value === props.currentStatus)
+    return false
+
+  // Check if reason is required and filled
+  if (requiresReason.value && !reason.value.trim())
+    return false
+
+  // Check if seasonal closure requires reopening date
+  if (showSeasonalFields.value && !reopeningDate.value)
+    return false
+
+  return true
+})
 </script>
 
 <template>
@@ -135,7 +160,10 @@ const entityTypeLabel = computed(() => {
               <strong>{{ entityTypeLabel }}:</strong>
               {{ entityName || entityId }}
             </div>
-            <div class="text-body-2 mb-4 d-flex align-center gap-2">
+            <div
+              v-if="currentStatus"
+              class="text-body-2 mb-4 d-flex align-center gap-2"
+            >
               <strong>Current Status:</strong>
               <StatusBadge
                 :status="currentStatus"
@@ -219,7 +247,7 @@ const entityTypeLabel = computed(() => {
             <VBtn
               color="primary"
               :loading="isLoading"
-              :disabled="!newStatus || isLoading"
+              :disabled="!isFormValid || isLoading"
               prepend-icon="tabler-check"
               size="large"
               block
@@ -231,5 +259,15 @@ const entityTypeLabel = computed(() => {
         </VRow>
       </VCardText>
     </VCard>
+
+    <!-- 👉 Error Snackbar -->
+    <VSnackbar
+      v-model="errorSnackbar.show"
+      color="error"
+      location="top end"
+      :timeout="4000"
+    >
+      {{ errorSnackbar.message }}
+    </VSnackbar>
   </VDialog>
 </template>

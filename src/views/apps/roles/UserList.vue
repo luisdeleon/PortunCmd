@@ -91,8 +91,18 @@ const fetchUsers = async () => {
       )
     }
 
+    // Role hierarchy order for sorting
+    const roleOrder: Record<string, number> = {
+      'Super Admin': 1,
+      'Mega Dealer': 2,
+      'Dealer': 3,
+      'Administrator': 4,
+      'Guard': 5,
+      'Resident': 6,
+    }
+
     // Transform Supabase data to match UserProperties format
-    users.value = filteredData.map((profile) => ({
+    const transformedUsers = filteredData.map((profile) => ({
       id: profile.id,
       fullName: profile.display_name || 'No Name',
       email: profile.email || 'No Email',
@@ -103,6 +113,13 @@ const fetchUsers = async () => {
       status: profile.enabled ? 'active' : 'inactive',
       billing: 'Auto Debit',
     }))
+
+    // Sort by role hierarchy
+    users.value = transformedUsers.sort((a, b) => {
+      const orderA = roleOrder[a.role] || 999
+      const orderB = roleOrder[b.role] || 999
+      return orderA - orderB
+    })
 
     totalUsers.value = count || 0
   } catch (err) {
@@ -125,8 +142,9 @@ watch([searchQuery, selectedRole, selectedStatus, page, itemsPerPage], () => {
 // 👉 search filters
 const roles = [
   { title: 'Super Admin', value: 'Super Admin' },
-  { title: 'Administrator', value: 'Administrator' },
+  { title: 'Mega Dealer', value: 'Mega Dealer' },
   { title: 'Dealer', value: 'Dealer' },
+  { title: 'Administrator', value: 'Administrator' },
   { title: 'Guard', value: 'Guard' },
   { title: 'Resident', value: 'Resident' },
 ]
@@ -136,10 +154,12 @@ const resolveUserRoleVariant = (role: string) => {
 
   if (roleLowerCase === 'super admin' || roleLowerCase === 'superadmin')
     return { color: 'error', icon: 'tabler-crown' }
-  if (roleLowerCase === 'administrator' || roleLowerCase === 'admin')
-    return { color: 'primary', icon: 'tabler-shield-check' }
+  if (roleLowerCase === 'mega dealer')
+    return { color: 'purple', icon: 'tabler-building-store' }
   if (roleLowerCase === 'dealer')
     return { color: 'warning', icon: 'tabler-briefcase' }
+  if (roleLowerCase === 'administrator' || roleLowerCase === 'admin')
+    return { color: 'primary', icon: 'tabler-shield-check' }
   if (roleLowerCase === 'guard')
     return { color: 'info', icon: 'tabler-shield-lock' }
   if (roleLowerCase === 'resident')
