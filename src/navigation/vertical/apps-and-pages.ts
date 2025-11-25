@@ -117,8 +117,10 @@ export default [
   {
     title: 'Roles',
     icon: { icon: 'tabler-lock' },
+    action: 'manage',
+    subject: 'all',
     children: [
-      { title: 'List', to: 'apps-roles' },
+      { title: 'List', to: 'apps-roles', action: 'manage', subject: 'all' },
     ],
   },
 

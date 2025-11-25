@@ -13,6 +13,10 @@ import type { NavGroup } from '@layouts/types'
  * @param {string} subject CASL Subject // https://casl.js.org/v4/en/guide/intro#basics
  */
 export const can = (action: string | undefined, subject: string | undefined) => {
+  // If no action and subject defined, allow access (no ACL restriction on this item)
+  if (!action && !subject)
+    return true
+
   const vm = getCurrentInstance()
 
   if (!vm)

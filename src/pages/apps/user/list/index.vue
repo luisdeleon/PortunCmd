@@ -88,6 +88,12 @@ const fetchUsers = async () => {
           scope_community_ids,
           scope_property_ids,
           role!profile_role_role_id_fkey(role_name)
+        ),
+        property_owner(
+          community_id,
+          property_id,
+          community:community_id(id, name),
+          property:property_id(id, name, community_id)
         )
       `, { count: 'exact' })
 
@@ -148,19 +154,46 @@ const fetchUsers = async () => {
     }
 
     // Transform Supabase data first
-    let allData = (data || []).map(profile => ({
-      id: profile.id,
-      fullName: profile.display_name || 'No Name',
-      email: profile.email || 'No Email',
-      currentPlan: profile.profile_role?.[0]?.role?.role_name || 'No Role',
-      community: profile.def_community_id || 'N/A',
-      property: profile.def_property_id || 'N/A',
-      avatar: null,
-      role: profile.profile_role?.[0]?.role?.role_name || 'No Role',
-      scopeType: profile.profile_role?.[0]?.scope_type || 'global',
-      status: profile.status || 'active',
-      billing: 'Auto Debit',
-    }))
+    let allData = (data || []).map(profile => {
+      // Get communities from scope_community_ids (for Admins, Guards, etc.)
+      const scopeCommunityIds = profile.profile_role?.[0]?.scope_community_ids || []
+
+      // Get communities from property_owner (for Residents)
+      const propertyOwnerCommunities = profile.property_owner?.map((po: any) => ({
+        id: po.community_id,
+        name: po.community?.name || po.community_id
+      })) || []
+
+      // Combine communities - use scope_community_ids if available, otherwise property_owner
+      let communities: { id: string; name: string }[] = []
+      if (scopeCommunityIds.length > 0) {
+        communities = scopeCommunityIds.map((id: string) => ({ id, name: id }))
+      } else if (propertyOwnerCommunities.length > 0) {
+        communities = propertyOwnerCommunities
+      }
+
+      // Get unique community names for display
+      const communityNames = [...new Set(communities.map(c => c.name || c.id))]
+
+      // Get properties from property_owner
+      const properties = profile.property_owner?.map((po: any) => po.property_id).filter(Boolean) || []
+      const propertyDisplay = properties.length > 0 ? properties.join(', ') : (profile.def_property_id || 'N/A')
+
+      return {
+        id: profile.id,
+        fullName: profile.display_name || 'No Name',
+        email: profile.email || 'No Email',
+        currentPlan: profile.profile_role?.[0]?.role?.role_name || 'No Role',
+        community: communityNames.length > 0 ? communityNames.join(', ') : (profile.def_community_id || 'N/A'),
+        communityList: communities,
+        property: propertyDisplay,
+        avatar: null,
+        role: profile.profile_role?.[0]?.role?.role_name || 'No Role',
+        scopeType: profile.profile_role?.[0]?.scope_type || 'global',
+        status: profile.status || 'active',
+        billing: 'Auto Debit',
+      }
+    })
 
     // Client-side role filter
     if (selectedRole.value) {
@@ -1052,8 +1085,27 @@ const widgetData = computed(() => {
 
         <!-- 👉 Community -->
         <template #item.community="{ item }">
-          <div class="text-body-1 text-high-emphasis">
-            {{ item.community }}
+          <div class="d-flex flex-wrap gap-1">
+            <template v-if="item.communityList && item.communityList.length > 0">
+              <VChip
+                v-for="comm in item.communityList.slice(0, 3)"
+                :key="comm.id"
+                size="small"
+                color="primary"
+                variant="tonal"
+              >
+                {{ comm.name || comm.id }}
+              </VChip>
+              <VChip
+                v-if="item.communityList.length > 3"
+                size="small"
+                color="secondary"
+                variant="tonal"
+              >
+                +{{ item.communityList.length - 3 }}
+              </VChip>
+            </template>
+            <span v-else class="text-body-2 text-disabled">N/A</span>
           </div>
         </template>
 
