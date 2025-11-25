@@ -174,7 +174,8 @@ const fetchUsers = async () => {
       'Dealer': 3,
       'Administrator': 4,
       'Guard': 5,
-      'Resident': 6,
+      'Client': 6,
+      'Resident': 7,
     }
 
     // Sort by role hierarchy
@@ -362,11 +363,12 @@ watch([searchQuery, selectedRole, selectedCommunity, selectedStatus, page, items
 // 👉 search filters
 const roles = computed(() => [
   { title: t('userList.roles.superAdmin'), value: 'Super Admin' },
-  { title: 'Mega Dealer', value: 'Mega Dealer' },
+  { title: t('userList.roles.megaDealer'), value: 'Mega Dealer' },
   { title: t('userList.roles.dealer'), value: 'Dealer' },
   { title: t('userList.roles.administrator'), value: 'Administrator' },
   { title: t('userList.roles.guard'), value: 'Guard' },
   { title: t('userList.roles.resident'), value: 'Resident' },
+  { title: t('userList.roles.client'), value: 'Client' },
 ])
 
 const communities = ref([])
@@ -384,6 +386,8 @@ const resolveUserRoleVariant = (role: string) => {
     return { color: 'primary', icon: 'tabler-shield-check' }
   if (roleLowerCase === 'guard')
     return { color: 'info', icon: 'tabler-shield-lock' }
+  if (roleLowerCase === 'client')
+    return { color: 'secondary', icon: 'tabler-user-circle' }
   if (roleLowerCase === 'resident')
     return { color: 'success', icon: 'tabler-home' }
 

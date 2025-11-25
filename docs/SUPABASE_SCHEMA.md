@@ -58,7 +58,7 @@ Property/unit information within a community.
 - Referenced by: `community_manager.property_id`, `property_owner.property_id`, `profile.def_property_id`, `visitor_records_uid.property_id`
 
 ### `role`
-User roles in the system.
+User roles in the system. The system uses a 7-level role hierarchy.
 
 **Columns:**
 - `id` (uuid, primary key)
@@ -66,6 +66,28 @@ User roles in the system.
 - `enabled` (boolean)
 - `created_at` (timestamptz)
 - `updated_at` (timestamptz)
+
+**Available Roles (in hierarchy order):**
+| Role | Scope Type | Description |
+|------|------------|-------------|
+| Super Admin | Global | Full system access, can manage all dealers, communities, and users |
+| Mega Dealer | Dealer | Manages multiple dealers and their communities |
+| Dealer | Dealer | Manages their assigned communities and administrators |
+| Administrator | Community | Manages residents, properties, and visitors within assigned communities |
+| Guard | Community | Controls access gates, views visitor records in assigned communities |
+| Client | Community | External client with limited access to specific communities |
+| Resident | Property | Creates visitor access records for their properties |
+
+**Role Hierarchy:**
+```
+Super Admin (Level 1 - Global)
+    └── Mega Dealer (Level 2 - Dealer scope)
+        └── Dealer (Level 3 - Dealer scope)
+            └── Administrator (Level 4 - Community scope)
+                ├── Guard (Level 5 - Community scope)
+                └── Client (Level 5 - Community scope)
+                    └── Resident (Level 6 - Property scope)
+```
 
 **Relationships:**
 - Referenced by: `profile_role.role_id`
@@ -93,9 +115,11 @@ Junction table linking profiles to roles with scope-based access control.
 
 **Scope Types:**
 - `global` - Unrestricted access (Super Admin only)
-- `dealer` - Scoped to dealer's communities
-- `community` - Scoped to specific communities
-- `property` - Scoped to specific properties
+- `dealer` - Scoped to dealer's communities (Mega Dealer and Dealer roles)
+  - Mega Dealers: Can manage multiple dealers and their communities via `scope_dealer_id`
+  - Dealers: Can manage their assigned communities
+- `community` - Scoped to specific communities (Administrator, Guard, Client)
+- `property` - Scoped to specific properties (Resident)
 
 ### `community_manager`
 Community managers assignment.
@@ -443,6 +467,6 @@ Update OneSignal external user ID.
 - Foreign key relationships enforce referential integrity
 - The schema supports a multi-tenant architecture with communities and properties
 - **RBAC System:** Fully implemented with granular permissions, scope-based access control, and Row Level Security
-- **Scope Types:** global (Super Admin), dealer (Dealer), community (Administrator/Guard), property (Resident)
-- **Permission System:** 34 granular permissions mapped to 5 roles via database
+- **Scope Types:** global (Super Admin), dealer (Mega Dealer/Dealer), community (Administrator/Guard/Client), property (Resident)
+- **Permission System:** 34 granular permissions mapped to 7 roles via database
 

@@ -15,10 +15,10 @@ This guide documents the complete Role-Based Access Control (RBAC) system implem
 ## Overview
 
 PortunCmd implements a sophisticated **scope-based RBAC system** with:
-- **5 Core Roles**: Super Admin, Dealer, Administrator, Guard, Resident
+- **7 Core Roles**: Super Admin, Mega Dealer, Dealer, Administrator, Guard, Client, Resident
 - **34 Granular Permissions** across 9 resource types
 - **Multi-level Scopes**: Global, Dealer, Community, Property
-- **Hierarchical Access Control**: Dealers → Administrators → Communities → Properties
+- **Hierarchical Access Control**: Super Admin → Mega Dealer → Dealers → Administrators → Guards/Clients → Residents
 
 ### System Architecture
 
@@ -27,6 +27,12 @@ PortunCmd implements a sophisticated **scope-based RBAC system** with:
 │           Super Admin                    │
 │         (Global Scope)                   │
 │     All 34 permissions                   │
+└──────────────┬──────────────────────────┘
+               │
+┌──────────────▼──────────────────────────┐
+│          Mega Dealer                     │
+│        (Dealer Scope)                    │
+│    Manages multiple dealers              │
 └──────────────┬──────────────────────────┘
                │
      ┌─────────┴─────────┐
@@ -44,10 +50,10 @@ PortunCmd implements a sophisticated **scope-based RBAC system** with:
   │15perm│          │15perm│
   └──┬───┘          └──┬───┘
      │                 │
-  ┌──▼──┐          ┌──▼──┐
-  │Guard│          │Resid│
-  │6perm│          │4perm│
-  └─────┘          └─────┘
+  ┌──┴──┐          ┌──┴──┐
+  │Guard│  │Client│ │Resid│
+  │6perm│  │ read │ │4perm│
+  └─────┘  └──────┘ └─────┘
 ```
 
 ---
@@ -67,7 +73,7 @@ PortunCmd implements a sophisticated **scope-based RBAC system** with:
 - Displays actual user counts from `profile_role` table
 - Shows permission counts from `role_permissions` table
 - Status indicators (Enabled/Disabled) with color-coded chips
-- Custom role ordering: Super Admin → Dealer → Administrator → Guard → Resident
+- Custom role ordering: Super Admin → Mega Dealer → Dealer → Administrator → Guard → Client → Resident
 - Role-specific icons and colors
 
 **Technical Implementation**:
@@ -94,9 +100,11 @@ const { count: permissionCount } = await supabase
 | Role | Users | Permissions | Icon | Color |
 |------|-------|-------------|------|-------|
 | Super Admin | 3 | 34 | 👑 Crown | Red |
+| Mega Dealer | 1 | 12 | 🏪 Building Store | Purple |
 | Dealer | 4 | 10 | 💼 Briefcase | Orange |
 | Administrator | 2 | 15 | 🛡️ Shield | Blue |
 | Guard | 1 | 6 | 🔒 Shield Lock | Cyan |
+| Client | 0 | 4 | 👤 User Circle | Gray |
 | Resident | 3 | 4 | 🏠 Home | Green |
 
 #### 2. Status Filters

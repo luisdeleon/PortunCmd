@@ -123,7 +123,7 @@ const fetchRoles = async () => {
 }
 
 // Define role order
-const roleOrder = ['Super Admin', 'Mega Dealer', 'Dealer', 'Administrator', 'Guard', 'Resident']
+const roleOrder = ['Super Admin', 'Mega Dealer', 'Dealer', 'Administrator', 'Guard', 'Client', 'Resident']
 
 // Computed filtered roles
 const filteredRoles = computed(() => {
@@ -185,6 +185,8 @@ const resolveRoleVariant = (roleName: string) => {
     return { icon: 'tabler-shield-check', color: 'primary' }
   if (lowerRole.includes('guard'))
     return { icon: 'tabler-shield-lock', color: 'info' }
+  if (lowerRole.includes('client'))
+    return { icon: 'tabler-user-circle', color: 'secondary' }
   if (lowerRole.includes('resident'))
     return { icon: 'tabler-home', color: 'success' }
 

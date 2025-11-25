@@ -10,7 +10,7 @@
 |-----------|--------|---------|
 | Database Schema | ✅ Complete | 3 new tables: `permissions`, `role_permissions`, `dealer_administrators` |
 | Profile Role Scoping | ✅ Complete | 8 new columns added to `profile_role` table |
-| Permissions System | ✅ Complete | 34 permissions mapped to 5 roles |
+| Permissions System | ✅ Complete | 34 permissions mapped to 7 roles |
 | Authentication Logic | ✅ Complete | `useAuth.ts` updated with scope-aware logic |
 | Row Level Security | ✅ Complete | 40 RLS policies across 5 tables |
 | TypeScript Types | ✅ Complete | Regenerated for PortunCmd project |
@@ -42,7 +42,8 @@ PortunCmd is a multi-tenant property management system with visitor access contr
 ### System Requirements
 
 - Multi-tenant architecture supporting multiple communities
-- Hierarchical role structure (Super Admin → Dealer → Administrator → Resident)
+- 7-level hierarchical role structure: Super Admin → Mega Dealer → Dealer → Administrator → Guard/Client → Resident
+- 4 scope types: Global, Dealer, Community, Property
 - Scoped data access based on role and assignment
 - Flexible permissions system for future extensibility
 - Audit trail for access changes
@@ -76,7 +77,7 @@ Role definitions.
 ```typescript
 {
   id: string                    // UUID
-  role_name: string             // 'Super Admin', 'Dealer', 'Administrator', 'Resident', 'Guard', 'Client'
+  role_name: string             // 'Super Admin', 'Mega Dealer', 'Dealer', 'Administrator', 'Guard', 'Client', 'Resident'
   enabled: boolean              // Role active status
   created_at: timestamp
   updated_at: timestamp
@@ -151,17 +152,40 @@ Located in `src/composables/useAuth.ts`:
 
 ## Role Hierarchy & Permissions
 
+### Role Hierarchy Overview
+
+```
+┌─────────────────────────────────────────────────────────────────────┐
+│                        ROLE HIERARCHY                                │
+├─────────────────────────────────────────────────────────────────────┤
+│  Level 1: Super Admin     (Global Scope)                            │
+│      │                                                               │
+│      └── Level 2: Mega Dealer  (Dealer Scope - manages dealers)     │
+│              │                                                       │
+│              └── Level 3: Dealer  (Dealer Scope - manages admins)   │
+│                      │                                               │
+│                      └── Level 4: Administrator (Community Scope)   │
+│                              │                                       │
+│                              ├── Level 5: Guard   (Community Scope) │
+│                              │                                       │
+│                              └── Level 5: Client  (Community Scope) │
+│                                      │                               │
+│                                      └── Level 6: Resident (Property)│
+└─────────────────────────────────────────────────────────────────────┘
+```
+
 ### Role Definitions
 
 #### 1. Super Admin
 - **Description**: Application owner with unrestricted access
 - **Scope**: Global (all data across all tenants)
+- **Hierarchy Level**: 1
 - **Key Permissions**:
   - Manage all users, roles, and permissions
   - Access all communities and properties
   - Configure system settings
   - View all analytics and reports
-  - Manage dealers and administrators
+  - Manage Mega Dealers, dealers, and administrators
 
 **Use Cases**:
 - System configuration and maintenance
@@ -169,9 +193,37 @@ Located in `src/composables/useAuth.ts`:
 - User account management
 - Troubleshooting and support
 
-#### 2. Dealer
+#### 2. Mega Dealer
+- **Description**: Enterprise-level dealer that manages multiple dealers and their portfolios
+- **Scope**: Dealer (manages multiple dealers and their communities)
+- **Hierarchy Level**: 2
+- **Key Permissions**:
+  - Create, update, delete dealers under their management
+  - View all communities managed by their dealers
+  - View aggregate statistics across all their dealers' communities
+  - Assign dealers to geographic regions or market segments
+  - Access enterprise-level reporting
+  - Manage dealer performance and compliance
+
+**Use Cases**:
+- Regional or national franchise management
+- Multi-market property management companies
+- Enterprise-level oversight of dealer networks
+- Cross-dealer analytics and reporting
+
+**Data Access Rules**:
+- Can see all dealers they directly manage
+- Can see all communities managed by their dealers
+- Can see aggregate data from all subordinate dealers
+- Cannot see data from other Mega Dealers' networks
+- Can transfer dealers between their network
+
+**Icon & Color**: `tabler-building-store` / Purple
+
+#### 3. Dealer
 - **Description**: Business entity that manages multiple administrators and communities
-- **Scope**: Limited to their owned communities and subordinate administrators
+- **Scope**: Dealer (limited to their owned communities and subordinate administrators)
+- **Hierarchy Level**: 3
 - **Key Permissions**:
   - Create, update, delete administrators under their management
   - View communities managed by their administrators
@@ -192,9 +244,10 @@ Located in `src/composables/useAuth.ts`:
 - Can see aggregate resident data from their communities
 - Cannot see data from other dealers' communities
 
-#### 3. Administrator
+#### 4. Administrator
 - **Description**: Community manager who handles day-to-day operations
-- **Scope**: Limited to specifically assigned communities
+- **Scope**: Community (limited to specifically assigned communities)
+- **Hierarchy Level**: 4
 - **Key Permissions**:
   - Manage residents within assigned communities
   - Create, update, delete properties in assigned communities
@@ -217,9 +270,10 @@ Located in `src/composables/useAuth.ts`:
 - Cannot see other administrators' communities
 - Cannot see dealer-level data
 
-#### 4. Resident
+#### 5. Resident
 - **Description**: Property owner or tenant
-- **Scope**: Limited to their own properties
+- **Scope**: Property (limited to their own properties)
+- **Hierarchy Level**: 6
 - **Key Permissions**:
   - View their own property details
   - Create visitor access requests
@@ -239,9 +293,10 @@ Located in `src/composables/useAuth.ts`:
 - Can see community-level public information
 - Cannot see other residents' data
 
-#### 5. Guard (Security Personnel)
+#### 6. Guard (Security Personnel)
 - **Description**: Security staff managing gate access
-- **Scope**: Limited to assigned communities
+- **Scope**: Community (limited to assigned communities)
+- **Hierarchy Level**: 5
 - **Key Permissions**:
   - Scan visitor QR codes
   - Log entry/exit times
@@ -253,10 +308,27 @@ Located in `src/composables/useAuth.ts`:
 - Visitor verification
 - Security logging
 
-#### 6. Client (Future Role)
-- **Description**: Reserved for future use (API clients, integrations, etc.)
-- **Scope**: To be defined
-- **Key Permissions**: To be defined
+#### 7. Client
+- **Description**: External client with limited access to specific communities (API clients, integrations, partners)
+- **Scope**: Community (limited to assigned communities)
+- **Hierarchy Level**: 5
+- **Key Permissions**:
+  - View community information
+  - View limited resident counts
+  - Access community-specific APIs
+  - View restricted reports
+
+**Use Cases**:
+- External API integrations
+- Partner system access
+- Third-party service connections
+- Limited data sharing with external parties
+
+**Data Access Rules**:
+- Can only see communities they are assigned to
+- Cannot modify community data
+- Read-only access to aggregate statistics
+- Cannot see individual resident details
 
 ---
 
@@ -340,7 +412,7 @@ All phases of the RBAC system implementation have been completed successfully. T
 
 The implemented **Scope-Based RBAC System** includes the following components:
 
-1. **Role-Permission Mapping** ✅ - Granular permissions assigned to roles (34 permissions across 5 roles)
+1. **Role-Permission Mapping** ✅ - Granular permissions assigned to roles (34 permissions across 7 roles)
 2. **Scoped Role Assignments** ✅ - Roles assigned with specific scope (global, dealer, community, property)
 3. **Hierarchical Relationships** ✅ - Explicit tracking of organizational hierarchy via dealer_administrators table
 4. **Dynamic Authorization** ✅ - Runtime permission checks based on scope and hierarchy
@@ -574,7 +646,7 @@ CREATE TABLE role_permissions (
 1. ✅ Created database backup (2 backups: JSON schema + full SQL)
 2. ✅ Ran migration scripts for permissions system
 3. ✅ Verified data integrity with Supabase MCP tools
-4. ✅ Seeded 34 permissions and mapped to 5 roles
+4. ✅ Seeded 34 permissions and mapped to 7 roles
 5. ✅ Added indexes and constraints via migrations
 
 **Deliverables:**

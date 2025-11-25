@@ -94,8 +94,11 @@ import { supabase } from '@/lib/supabase'
 ### Key Database Tables
 
 - `profile` - User profiles (links to auth.users)
-- `role` - Available roles (Super Admin, Administrator, Guard, Resident, Dealer, Client)
-- `profile_role` - User-role assignments (many-to-many)
+- `role` - Available roles in hierarchy order: Super Admin, Mega Dealer, Dealer, Administrator, Guard, Client, Resident
+- `profile_role` - User-role assignments with scope-based access control (many-to-many)
+- `permissions` - 34 granular permissions for RBAC system
+- `role_permissions` - Role-permission mappings
+- `dealer_administrators` - Tracks dealer-administrator relationships
 - `community` - Communities/condominiums
 - `property` - Properties/units within communities
 - `community_manager` - Manager-community assignments
@@ -104,6 +107,26 @@ import { supabase } from '@/lib/supabase'
 - `visitor_record_logs` - Entry/exit logs
 - `automation_devices` - IoT devices (Shelly) for gate control
 - `notifications` & `notification_users` - Notification system
+
+### Role Hierarchy
+
+The system uses a 7-level role hierarchy with 4 scope types:
+
+| Level | Role | Scope Type | Description |
+|-------|------|------------|-------------|
+| 1 | Super Admin | Global | Full system access |
+| 2 | Mega Dealer | Dealer | Manages multiple dealers and their communities |
+| 3 | Dealer | Dealer | Manages their administrators and communities |
+| 4 | Administrator | Community | Manages residents, properties, visitors |
+| 5 | Guard | Community | Controls access gates, views visitor records |
+| 5 | Client | Community | External client with limited access |
+| 6 | Resident | Property | Creates visitor access for their properties |
+
+**Scope Types:**
+- `global` - Unrestricted access (Super Admin only)
+- `dealer` - Scoped to dealer's communities (Mega Dealer and Dealer)
+- `community` - Scoped to specific communities (Administrator, Guard, Client)
+- `property` - Scoped to specific properties (Resident)
 
 ### Component Organization
 
@@ -214,10 +237,23 @@ MSW is installed but currently disabled. The worker directory is in `public/`. I
 - **Router guards run on every navigation** - cookies are checked first for performance, session verification happens in background
 - **Profile must be enabled** - `profile.enabled` must be true for users to log in
 - **Roles are extensible** - new roles can be added to the `role` table and ability rules updated in `useAuth.ts`
+- **Role hierarchy is enforced** - 7-level hierarchy (Super Admin → Mega Dealer → Dealer → Administrator → Guard/Client → Resident)
+- **Scope-based access control** - Users can only access data within their assigned scope (global, dealer, community, or property)
 - **File-based routing** - nested routes use folder structure, dynamic routes use `[param]` syntax
 - **TypeScript strict mode** - enabled, so all types must be properly defined
 - **Vuetify components** - don't need imports, globally available
 - **Icon system** - uses Iconify with Tabler icons (`tabler-icon-name`)
+
+### Role Icons & Colors
+| Role | Icon | Color |
+|------|------|-------|
+| Super Admin | `tabler-crown` | error (red) |
+| Mega Dealer | `tabler-building-store` | purple |
+| Dealer | `tabler-briefcase` | warning (orange) |
+| Administrator | `tabler-shield-check` | primary (blue) |
+| Guard | `tabler-shield-lock` | info (cyan) |
+| Client | `tabler-user-circle` | secondary (gray) |
+| Resident | `tabler-home` | success (green) |
 
 ## Git Workflow
 

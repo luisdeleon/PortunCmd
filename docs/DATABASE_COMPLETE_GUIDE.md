@@ -13,7 +13,7 @@ PortunCmd uses a **multi-tenant, scope-based access control system** for propert
    └─ Communities, Properties, Users
 
 2. ROLES (What can you do?)
-   └─ Super Admin, Dealer, Administrator, Guard, Resident
+   └─ Super Admin, Mega Dealer, Dealer, Administrator, Guard, Client, Resident
 
 3. SCOPES (Where can you do it?)
    └─ Global, Dealer, Community, Property
@@ -389,7 +389,7 @@ Before building features, ensure you understand:
 
 - [ ] **Entities**: What are Communities, Properties, and Profiles?
 - [ ] **Relationships**: How do entities connect (via junction tables)?
-- [ ] **Roles**: What are the 5 roles and what can each do?
+- [ ] **Roles**: What are the 7 roles and what can each do?
 - [ ] **Scopes**: What are the 4 scope types and how do they limit access?
 - [ ] **profile_role**: How does this table combine role + scope?
 - [ ] **RLS Policies**: How are scopes enforced in the database?

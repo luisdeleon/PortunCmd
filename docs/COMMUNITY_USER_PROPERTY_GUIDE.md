@@ -29,7 +29,7 @@ PortunCmd uses a **multi-tenant architecture** where:
 | **Community** | A physical location containing multiple properties | "Sunset Gardens Condominium", "Oak Park Estates" |
 | **Property** | An individual unit within a community | "Apartment 501", "House #23", "Lot A-15" |
 | **Profile** | A user account with contact info and preferences | "John Doe (john@email.com)" |
-| **Role** | A permission level assigned to users | Super Admin, Dealer, Administrator, Guard, Resident |
+| **Role** | A permission level assigned to users | Super Admin, Mega Dealer, Dealer, Administrator, Guard, Client, Resident |
 | **Assignment** | Linking users to communities/properties with specific roles | "Jane is Administrator of Sunset Gardens" |
 
 ---

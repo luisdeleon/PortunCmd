@@ -439,10 +439,12 @@
     },
     "roles": {
       "superAdmin": "Super Admin",
+      "megaDealer": "Mega Dealer",
       "administrator": "Administrator",
       "dealer": "Dealer",
       "guard": "Guard",
-      "resident": "Resident"
+      "resident": "Resident",
+      "client": "Client"
     },
     "status": {
       "active": "Active",

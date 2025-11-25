@@ -98,7 +98,8 @@ const fetchUsers = async () => {
       'Dealer': 3,
       'Administrator': 4,
       'Guard': 5,
-      'Resident': 6,
+      'Client': 6,
+      'Resident': 7,
     }
 
     // Transform Supabase data to match UserProperties format
@@ -146,6 +147,7 @@ const roles = [
   { title: 'Dealer', value: 'Dealer' },
   { title: 'Administrator', value: 'Administrator' },
   { title: 'Guard', value: 'Guard' },
+  { title: 'Client', value: 'Client' },
   { title: 'Resident', value: 'Resident' },
 ]
 
@@ -162,6 +164,8 @@ const resolveUserRoleVariant = (role: string) => {
     return { color: 'primary', icon: 'tabler-shield-check' }
   if (roleLowerCase === 'guard')
     return { color: 'info', icon: 'tabler-shield-lock' }
+  if (roleLowerCase === 'client')
+    return { color: 'secondary', icon: 'tabler-user-circle' }
   if (roleLowerCase === 'resident')
     return { color: 'success', icon: 'tabler-home' }
 

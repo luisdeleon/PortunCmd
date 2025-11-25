@@ -36,8 +36,9 @@ PortunCmd is a comprehensive admin dashboard and property management system desi
 
 ### 🔐 Authentication & Authorization
 - Secure Supabase authentication
-- Role-based access control (RBAC)
-- Multiple user roles: Super Admin, Administrator, Guard, Resident, Dealer, Client
+- Role-based access control (RBAC) with scope-based permissions
+- 7-level role hierarchy: Super Admin, Mega Dealer, Dealer, Administrator, Guard, Client, Resident
+- 4 scope types: Global, Dealer, Community, Property
 - Session management with cookie persistence
 
 ### 📊 Dashboard & Analytics
@@ -239,7 +240,7 @@ The application uses 13 main tables:
 | `profile` | User profiles and preferences |
 | `community` | Community/condominium information |
 | `property` | Property/unit details |
-| `role` | User roles (Super Admin, Admin, Guard, Resident, etc.) |
+| `role` | User roles (Super Admin, Mega Dealer, Dealer, Administrator, Guard, Client, Resident) |
 | `profile_role` | User-role assignments |
 | `community_manager` | Manager-community assignments |
 | `property_owner` | Owner-property assignments |
