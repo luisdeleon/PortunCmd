@@ -13,6 +13,15 @@ definePage({
   },
 })
 
+// 👉 User data for permission checks
+const userData = useCookie<any>('userData')
+
+// Check if user can add/edit/delete (not Guard or Resident)
+const canManage = computed(() => {
+  const role = userData.value?.role
+  return role && !['Guard', 'Resident'].includes(role)
+})
+
 // 👉 i18n
 const { t } = useI18n()
 
@@ -649,7 +658,7 @@ const widgetData = computed(() => {
 
           <!-- 👉 Bulk Status Update button (shown when items are selected) -->
           <VBtn
-            v-if="hasSelectedRows"
+            v-if="hasSelectedRows && canManage"
             variant="tonal"
             color="warning"
             prepend-icon="tabler-replace"
@@ -660,7 +669,7 @@ const widgetData = computed(() => {
 
           <!-- 👉 Bulk Delete button (shown when items are selected) -->
           <VBtn
-            v-if="hasSelectedRows"
+            v-if="hasSelectedRows && canManage"
             variant="tonal"
             color="error"
             prepend-icon="tabler-trash"
@@ -692,6 +701,7 @@ const widgetData = computed(() => {
 
           <!-- 👉 Import button -->
           <VBtn
+            v-if="canManage"
             variant="tonal"
             color="secondary"
             prepend-icon="tabler-download"
@@ -702,6 +712,7 @@ const widgetData = computed(() => {
 
           <!-- 👉 Add property button -->
           <VBtn
+            v-if="canManage"
             prepend-icon="tabler-plus"
             @click="openAddPropertyDialog"
           >
@@ -795,7 +806,10 @@ const widgetData = computed(() => {
             </VTooltip>
           </IconBtn>
 
-          <IconBtn @click="openEditPropertyDialog(item)">
+          <IconBtn
+            v-if="canManage"
+            @click="openEditPropertyDialog(item)"
+          >
             <VIcon icon="tabler-pencil" />
             <VTooltip
               activator="parent"
@@ -805,7 +819,10 @@ const widgetData = computed(() => {
             </VTooltip>
           </IconBtn>
 
-          <IconBtn @click="openStatusChangeDialog(item)">
+          <IconBtn
+            v-if="canManage"
+            @click="openStatusChangeDialog(item)"
+          >
             <VIcon icon="tabler-replace" />
             <VTooltip
               activator="parent"
@@ -815,7 +832,10 @@ const widgetData = computed(() => {
             </VTooltip>
           </IconBtn>
 
-          <IconBtn @click="openDeleteDialog(item)">
+          <IconBtn
+            v-if="canManage"
+            @click="openDeleteDialog(item)"
+          >
             <VIcon icon="tabler-trash" />
             <VTooltip
               activator="parent"

@@ -28,6 +28,15 @@ interface Props {
 const props = defineProps<Props>()
 const { t } = useI18n()
 
+// 👉 User data for permission checks
+const currentUserData = useCookie<any>('userData')
+
+// Check if user can manage (delete/enable/disable) - not Guard or Resident
+const canManage = computed(() => {
+  const role = currentUserData.value?.role
+  return role && !['Guard', 'Resident'].includes(role)
+})
+
 const standardPlan = computed(() => ({
   plan: 'Standard',
   price: 99,
@@ -366,6 +375,7 @@ const toggleUserStatus = async () => {
         <!-- 👉 Action buttons -->
         <VCardText class="d-flex justify-center gap-x-4">
           <VBtn
+            v-if="canManage"
             variant="elevated"
             @click="isUserInfoEditDialogVisible = true"
           >
@@ -373,6 +383,7 @@ const toggleUserStatus = async () => {
           </VBtn>
 
           <VBtn
+            v-if="canManage"
             variant="tonal"
             color="error"
             @click="isDeleteDialogVisible = true"
@@ -381,6 +392,7 @@ const toggleUserStatus = async () => {
           </VBtn>
 
           <VBtn
+            v-if="canManage"
             variant="tonal"
             :color="props.userData.enabled ? 'warning' : 'success'"
             @click="isToggleStatusDialogVisible = true"
