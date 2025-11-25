@@ -141,6 +141,7 @@ export const useAuth = () => {
             id: authData.user.id,
             email: authData.user.email || email,
             enabled: true,
+            status: 'active',
           })
           .select()
           .single()
@@ -163,8 +164,9 @@ export const useAuth = () => {
       throw new Error('User profile not found')
     }
 
-    // Check if user is enabled
-    if (!profile.enabled) {
+    // Check if user is active (using status column, fallback to enabled for backward compatibility)
+    const isActive = profile.status ? profile.status === 'active' : profile.enabled
+    if (!isActive) {
       throw new Error('Your account has been disabled. Please contact support.')
     }
 
