@@ -37,6 +37,70 @@ const canManage = computed(() => {
   return role && !['Guard', 'Resident'].includes(role)
 })
 
+// 👉 Dynamic counts from database
+const communitiesCount = ref(0)
+const propertiesCount = ref(0)
+
+// Fetch actual counts from database
+const fetchCounts = async () => {
+  if (!props.userData?.id) return
+
+  try {
+    // Get user's role and scope
+    const { data: profileRole, error: roleError } = await supabase
+      .from('profile_role')
+      .select('scope_type, scope_community_ids, scope_property_ids, role:role_id(role_name)')
+      .eq('profile_id', props.userData.id)
+      .single()
+
+    if (roleError) {
+      console.error('Error fetching profile role:', roleError)
+      return
+    }
+
+    const roleName = (profileRole?.role as any)?.role_name
+
+    // For Super Admin or global scope, count all
+    if (roleName === 'Super Admin' || profileRole?.scope_type === 'global') {
+      const { count: commCount } = await supabase
+        .from('community')
+        .select('*', { count: 'exact', head: true })
+
+      const { count: propCount } = await supabase
+        .from('property')
+        .select('*', { count: 'exact', head: true })
+
+      communitiesCount.value = commCount || 0
+      propertiesCount.value = propCount || 0
+    } else {
+      // Count from scope arrays
+      communitiesCount.value = profileRole?.scope_community_ids?.length || 0
+      propertiesCount.value = profileRole?.scope_property_ids?.length || 0
+
+      // If no scope_property_ids, check property_owner table
+      if (propertiesCount.value === 0) {
+        const { count: ownerCount } = await supabase
+          .from('property_owner')
+          .select('*', { count: 'exact', head: true })
+          .eq('profile_id', props.userData.id)
+
+        propertiesCount.value = ownerCount || 0
+      }
+    }
+  } catch (err) {
+    console.error('Error fetching counts:', err)
+  }
+}
+
+// Watch for userData changes and fetch counts
+watch(() => props.userData?.id, () => {
+  fetchCounts()
+}, { immediate: true })
+
+// Singular/plural labels
+const communityLabel = computed(() => communitiesCount.value === 1 ? 'Community' : 'Communities')
+const propertyLabel = computed(() => propertiesCount.value === 1 ? 'Property' : 'Properties')
+
 const standardPlan = computed(() => ({
   plan: 'Standard',
   price: 99,
@@ -183,10 +247,10 @@ const toggleUserStatus = async () => {
               </VAvatar>
               <div>
                 <h5 class="text-h5">
-                  {{ props.userData.communitiesCount }}
+                  {{ communitiesCount }}
                 </h5>
 
-                <span class="text-sm">Communities</span>
+                <span class="text-sm">{{ communityLabel }}</span>
               </div>
             </div>
 
@@ -206,9 +270,9 @@ const toggleUserStatus = async () => {
               </VAvatar>
               <div>
                 <h5 class="text-h5">
-                  {{ props.userData.propertiesCount }}
+                  {{ propertiesCount }}
                 </h5>
-                <span class="text-sm">Properties</span>
+                <span class="text-sm">{{ propertyLabel }}</span>
               </div>
             </div>
           </div>
@@ -280,7 +344,7 @@ const toggleUserStatus = async () => {
                   />
                   {{ $t('userView.bioPanel.status') }}:
                   <VChip
-                    :color="props.userData.enabled ? 'success' : 'error'"
+                    :color="props.userData.status === 'active' ? 'success' : 'error'"
                     size="small"
                     class="ms-2 text-capitalize"
                   >
@@ -533,19 +597,19 @@ const toggleUserStatus = async () => {
 
         <div class="d-flex gap-4 justify-center">
           <VBtn
-            color="error"
-            variant="elevated"
-            @click="deleteUser(); isDeleteDialogVisible = false"
-          >
-            Delete User
-          </VBtn>
-
-          <VBtn
             color="secondary"
             variant="tonal"
             @click="isDeleteDialogVisible = false"
           >
             Cancel
+          </VBtn>
+
+          <VBtn
+            color="error"
+            variant="elevated"
+            @click="deleteUser(); isDeleteDialogVisible = false"
+          >
+            Delete User
           </VBtn>
         </div>
       </VCardText>
@@ -591,19 +655,19 @@ const toggleUserStatus = async () => {
 
         <div class="d-flex gap-4 justify-center">
           <VBtn
-            :color="props.userData.enabled ? 'warning' : 'success'"
-            variant="elevated"
-            @click="toggleUserStatus(); isToggleStatusDialogVisible = false"
-          >
-            {{ props.userData.enabled ? 'Disable' : 'Enable' }} User
-          </VBtn>
-
-          <VBtn
             color="secondary"
             variant="tonal"
             @click="isToggleStatusDialogVisible = false"
           >
             Cancel
+          </VBtn>
+
+          <VBtn
+            :color="props.userData.enabled ? 'warning' : 'success'"
+            variant="elevated"
+            @click="toggleUserStatus(); isToggleStatusDialogVisible = false"
+          >
+            {{ props.userData.enabled ? 'Disable' : 'Enable' }} User
           </VBtn>
         </div>
       </VCardText>

@@ -44,6 +44,7 @@ const fetchUserData = async () => {
         display_name,
         email,
         enabled,
+        status,
         def_community_id,
         def_property_id,
         profile_role!profile_role_profile_id_fkey(
@@ -90,7 +91,7 @@ const fetchUserData = async () => {
       contact: 'N/A',
       email: data.email || 'No Email',
       currentPlan: data.profile_role?.[0]?.role?.role_name || 'No Role',
-      status: data.enabled ? 'active' : 'inactive',
+      status: data.status || (data.enabled ? 'active' : 'inactive'),
       enabled: data.enabled || false,
       avatar: null,
       communitiesCount: communityCount || 0,

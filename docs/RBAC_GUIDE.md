@@ -174,6 +174,24 @@ Located in `src/composables/useAuth.ts`:
 └─────────────────────────────────────────────────────────────────────┘
 ```
 
+### Role-Scope Matrix
+
+| Role | Scope Type | Scope Description | Available Scopes in UI |
+|------|------------|-------------------|------------------------|
+| **Super Admin** | `global` | Unrestricted access to all data | Global Access only |
+| **Mega Dealer** | `dealer` | Manages multiple dealers and their communities | Dealer Scope only |
+| **Dealer** | `dealer` | Manages their administrators and communities | Dealer Scope only |
+| **Administrator** | `community` | Limited to specific communities | Community Scope only |
+| **Guard** | `community` | Limited to assigned communities | Community Scope only |
+| **Client** | `community` | Limited to assigned communities | Community Scope only |
+| **Resident** | `property` | Limited to their own properties | Property Scope only |
+
+**Important Notes:**
+- **Dealer Scope** is shared by both Mega Dealer and Dealer roles - the difference is in their permissions, not scope type
+- When assigning roles, the UI should auto-select the appropriate scope based on the role selected
+- Global Scope should only be available for Super Admin
+- Property Scope should only be available for Resident
+
 ### Role Definitions
 
 #### 1. Super Admin

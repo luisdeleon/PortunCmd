@@ -217,21 +217,21 @@ const dialogModelValueUpdate = (val: boolean) => {
               />
             </VCol>
 
-            <!-- 👉 Submit and Cancel -->
+            <!-- 👉 Cancel and Submit -->
             <VCol
               cols="12"
               class="d-flex flex-wrap justify-center gap-4"
             >
-              <VBtn type="submit">
-                Submit
-              </VBtn>
-
               <VBtn
                 color="secondary"
                 variant="tonal"
                 @click="onFormReset"
               >
                 Cancel
+              </VBtn>
+
+              <VBtn type="submit">
+                Submit
               </VBtn>
             </VCol>
           </VRow>

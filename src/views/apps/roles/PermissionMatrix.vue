@@ -194,7 +194,7 @@ const groupedPermissions = computed(() => {
 })
 
 // Role ordering
-const roleOrder = ['Super Admin', 'Mega Dealer', 'Dealer', 'Administrator', 'Guard', 'Resident']
+const roleOrder = ['Super Admin', 'Mega Dealer', 'Dealer', 'Administrator', 'Guard', 'Client', 'Resident']
 const sortedRoles = computed(() => {
   return [...roles.value].sort((a, b) => {
     const indexA = roleOrder.indexOf(a.role_name)
@@ -207,6 +207,20 @@ const sortedRoles = computed(() => {
     return indexA - indexB
   })
 })
+
+// Role-Scope Matrix data
+const roleScopeMatrix = [
+  { role: 'Super Admin', scope: 'Global', scopeType: 'global', description: 'Unrestricted access to all data', icon: 'tabler-crown', color: 'error' },
+  { role: 'Mega Dealer', scope: 'Dealer', scopeType: 'dealer', description: 'Manages multiple dealers and their communities', icon: 'tabler-building-store', color: 'purple' },
+  { role: 'Dealer', scope: 'Dealer', scopeType: 'dealer', description: 'Manages their administrators and communities', icon: 'tabler-briefcase', color: 'warning' },
+  { role: 'Administrator', scope: 'Community', scopeType: 'community', description: 'Limited to specific communities', icon: 'tabler-shield-check', color: 'primary' },
+  { role: 'Guard', scope: 'Community', scopeType: 'community', description: 'Limited to assigned communities', icon: 'tabler-shield-lock', color: 'info' },
+  { role: 'Client', scope: 'Community', scopeType: 'community', description: 'Limited to assigned communities', icon: 'tabler-user-circle', color: 'secondary' },
+  { role: 'Resident', scope: 'Property', scopeType: 'property', description: 'Limited to their own properties', icon: 'tabler-home', color: 'success' },
+]
+
+// Show/hide scope matrix
+const showScopeMatrix = ref(true)
 
 // Stats
 const totalPermissions = computed(() => permissions.value.length)
@@ -257,15 +271,116 @@ onMounted(() => {
 const resolveRoleColor = (roleName: string) => {
   const lowerRole = roleName.toLowerCase()
   if (lowerRole.includes('super admin')) return 'error'
+  if (lowerRole.includes('mega dealer')) return 'purple'
   if (lowerRole.includes('dealer')) return 'warning'
   if (lowerRole.includes('administrator')) return 'primary'
   if (lowerRole.includes('guard')) return 'info'
+  if (lowerRole.includes('client')) return 'secondary'
   if (lowerRole.includes('resident')) return 'success'
   return 'secondary'
 }
 </script>
 
 <template>
+  <!-- Role-Scope Matrix Card -->
+  <VCard class="mb-6">
+    <VCardItem>
+      <template #prepend>
+        <VIcon
+          icon="tabler-hierarchy-2"
+          size="24"
+          color="primary"
+        />
+      </template>
+      <VCardTitle>Role-Scope Matrix</VCardTitle>
+      <VCardSubtitle>Each role is assigned a specific scope type that defines where they can exercise their permissions</VCardSubtitle>
+      <template #append>
+        <VBtn
+          variant="text"
+          :icon="showScopeMatrix ? 'tabler-chevron-up' : 'tabler-chevron-down'"
+          size="small"
+          @click="showScopeMatrix = !showScopeMatrix"
+        />
+      </template>
+    </VCardItem>
+
+    <VExpandTransition>
+      <div v-show="showScopeMatrix">
+        <VDivider />
+        <VCardText>
+          <VTable
+            class="text-no-wrap"
+            density="comfortable"
+          >
+            <thead>
+              <tr>
+                <th class="text-left">
+                  Role
+                </th>
+                <th class="text-left">
+                  Scope Type
+                </th>
+                <th class="text-left">
+                  Description
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr
+                v-for="item in roleScopeMatrix"
+                :key="item.role"
+              >
+                <td>
+                  <div class="d-flex align-center gap-2">
+                    <VAvatar
+                      :color="item.color"
+                      variant="tonal"
+                      size="32"
+                    >
+                      <VIcon
+                        :icon="item.icon"
+                        size="18"
+                      />
+                    </VAvatar>
+                    <span class="font-weight-medium">{{ item.role }}</span>
+                  </div>
+                </td>
+                <td>
+                  <VChip
+                    :color="item.scopeType === 'global' ? 'error' : item.scopeType === 'dealer' ? 'warning' : item.scopeType === 'community' ? 'primary' : 'success'"
+                    size="small"
+                    label
+                  >
+                    {{ item.scope }}
+                  </VChip>
+                </td>
+                <td class="text-medium-emphasis">
+                  {{ item.description }}
+                </td>
+              </tr>
+            </tbody>
+          </VTable>
+
+          <VAlert
+            color="info"
+            variant="tonal"
+            class="mt-4"
+          >
+            <template #prepend>
+              <VIcon icon="tabler-info-circle" />
+            </template>
+            <div class="text-body-2">
+              <strong>Note:</strong> Dealer Scope is shared by both Mega Dealer and Dealer roles.
+              Community Scope is shared by Administrator, Guard, and Client roles.
+              The difference between roles with the same scope type is in their <strong>permissions</strong>, not their scope.
+            </div>
+          </VAlert>
+        </VCardText>
+      </div>
+    </VExpandTransition>
+  </VCard>
+
+  <!-- Permission Matrix Card -->
   <VCard>
     <VCardItem>
       <VCardTitle>Permission Matrix</VCardTitle>

@@ -21,6 +21,11 @@ const canManage = computed(() => {
   return role && !['Guard', 'Resident'].includes(role)
 })
 
+// Check if user is Super Admin (only Super Admin can add communities)
+const isSuperAdmin = computed(() => {
+  return userData.value?.role === 'Super Admin'
+})
+
 // 👉 i18n
 const { t } = useI18n()
 
@@ -800,9 +805,9 @@ const widgetData = computed(() => {
             Import
           </VBtn>
 
-          <!-- 👉 Add community button -->
+          <!-- 👉 Add community button (Super Admin only) -->
           <VBtn
-            v-if="canManage"
+            v-if="isSuperAdmin"
             prepend-icon="tabler-plus"
             @click="openAddCommunityDialog"
           >

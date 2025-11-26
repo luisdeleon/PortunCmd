@@ -164,6 +164,74 @@ Configured in `src/plugins/i18n/`:
 
 When adding new features or components, study similar existing pages and components to ensure visual and interaction consistency with the rest of the application.
 
+### Modal/Dialog Design Standard
+
+**CRITICAL: All confirmation and action dialogs MUST follow this consistent design pattern:**
+
+```vue
+<VDialog v-model="isDialogVisible" max-width="500">
+  <VCard>
+    <VCardText class="text-center px-10 py-6">
+      <!-- 1. Icon at top (large, centered) -->
+      <VIcon
+        icon="tabler-icon-name"
+        color="warning|error|primary|success"
+        size="56"
+        class="my-4"
+      />
+
+      <!-- 2. Title -->
+      <h6 class="text-h6 mb-4">
+        Dialog Title
+      </h6>
+
+      <!-- 3. Description/Message -->
+      <p class="text-body-1 mb-6">
+        Are you sure you want to [action] <strong>{{ itemName }}</strong>?
+        This action cannot be undone.
+      </p>
+
+      <!-- 4. Buttons: Cancel (left) → Confirm (right) -->
+      <div class="d-flex gap-4 justify-center">
+        <VBtn
+          color="secondary"
+          variant="tonal"
+          @click="cancelAction"
+        >
+          Cancel
+        </VBtn>
+
+        <VBtn
+          color="warning|error|primary"
+          variant="elevated"
+          @click="confirmAction"
+        >
+          Confirm/Delete/Remove
+        </VBtn>
+      </div>
+    </VCardText>
+  </VCard>
+</VDialog>
+```
+
+**Modal Design Rules:**
+1. **Icon** - Always include a large (56px) icon at the top, centered, with appropriate color
+2. **Title** - Clear, concise action title (e.g., "Delete Community", "Remove User")
+3. **Message** - Descriptive text explaining the action and consequences
+4. **Button Order** - Cancel button on LEFT, Confirm/Action button on RIGHT
+5. **Button Colors**:
+   - Cancel: `color="secondary" variant="tonal"`
+   - Delete/Remove: `color="error" variant="elevated"` or `color="warning" variant="elevated"`
+   - Confirm/Assign: `color="primary" variant="elevated"`
+6. **Max Width** - Use `max-width="500"` for standard dialogs
+7. **Padding** - Use `class="text-center px-10 py-6"` on VCardText
+
+**Icon Color Guidelines:**
+- `error` (red) - Destructive actions (Delete permanently)
+- `warning` (orange) - Caution actions (Remove, Disable)
+- `primary` (blue) - Neutral/positive actions (Assign, Confirm)
+- `success` (green) - Positive confirmations (Enable, Activate)
+
 ## Common Patterns
 
 ### Creating a New Page

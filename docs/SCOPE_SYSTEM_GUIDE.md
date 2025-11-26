@@ -135,9 +135,9 @@ INSERT INTO profile_role (
 
 #### 2. Dealer Scope (`dealer`)
 
-**Who uses it**: Dealer role
+**Who uses it**: Mega Dealer and Dealer roles
 
-**Access Level**: Multiple communities they manage + their administrators
+**Access Level**: Multiple communities they manage + their administrators (and subordinate dealers for Mega Dealer)
 
 **Database Fields**:
 ```sql
@@ -211,7 +211,7 @@ INSERT INTO dealer_administrators (
 
 #### 3. Community Scope (`community`)
 
-**Who uses it**: Administrator, Guard roles
+**Who uses it**: Administrator, Guard, and Client roles
 
 **Access Level**: Specific communities only
 
@@ -1473,8 +1473,8 @@ WHERE expires_at IS NOT NULL AND expires_at < NOW();
 | Scope | Role | Access | Database Field | Relationship Table |
 |-------|------|--------|----------------|-------------------|
 | **Global** | Super Admin | Everything | `scope_type = 'global'` | None |
-| **Dealer** | Dealer | Their communities | `scope_dealer_id = self` | `dealer_administrators` |
-| **Community** | Admin, Guard | Specific communities | `scope_community_ids = [...]` | `community_manager` |
+| **Dealer** | Mega Dealer, Dealer | Their communities | `scope_dealer_id = self` | `dealer_administrators` |
+| **Community** | Administrator, Guard, Client | Specific communities | `scope_community_ids = [...]` | `community_manager` |
 | **Property** | Resident | Specific properties | `scope_property_ids = [...]` | `property_owner` |
 
 ### Scope Assignment Checklist

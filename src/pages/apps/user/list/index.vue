@@ -184,9 +184,14 @@ const fetchUsers = async () => {
       // Get unique community names for display
       const communityNames = [...new Set(communities.map(c => c.name || c.id))]
 
-      // Get properties from property_owner
-      const properties = profile.property_owner?.map((po: any) => po.property_id).filter(Boolean) || []
-      const propertyDisplay = properties.length > 0 ? properties.join(', ') : (profile.def_property_id || 'N/A')
+      // Get properties from property_owner with name
+      const propertyList = profile.property_owner?.map((po: any) => ({
+        id: po.property_id,
+        name: po.property?.name || po.property_id,
+      })).filter((p: any) => p.id) || []
+      const propertyDisplay = propertyList.length > 0
+        ? propertyList.map((p: any) => p.name || p.id).join(', ')
+        : (profile.def_property_id || 'N/A')
 
       return {
         id: profile.id,
@@ -196,6 +201,7 @@ const fetchUsers = async () => {
         community: communityNames.length > 0 ? communityNames.join(', ') : (profile.def_community_id || 'N/A'),
         communityList: communities,
         property: propertyDisplay,
+        propertyList: propertyList,
         avatar: null,
         role: profile.profile_role?.[0]?.role?.role_name || 'No Role',
         scopeType: profile.profile_role?.[0]?.scope_type || 'global',
@@ -1104,6 +1110,7 @@ const widgetData = computed(() => {
                 size="small"
                 color="primary"
                 variant="tonal"
+                label
               >
                 {{ comm.name || comm.id }}
               </VChip>
@@ -1112,6 +1119,7 @@ const widgetData = computed(() => {
                 size="small"
                 color="secondary"
                 variant="tonal"
+                label
               >
                 +{{ item.communityList.length - 3 }}
               </VChip>
@@ -1136,8 +1144,29 @@ const widgetData = computed(() => {
 
         <!-- 👉 Property -->
         <template #item.property="{ item }">
-          <div class="text-body-1 text-high-emphasis">
-            {{ item.property }}
+          <div class="d-flex flex-wrap gap-1">
+            <template v-if="item.propertyList && item.propertyList.length > 0">
+              <VChip
+                v-for="prop in item.propertyList.slice(0, 3)"
+                :key="prop.id"
+                size="small"
+                color="success"
+                variant="tonal"
+                label
+              >
+                {{ prop.name || prop.id }}
+              </VChip>
+              <VChip
+                v-if="item.propertyList.length > 3"
+                size="small"
+                color="secondary"
+                variant="tonal"
+                label
+              >
+                +{{ item.propertyList.length - 3 }}
+              </VChip>
+            </template>
+            <span v-else class="text-body-2 text-disabled">N/A</span>
           </div>
         </template>
 

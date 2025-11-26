@@ -13,6 +13,31 @@ definePage({
 const router = useRouter()
 const { getCountries } = useCountriesStates()
 
+// 👉 Current user data for permission checks
+const currentUserData = useCookie<any>('userData')
+
+// Check if user can create users (not Guard or Resident)
+const canCreateUsers = computed(() => {
+  const role = currentUserData.value?.role
+  return role && ['Super Admin', 'Mega Dealer', 'Dealer', 'Administrator'].includes(role)
+})
+
+// Role hierarchy - defines which roles each role can assign
+const roleHierarchy: Record<string, string[]> = {
+  'Super Admin': ['Super Admin', 'Mega Dealer', 'Dealer', 'Administrator', 'Guard', 'Resident'],
+  'Mega Dealer': ['Dealer', 'Administrator', 'Guard', 'Resident'],
+  'Dealer': ['Administrator', 'Guard', 'Resident'],
+  'Administrator': ['Administrator', 'Guard', 'Resident'],
+  'Guard': [],
+  'Resident': [],
+}
+
+// Get allowed roles for current user
+const allowedRoleNames = computed(() => {
+  const currentRole = currentUserData.value?.role
+  return roleHierarchy[currentRole] || []
+})
+
 const refUserForm = ref<VForm>()
 const isSaving = ref(false)
 const snackbar = ref({ show: false, message: '', color: 'success' })
@@ -103,7 +128,7 @@ const fetchProperties = async () => {
   }
 }
 
-// Fetch roles
+// Fetch roles (filtered by role hierarchy)
 const fetchRoles = async () => {
   try {
     isLoadingRoles.value = true
@@ -119,10 +144,15 @@ const fetchRoles = async () => {
       return
     }
 
-    roles.value = data?.map(role => ({
+    // Filter roles based on current user's allowed roles
+    const filteredRoles = (data || []).filter(role =>
+      allowedRoleNames.value.includes(role.role_name)
+    )
+
+    roles.value = filteredRoles.map(role => ({
       title: role.role_name,
       value: role.id,
-    })) || []
+    }))
   } catch (err) {
     console.error('Error in fetchRoles:', err)
   } finally {
@@ -132,6 +162,19 @@ const fetchRoles = async () => {
 
 // Load data on mount
 onMounted(() => {
+  // Redirect if user doesn't have permission to create users
+  if (!canCreateUsers.value) {
+    snackbar.value = {
+      show: true,
+      message: 'You do not have permission to create users',
+      color: 'error',
+    }
+    setTimeout(() => {
+      router.push({ name: 'apps-user-list' })
+    }, 1500)
+    return
+  }
+
   fetchCommunities()
   fetchProperties()
   fetchRoles()

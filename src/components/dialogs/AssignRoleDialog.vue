@@ -45,6 +45,31 @@ const props = withDefaults(defineProps<Props>(), {
 
 const emit = defineEmits<Emit>()
 
+// 👉 Current user data for permission checks
+const currentUserData = useCookie<any>('userData')
+
+// Check if user can assign roles (not Guard or Resident)
+const canAssignRoles = computed(() => {
+  const role = currentUserData.value?.role
+  return role && ['Super Admin', 'Mega Dealer', 'Dealer', 'Administrator'].includes(role)
+})
+
+// Role hierarchy - defines which roles each role can assign
+const roleHierarchy: Record<string, string[]> = {
+  'Super Admin': ['Super Admin', 'Mega Dealer', 'Dealer', 'Administrator', 'Guard', 'Resident'],
+  'Mega Dealer': ['Dealer', 'Administrator', 'Guard', 'Resident'],
+  'Dealer': ['Administrator', 'Guard', 'Resident'],
+  'Administrator': ['Administrator', 'Guard', 'Resident'],
+  'Guard': [],
+  'Resident': [],
+}
+
+// Get allowed roles for current user
+const allowedRoleNames = computed(() => {
+  const currentRole = currentUserData.value?.role
+  return roleHierarchy[currentRole] || []
+})
+
 // Form data
 const selectedUser = ref<string | null>(null)
 const selectedRole = ref<string | null>(null)
@@ -94,7 +119,7 @@ const fetchUsers = async () => {
   }
 }
 
-// Fetch roles
+// Fetch roles (filtered by role hierarchy)
 const fetchRoles = async () => {
   try {
     const { data, error } = await supabase
@@ -105,7 +130,10 @@ const fetchRoles = async () => {
 
     if (error) throw error
 
-    roles.value = data || []
+    // Filter roles based on current user's allowed roles
+    roles.value = (data || []).filter(role =>
+      allowedRoleNames.value.includes(role.role_name)
+    )
   } catch (err) {
     console.error('Error fetching roles:', err)
   }
@@ -198,6 +226,13 @@ watch(scopeType, (newType) => {
 // Load data when dialog opens
 watch(() => props.isDialogVisible, async (newVal) => {
   if (newVal) {
+    // Check if user has permission to assign roles
+    if (!canAssignRoles.value) {
+      alert('You do not have permission to assign roles')
+      emit('update:isDialogVisible', false)
+      return
+    }
+
     isLoading.value = true
     await Promise.all([
       fetchUsers(),
@@ -328,6 +363,20 @@ const propertyOptions = computed(() =>
   }))
 )
 
+// Get selected user's name (for display when userId is provided)
+const selectedUserName = computed(() => {
+  if (!selectedUser.value) return ''
+  const user = users.value.find(u => u.id === selectedUser.value)
+  return user ? user.display_name : selectedUser.value
+})
+
+// Get selected user's display name with email
+const selectedUserDisplayName = computed(() => {
+  if (!selectedUser.value) return ''
+  const user = users.value.find(u => u.id === selectedUser.value)
+  return user ? user.display_name : ''
+})
+
 // Validation rules
 const requiredRule = (v: any) => !!v || 'This field is required'
 </script>
@@ -373,20 +422,56 @@ const requiredRule = (v: any) => !!v || 'This field is required'
           @submit.prevent="onSubmit"
         >
           <VRow>
-            <!-- User Selection -->
-            <VCol cols="12">
+            <!-- User Selection (hidden if userId is provided) -->
+            <VCol
+              v-if="!userId"
+              cols="12"
+            >
               <AppSelect
                 v-model="selectedUser"
                 label="Select User"
                 placeholder="Choose a user"
                 :items="userOptions"
                 :rules="[requiredRule]"
-                :disabled="!!userId"
               >
                 <template #prepend-inner>
                   <VIcon icon="tabler-user" />
                 </template>
               </AppSelect>
+            </VCol>
+
+            <!-- Selected User Display (shown if userId is provided) -->
+            <VCol
+              v-if="userId"
+              cols="12"
+            >
+              <div class="text-body-2 text-disabled mb-1">
+                Selected User
+              </div>
+              <div class="d-flex align-center gap-2 pa-3 rounded bg-light">
+                <VIcon
+                  icon="tabler-user"
+                  color="primary"
+                />
+                <span class="text-body-1 font-weight-medium">{{ selectedUserName }}</span>
+              </div>
+            </VCol>
+
+            <!-- User Name Display -->
+            <VCol
+              v-if="selectedUser"
+              cols="12"
+            >
+              <AppTextField
+                :model-value="selectedUserDisplayName"
+                label="Name"
+                readonly
+                disabled
+              >
+                <template #prepend-inner>
+                  <VIcon icon="tabler-id" />
+                </template>
+              </AppTextField>
             </VCol>
 
             <!-- Role Selection -->
@@ -406,31 +491,73 @@ const requiredRule = (v: any) => !!v || 'This field is required'
 
             <!-- Scope Type Selection -->
             <VCol cols="12">
-              <div class="text-body-2 text-disabled mb-2">
+              <div class="text-body-2 text-disabled mb-3">
                 Access Scope
               </div>
-              <VRadioGroup
-                v-model="scopeType"
-                inline
-              >
-                <VRadio
-                  v-for="option in scopeTypeOptions"
-                  :key="option.value"
-                  :label="option.title"
-                  :value="option.value"
+              <VRow>
+                <VCol
+                  cols="12"
+                  sm="6"
                 >
-                  <template #label>
-                    <div>
-                      <div class="text-body-2">
-                        {{ option.title }}
-                      </div>
-                      <div class="text-caption text-disabled">
-                        {{ option.description }}
-                      </div>
-                    </div>
-                  </template>
-                </VRadio>
-              </VRadioGroup>
+                  <VRadioGroup v-model="scopeType">
+                    <VRadio value="global">
+                      <template #label>
+                        <div>
+                          <div class="text-body-2 font-weight-medium">
+                            Global Access
+                          </div>
+                          <div class="text-caption text-disabled">
+                            Access to all communities and properties
+                          </div>
+                        </div>
+                      </template>
+                    </VRadio>
+                    <VRadio value="dealer">
+                      <template #label>
+                        <div>
+                          <div class="text-body-2 font-weight-medium">
+                            Dealer Scope
+                          </div>
+                          <div class="text-caption text-disabled">
+                            Limited to dealer's communities
+                          </div>
+                        </div>
+                      </template>
+                    </VRadio>
+                  </VRadioGroup>
+                </VCol>
+                <VCol
+                  cols="12"
+                  sm="6"
+                >
+                  <VRadioGroup v-model="scopeType">
+                    <VRadio value="community">
+                      <template #label>
+                        <div>
+                          <div class="text-body-2 font-weight-medium">
+                            Community Scope
+                          </div>
+                          <div class="text-caption text-disabled">
+                            Limited to specific communities
+                          </div>
+                        </div>
+                      </template>
+                    </VRadio>
+                    <VRadio value="property">
+                      <template #label>
+                        <div>
+                          <div class="text-body-2 font-weight-medium">
+                            Property Scope
+                          </div>
+                          <div class="text-caption text-disabled">
+                            Limited to specific properties
+                          </div>
+                        </div>
+                      </template>
+                    </VRadio>
+                  </VRadioGroup>
+                </VCol>
+              </VRow>
             </VCol>
 
             <!-- Dealer Scope Field -->
