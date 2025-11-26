@@ -82,7 +82,8 @@ Comprehensive guides are available in the [`/docs`](./docs/) folder:
 - 🚀 [Getting Started](./docs/GETTING_STARTED.md) - Development environment setup
 - 🔒 [Authentication](./docs/AUTHENTICATION.md) - User management and auth configuration
 - 👥 [User Management](./docs/USER_MANAGEMENT.md) - User CRUD, bulk operations, and deletion workflows
-- 🧭 [Navigation Menu Guide](./docs/NAVIGATION_MENU_GUIDE.md) - **NEW!** Complete navigation structure and implementation roadmap
+- 📋 [Onboarding Tutorial](./docs/ONBOARDING_TUTORIAL.md) - **NEW!** Step-by-step guide for onboarding communities, properties, and users
+- 🧭 [Navigation Menu Guide](./docs/NAVIGATION_MENU_GUIDE.md) - Complete navigation structure and implementation roadmap
 - 🌐 [Cloudflare Setup](./docs/CLOUDFLARE_SETUP.md) - Production deployment guide
 
 ### Technical Reference
@@ -308,7 +309,14 @@ All project documentation is available in the [`/docs`](./docs/) directory:
 - **[Setup Guide](./docs/SETUP_GUIDE.md)** - Complete setup instructions for new developers
 - **[Getting Started](./docs/GETTING_STARTED.md)** - Development environment setup and workflow
 - **[Authentication](./docs/AUTHENTICATION.md)** - User management, auth configuration, and demo accounts
-- **[User Management](./docs/USER_MANAGEMENT.md)** - **NEW!** Comprehensive user management guide
+- **[Onboarding Tutorial](./docs/ONBOARDING_TUTORIAL.md)** - **NEW!** Step-by-step guide for onboarding
+  - The correct creation order: Community → Properties → Users → Roles → Relationships
+  - SQL examples for each step with explanations
+  - Role hierarchy and scope assignments
+  - Quick checklists for communities, properties, admins, guards, and residents
+  - Common scenarios: new community setup, adding residents, property transfers
+  - Troubleshooting guide for common issues
+- **[User Management](./docs/USER_MANAGEMENT.md)** - Comprehensive user management guide
   - User view page with statistics and icons
   - Single and bulk delete operations
   - Bulk import from CSV files
