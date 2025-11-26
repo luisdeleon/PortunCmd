@@ -873,7 +873,8 @@ const widgetData = computed(() => {
           <StatusBadge
             :status="item.status"
             entity-type="community"
-            @click="openStatusChangeDialog(item)"
+            :style="canManage ? 'cursor: pointer' : ''"
+            @click="canManage && openStatusChangeDialog(item)"
           />
         </template>
 
