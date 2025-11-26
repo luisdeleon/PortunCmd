@@ -1,14 +1,101 @@
 export default [
-  { heading: 'Apps & Pages' },
-  // Hidden for now - Uncomment to restore
+  { heading: 'Management' },
+
+  // Communities
+  {
+    title: 'Communities',
+    icon: { icon: 'tabler-building-community' },
+    children: [
+      { title: 'List', to: 'apps-community-list' },
+      // TODO: Add these pages
+      // { title: 'Add', to: 'apps-community-add' },
+    ],
+  },
+
+  // Properties
+  {
+    title: 'Properties',
+    icon: { icon: 'tabler-home' },
+    children: [
+      { title: 'List', to: 'apps-property-list' },
+      // TODO: Add these pages
+      // { title: 'Add', to: 'apps-property-add' },
+    ],
+  },
+
+  // Users
+  {
+    title: 'Users',
+    icon: { icon: 'tabler-users' },
+    children: [
+      { title: 'List', to: 'apps-user-list' },
+      { title: 'Add', to: 'apps-user-add' },
+    ],
+  },
+
+  { heading: 'Visitor Access' },
+
+  // Visitor Management - Core Feature
+  {
+    title: 'Visitors',
+    icon: { icon: 'tabler-ticket' },
+    children: [
+      // TODO: Create these pages
+      { title: 'Active Passes', to: 'apps-visitor-list', badgeContent: 'Soon', badgeClass: 'bg-light-primary text-primary' },
+      { title: 'Create Pass', to: 'apps-visitor-add', badgeContent: 'Soon', badgeClass: 'bg-light-primary text-primary' },
+      // { title: 'Scanner', to: 'apps-visitor-scanner' }, // For guards
+    ],
+  },
+
+  // Access Logs
+  {
+    title: 'Access Logs',
+    icon: { icon: 'tabler-list-check' },
+    // TODO: Create this page
+    to: 'apps-logs',
+    badgeContent: 'Soon',
+    badgeClass: 'bg-light-primary text-primary',
+  },
+
+  { heading: 'Automation' },
+
+  // Devices / IoT
+  {
+    title: 'Devices',
+    icon: { icon: 'tabler-device-desktop' },
+    children: [
+      // TODO: Create these pages
+      { title: 'List', to: 'apps-devices-list', badgeContent: 'Soon', badgeClass: 'bg-light-primary text-primary' },
+      // { title: 'Add', to: 'apps-devices-add' },
+      // { title: 'Gate Control', to: 'apps-devices-gate-control' },
+    ],
+  },
+
+  { heading: 'Access Control' },
+
+  // Roles & Permissions - Admin only
+  {
+    title: 'Roles',
+    icon: { icon: 'tabler-shield-check' },
+    to: 'apps-roles',
+    action: 'manage',
+    subject: 'all',
+  },
+  {
+    title: 'Permissions',
+    icon: { icon: 'tabler-lock' },
+    to: 'apps-permissions',
+    action: 'manage',
+    subject: 'all',
+  },
+
+  // Hidden template items - Uncomment if needed later
+  // { heading: 'Template Features' },
   // {
   //   title: 'Ecommerce',
   //   icon: { icon: 'tabler-shopping-cart' },
   //   children: [
-  //     {
-  //       title: 'Dashboard',
-  //       to: 'apps-ecommerce-dashboard',
-  //     },
+  //     { title: 'Dashboard', to: 'apps-ecommerce-dashboard' },
   //     {
   //       title: 'Product',
   //       children: [
@@ -31,18 +118,9 @@ export default [
   //         { title: 'Details', to: { name: 'apps-ecommerce-customer-details-id', params: { id: 478426 } } },
   //       ],
   //     },
-  //     {
-  //       title: 'Manage Review',
-  //       to: 'apps-ecommerce-manage-review',
-  //     },
-  //     {
-  //       title: 'Referrals',
-  //       to: 'apps-ecommerce-referrals',
-  //     },
-  //     {
-  //       title: 'Settings',
-  //       to: 'apps-ecommerce-settings',
-  //     },
+  //     { title: 'Manage Review', to: 'apps-ecommerce-manage-review' },
+  //     { title: 'Referrals', to: 'apps-ecommerce-referrals' },
+  //     { title: 'Settings', to: 'apps-ecommerce-settings' },
   //   ],
   // },
   // {
@@ -62,30 +140,13 @@ export default [
   //     { title: 'Fleet', to: 'apps-logistics-fleet' },
   //   ],
   // },
-  // {
-  //   title: 'Email',
-  //   icon: { icon: 'tabler-mail' },
-  //   to: 'apps-email',
-  // },
-  // {
-  //   title: 'Chat',
-  //   icon: { icon: 'tabler-message-circle-2' },
-  //   to: 'apps-chat',
-  // },
-  // {
-  //   title: 'Calendar',
-  //   icon: { icon: 'tabler-calendar' },
-  //   to: 'apps-calendar',
-  // },
-  // {
-  //   title: 'Kanban',
-  //   icon: { icon: 'tabler-layout-kanban' },
-  //   to: 'apps-kanban',
-  // },
+  // { title: 'Email', icon: { icon: 'tabler-mail' }, to: 'apps-email' },
+  // { title: 'Chat', icon: { icon: 'tabler-message-circle-2' }, to: 'apps-chat' },
+  // { title: 'Calendar', icon: { icon: 'tabler-calendar' }, to: 'apps-calendar' },
+  // { title: 'Kanban', icon: { icon: 'tabler-layout-kanban' }, to: 'apps-kanban' },
   // {
   //   title: 'Invoice',
   //   icon: { icon: 'tabler-file-invoice' },
-  //
   //   children: [
   //     { title: 'List', to: 'apps-invoice-list' },
   //     { title: 'Preview', to: { name: 'apps-invoice-preview-id', params: { id: '5036' } } },
@@ -93,38 +154,6 @@ export default [
   //     { title: 'Add', to: 'apps-invoice-add' },
   //   ],
   // },
-  {
-    title: 'Community',
-    icon: { icon: 'tabler-building-community' },
-    children: [
-      { title: 'List', to: 'apps-community-list' },
-    ],
-  },
-  {
-    title: 'Property',
-    icon: { icon: 'tabler-home' },
-    children: [
-      { title: 'List', to: 'apps-property-list' },
-    ],
-  },
-  {
-    title: 'User',
-    icon: { icon: 'tabler-user' },
-    children: [
-      { title: 'List', to: 'apps-user-list' },
-    ],
-  },
-  {
-    title: 'Roles',
-    icon: { icon: 'tabler-lock' },
-    action: 'manage',
-    subject: 'all',
-    children: [
-      { title: 'List', to: 'apps-roles', action: 'manage', subject: 'all' },
-    ],
-  },
-
-  // Hidden for now - Uncomment to restore
   // {
   //   title: 'Pages',
   //   icon: { icon: 'tabler-file' },
@@ -143,68 +172,5 @@ export default [
   //       ],
   //     },
   //   ],
-  // },
-  // {
-  //   title: 'Authentication',
-  //   icon: { icon: 'tabler-shield-lock' },
-  //   children: [
-  //     {
-  //       title: 'Login',
-  //       children: [
-  //         { title: 'Login v1', to: 'pages-authentication-login-v1', target: '_blank' },
-  //         { title: 'Login v2', to: 'pages-authentication-login-v2', target: '_blank' },
-  //       ],
-  //     },
-  //     {
-  //       title: 'Register',
-  //       children: [
-  //         { title: 'Register v1', to: 'pages-authentication-register-v1', target: '_blank' },
-  //         { title: 'Register v2', to: 'pages-authentication-register-v2', target: '_blank' },
-  //         { title: 'Register Multi-Steps', to: 'pages-authentication-register-multi-steps', target: '_blank' },
-  //       ],
-  //     },
-  //     {
-  //       title: 'Verify Email',
-  //       children: [
-  //         { title: 'Verify Email v1', to: 'pages-authentication-verify-email-v1', target: '_blank' },
-  //         { title: 'Verify Email v2', to: 'pages-authentication-verify-email-v2', target: '_blank' },
-  //       ],
-  //     },
-  //     {
-  //       title: 'Forgot Password',
-  //       children: [
-  //         { title: 'Forgot Password v1', to: 'pages-authentication-forgot-password-v1', target: '_blank' },
-  //         { title: 'Forgot Password v2', to: 'pages-authentication-forgot-password-v2', target: '_blank' },
-  //       ],
-  //     },
-  //     {
-  //       title: 'Reset Password',
-  //       children: [
-  //         { title: 'Reset Password v1', to: 'pages-authentication-reset-password-v1', target: '_blank' },
-  //         { title: 'Reset Password v2', to: 'pages-authentication-reset-password-v2', target: '_blank' },
-  //       ],
-  //     },
-  //     {
-  //       title: 'Two Steps',
-  //       children: [
-  //         { title: 'Two Steps v1', to: 'pages-authentication-two-steps-v1', target: '_blank' },
-  //         { title: 'Two Steps v2', to: 'pages-authentication-two-steps-v2', target: '_blank' },
-  //       ],
-  //     },
-  //   ],
-  // },
-  // {
-  //   title: 'Wizard Examples',
-  //   icon: { icon: 'tabler-dots' },
-  //   children: [
-  //     { title: 'Checkout', to: { name: 'wizard-examples-checkout' } },
-  //     { title: 'Property Listing', to: { name: 'wizard-examples-property-listing' } },
-  //     { title: 'Create Deal', to: { name: 'wizard-examples-create-deal' } },
-  //   ],
-  // },
-  // {
-  //   title: 'Dialog Examples',
-  //   icon: { icon: 'tabler-square' },
-  //   to: 'pages-dialog-examples',
   // },
 ]
