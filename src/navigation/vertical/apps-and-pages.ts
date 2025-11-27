@@ -62,8 +62,7 @@ export default [
     title: 'Devices',
     icon: { icon: 'tabler-device-desktop' },
     children: [
-      // TODO: Create these pages
-      { title: 'List', to: 'apps-devices-list', badgeContent: 'Soon', badgeClass: 'bg-light-primary text-primary' },
+      { title: 'List', to: 'apps-devices-list' },
       // { title: 'Add', to: 'apps-devices-add' },
       // { title: 'Gate Control', to: 'apps-devices-gate-control' },
     ],

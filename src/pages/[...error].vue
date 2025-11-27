@@ -13,6 +13,15 @@ definePage({
     public: true,
   },
 })
+
+// Redirect to dashboard after a short delay
+const router = useRouter()
+
+onMounted(() => {
+  setTimeout(() => {
+    router.replace('/dashboard')
+  }, 3000)
+})
 </script>
 
 <template>
@@ -24,10 +33,10 @@ definePage({
     />
 
     <VBtn
-      to="/"
+      to="/dashboard"
       class="mb-11"
     >
-      Back to Home
+      Back to Dashboard
     </VBtn>
 
     <!-- 👉 Image -->

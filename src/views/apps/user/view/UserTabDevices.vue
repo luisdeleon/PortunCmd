@@ -33,6 +33,21 @@ const deviceToView = ref<any>(null)
 // Add/Edit device dialog
 const isAddEditDeviceDialogVisible = ref(false)
 const isEditMode = ref(false)
+const isDuplicateMode = ref(false)
+const showAuthKey = ref(false)
+
+// Masked auth key display (first 4 and last 4 characters)
+const maskedAuthKey = computed(() => {
+  const key = deviceForm.value.auth_key
+  if (!key || key.length <= 8) return key
+  return `${key.substring(0, 4)}${'•'.repeat(Math.min(key.length - 8, 20))}${key.substring(key.length - 4)}`
+})
+
+// Check if auth key should be protected (edit or duplicate with existing key)
+const isAuthKeyProtected = computed(() => {
+  return isEditMode.value || (isDuplicateMode.value && !!deviceForm.value.auth_key)
+})
+
 const deviceForm = ref({
   id: '',
   device_name: '',
@@ -209,6 +224,8 @@ const openViewDeviceDialog = (device: any) => {
 // Open add device dialog
 const openAddDeviceDialog = async () => {
   isEditMode.value = false
+  isDuplicateMode.value = false
+  showAuthKey.value = false
   deviceForm.value = {
     id: '',
     device_name: '',
@@ -235,6 +252,8 @@ const openAddDeviceDialog = async () => {
 // Open edit device dialog
 const openEditDeviceDialog = async (device: any) => {
   isEditMode.value = true
+  isDuplicateMode.value = false
+  showAuthKey.value = false
   deviceForm.value = {
     id: device.id,
     device_name: device.device_name || '',
@@ -261,6 +280,8 @@ const openEditDeviceDialog = async (device: any) => {
 // Open duplicate device dialog (pre-populate with existing device data but as new)
 const openDuplicateDeviceDialog = async (device: any) => {
   isEditMode.value = false
+  isDuplicateMode.value = true
+  showAuthKey.value = false
   deviceForm.value = {
     id: '', // Empty ID for new device
     device_name: `${device.device_name || ''} (Copy)`,
@@ -807,12 +828,45 @@ onMounted(() => {
               cols="12"
               md="6"
             >
+              <!-- Edit/Duplicate mode with existing key: show masked display with reveal option -->
               <AppTextField
+                v-if="isAuthKeyProtected"
+                :model-value="showAuthKey ? maskedAuthKey : '••••••••••••••••'"
+                label="Auth Key"
+                readonly
+                hint="Auth key is protected. Click eye to reveal partial key."
+                persistent-hint
+              >
+                <template #prepend-inner>
+                  <VIcon icon="tabler-key" />
+                </template>
+                <template #append-inner>
+                  <VIcon
+                    :icon="showAuthKey ? 'tabler-eye-off' : 'tabler-eye'"
+                    style="cursor: pointer"
+                    @click="showAuthKey = !showAuthKey"
+                  />
+                </template>
+              </AppTextField>
+              <!-- Create mode: allow full editing -->
+              <AppTextField
+                v-else
                 v-model="deviceForm.auth_key"
                 label="Auth Key"
                 placeholder="Enter auth key"
-                type="password"
-              />
+                :type="showAuthKey ? 'text' : 'password'"
+              >
+                <template #prepend-inner>
+                  <VIcon icon="tabler-key" />
+                </template>
+                <template #append-inner>
+                  <VIcon
+                    :icon="showAuthKey ? 'tabler-eye-off' : 'tabler-eye'"
+                    style="cursor: pointer"
+                    @click="showAuthKey = !showAuthKey"
+                  />
+                </template>
+              </AppTextField>
             </VCol>
 
             <VCol

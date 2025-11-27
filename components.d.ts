@@ -10,6 +10,7 @@ declare module 'vue' {
     AddAuthenticatorAppDialog: typeof import('./src/components/dialogs/AddAuthenticatorAppDialog.vue')['default']
     AddEditAddressDialog: typeof import('./src/components/dialogs/AddEditAddressDialog.vue')['default']
     AddEditCommunityDialog: typeof import('./src/components/dialogs/AddEditCommunityDialog.vue')['default']
+    AddEditDeviceDialog: typeof import('./src/components/dialogs/AddEditDeviceDialog.vue')['default']
     AddEditPermissionDialog: typeof import('./src/components/dialogs/AddEditPermissionDialog.vue')['default']
     AddEditPropertyDialog: typeof import('./src/components/dialogs/AddEditPropertyDialog.vue')['default']
     AddEditRoleDialog: typeof import('./src/components/dialogs/AddEditRoleDialog.vue')['default']
@@ -398,6 +399,7 @@ declare module 'vue' {
     UserInfoEditDialog: typeof import('./src/components/dialogs/UserInfoEditDialog.vue')['default']
     UserUpgradePlanDialog: typeof import('./src/components/dialogs/UserUpgradePlanDialog.vue')['default']
     ViewCommunityDialog: typeof import('./src/components/dialogs/ViewCommunityDialog.vue')['default']
+    ViewDeviceDialog: typeof import('./src/components/dialogs/ViewDeviceDialog.vue')['default']
     ViewPropertyDialog: typeof import('./src/components/dialogs/ViewPropertyDialog.vue')['default']
     VueApexCharts: typeof import('vue3-apexcharts')['default']
   }
