@@ -4,6 +4,7 @@ import { supabase } from '@/lib/supabase'
 const totalCommunities = ref(0)
 const growthPercentage = ref(0)
 const weeklyData = ref<number[]>([0, 0, 0, 0, 0, 0, 0])
+const isLoading = ref(true)
 
 // Fetch communities data
 const fetchCommunitiesData = async () => {
@@ -67,6 +68,8 @@ const fetchCommunitiesData = async () => {
     }
   } catch (error) {
     console.error('Error fetching communities data:', error)
+  } finally {
+    isLoading.value = false
   }
 }
 
@@ -74,10 +77,17 @@ onMounted(() => {
   fetchCommunitiesData()
 })
 
+// Ensure chart has valid data (prevent errors with all-zero arrays)
+const chartData = computed(() => {
+  const hasData = weeklyData.value.some(v => v > 0)
+
+  return hasData ? weeklyData.value : weeklyData.value.map(() => 0.1)
+})
+
 const series = computed(() => [
   {
     name: 'Communities',
-    data: weeklyData.value,
+    data: chartData.value,
   },
 ])
 
@@ -98,21 +108,8 @@ const chartOptions = computed(() => {
       bar: {
         barHeight: '100%',
         columnWidth: '30%',
-        startingShape: 'rounded',
-        endingShape: 'rounded',
         borderRadius: 4,
-        colors: {
-          backgroundBarColors: [
-            'rgba(var(--v-track-bg))',
-            'rgba(var(--v-track-bg))',
-            'rgba(var(--v-track-bg))',
-            'rgba(var(--v-track-bg))',
-            'rgba(var(--v-track-bg))',
-            'rgba(var(--v-track-bg))',
-            'rgba(var(--v-track-bg))',
-          ],
-          backgroundBarRadius: 4,
-        },
+        borderRadiusApplication: 'end',
       },
     },
     colors: ['rgba(var(--v-theme-primary),1)'],
@@ -160,6 +157,7 @@ const chartOptions = computed(() => {
             bar: {
               columnWidth: '30%',
               borderRadius: 4,
+              borderRadiusApplication: 'end',
             },
           },
         },
@@ -171,6 +169,7 @@ const chartOptions = computed(() => {
             bar: {
               borderRadius: 6,
               columnWidth: '30%',
+              borderRadiusApplication: 'end',
             },
           },
         },
@@ -182,6 +181,7 @@ const chartOptions = computed(() => {
             bar: {
               columnWidth: '15%',
               borderRadius: 4,
+              borderRadiusApplication: 'end',
             },
           },
         },
@@ -214,6 +214,7 @@ const chartOptions = computed(() => {
 
     <VCardText>
       <VueApexCharts
+        v-if="!isLoading"
         :options="chartOptions"
         :series="series"
         :height="62"

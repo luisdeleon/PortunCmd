@@ -8,6 +8,7 @@ const currentTheme = vuetifyTheme.current.value.colors
 const totalRoleAssignments = ref(0)
 const growthPercentage = ref(0)
 const weeklyData = ref<number[]>([0, 0, 0, 0, 0, 0, 0])
+const isLoading = ref(true)
 
 // Fetch role assignments data
 const fetchRolesData = async () => {
@@ -71,6 +72,8 @@ const fetchRolesData = async () => {
     }
   } catch (error) {
     console.error('Error fetching roles data:', error)
+  } finally {
+    isLoading.value = false
   }
 }
 
@@ -78,10 +81,17 @@ onMounted(() => {
   fetchRolesData()
 })
 
+// Ensure chart has valid data (prevent errors with all-zero arrays)
+const chartData = computed(() => {
+  const hasData = weeklyData.value.some(v => v > 0)
+
+  return hasData ? weeklyData.value : weeklyData.value.map(() => 0.1)
+})
+
 const series = computed(() => [
   {
     name: 'Role Assignments',
-    data: weeklyData.value,
+    data: chartData.value,
   },
 ])
 
@@ -169,6 +179,7 @@ const chartOptions = computed(() => ({
     </VCardItem>
 
     <VueApexCharts
+      v-if="!isLoading"
       :options="chartOptions"
       :series="series"
       :height="68"

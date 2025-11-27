@@ -8,6 +8,7 @@ const currentTheme = vuetifyTheme.current.value.colors
 const totalProperties = ref(0)
 const growthPercentage = ref(0)
 const weeklyData = ref<number[]>([0, 0, 0, 0, 0, 0, 0])
+const isLoading = ref(true)
 
 // Fetch properties data
 const fetchPropertiesData = async () => {
@@ -71,6 +72,8 @@ const fetchPropertiesData = async () => {
     }
   } catch (error) {
     console.error('Error fetching properties data:', error)
+  } finally {
+    isLoading.value = false
   }
 }
 
@@ -78,10 +81,17 @@ onMounted(() => {
   fetchPropertiesData()
 })
 
+// Ensure chart has valid data (prevent errors with all-zero arrays)
+const chartData = computed(() => {
+  const hasData = weeklyData.value.some(v => v > 0)
+
+  return hasData ? weeklyData.value : weeklyData.value.map(() => 0.1)
+})
+
 const series = computed(() => [
   {
     name: 'Properties',
-    data: weeklyData.value,
+    data: chartData.value,
   },
 ])
 
@@ -169,6 +179,7 @@ const chartOptions = computed(() => ({
     </VCardItem>
 
     <VueApexCharts
+      v-if="!isLoading"
       :options="chartOptions"
       :series="series"
       :height="68"
