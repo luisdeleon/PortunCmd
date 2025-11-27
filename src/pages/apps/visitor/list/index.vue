@@ -2,14 +2,19 @@
 import { supabase } from '@/lib/supabase'
 import { useI18n } from 'vue-i18n'
 import QRCodeDisplay from '@/components/QRCodeDisplay.vue'
+import { useTranslations } from '@/composables/useTranslations'
 
 definePage({
   meta: {
     public: false,
+    navActiveLink: 'apps-visitor-list',
   },
 })
 
 const { t } = useI18n()
+
+// Translations for visitor types
+const { loadTranslations, translateVisitorType } = useTranslations()
 
 // User data for permission checks
 const userData = useCookie<any>('userData')
@@ -22,6 +27,10 @@ const canManage = computed(() => {
 
 // Check if user is a resident (can only see their own passes)
 const isResident = computed(() => userData.value?.role === 'Resident')
+
+// Get user scope for filtering
+const userScope = computed(() => userData.value?.scope || {})
+const isSuperAdmin = computed(() => userData.value?.role === 'Super Admin' || userScope.value.scopeType === 'global')
 
 // Data state
 const visitors = ref<any[]>([])
@@ -73,12 +82,23 @@ const totalExpired = ref(0)
 const totalUsed = ref(0)
 const totalToday = ref(0)
 
-// Headers
+// Expanded rows for additional details
+const expandedRows = ref<string[]>([])
+
+// Toggle row expansion on click
+const toggleRowExpansion = (id: string) => {
+  const index = expandedRows.value.indexOf(id)
+  if (index === -1) {
+    expandedRows.value = [...expandedRows.value, id]
+  } else {
+    expandedRows.value = expandedRows.value.filter(rowId => rowId !== id)
+  }
+}
+
+// Headers (reduced - additional info in expanded row)
 const headers = computed(() => [
   { title: 'Visitor', key: 'visitor' },
   { title: 'Host', key: 'host' },
-  { title: 'Community', key: 'community' },
-  { title: 'Property', key: 'property' },
   { title: 'Type', key: 'visitor_type' },
   { title: 'Status', key: 'status', sortable: false },
   { title: 'Valid Until', key: 'validity_end' },
@@ -116,10 +136,28 @@ const fetchVisitors = async () => {
       .from('visitor_records_uid')
       .select(`
         *,
-        host:host_uid(id, display_name, email),
-        community:community_id(id, name),
-        property:property_id(id, name)
+        host:profile!visitor_records_uid_host_uid_fkey(id, display_name, email),
+        community:community!visitor_records_uid_community_id_fkey(id, name),
+        property:property!visitor_records_uid_property_id_fkey(id, name)
       `, { count: 'exact' })
+
+    // Apply role-based scoping
+    if (!isSuperAdmin.value) {
+      const scope = userScope.value
+
+      if (scope.scopeType === 'property' && scope.scopePropertyIds?.length > 0) {
+        // Property-scoped users (Residents) - see only their properties
+        query = query.in('property_id', scope.scopePropertyIds)
+      }
+      else if (scope.scopeType === 'community' && scope.scopeCommunityIds?.length > 0) {
+        // Community-scoped users (Admin, Guard) - see only their communities
+        query = query.in('community_id', scope.scopeCommunityIds)
+      }
+      else if (isResident.value && userData.value?.id) {
+        // Fallback for residents without scope - show only their own passes
+        query = query.eq('host_uid', userData.value.id)
+      }
+    }
 
     // Apply search filter
     if (searchQuery.value) {
@@ -136,17 +174,15 @@ const fetchVisitors = async () => {
       query = query.eq('visitor_type', selectedType.value)
     }
 
-    // If resident, only show their own passes
-    if (isResident.value && userData.value?.id) {
-      query = query.eq('host_uid', userData.value.id)
-    }
-
     // Apply sorting
     if (sortBy.value) {
       const ascending = orderBy.value !== 'desc'
       query = query.order(sortBy.value, { ascending })
     } else {
-      query = query.order('created_at', { ascending: false })
+      // Default: newest created first, then most recently used
+      query = query
+        .order('created_at', { ascending: false })
+        .order('updated_at', { ascending: false })
     }
 
     // Apply pagination
@@ -185,13 +221,37 @@ const fetchVisitors = async () => {
   }
 }
 
-// Fetch communities for filter
+// Fetch communities for filter (scoped by user role)
 const fetchCommunities = async () => {
   try {
-    const { data, error } = await supabase
+    let query = supabase
       .from('community')
       .select('id, name')
       .order('name')
+
+    // Apply role-based scoping
+    if (!isSuperAdmin.value) {
+      const scope = userScope.value
+
+      if (scope.scopeCommunityIds?.length > 0) {
+        // Community-scoped users - only their communities
+        query = query.in('id', scope.scopeCommunityIds)
+      }
+      else if (scope.scopePropertyIds?.length > 0) {
+        // Property-scoped users - get communities from their properties
+        const { data: properties } = await supabase
+          .from('property')
+          .select('community_id')
+          .in('id', scope.scopePropertyIds)
+
+        const communityIds = [...new Set(properties?.map(p => p.community_id).filter(Boolean))]
+        if (communityIds.length > 0) {
+          query = query.in('id', communityIds)
+        }
+      }
+    }
+
+    const { data, error } = await query
 
     if (error) {
       console.error('Error fetching communities:', error)
@@ -214,10 +274,21 @@ const fetchStats = async () => {
     const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate())
 
     // Build base query for user scope
-    let baseQuery = supabase.from('visitor_records_uid').select('validity_end, entries_used, entries_allowed, created_at')
+    let baseQuery = supabase.from('visitor_records_uid').select('validity_end, entries_used, entries_allowed, created_at, community_id, property_id')
 
-    if (isResident.value && userData.value?.id) {
-      baseQuery = baseQuery.eq('host_uid', userData.value.id)
+    // Apply role-based scoping (same as fetchVisitors)
+    if (!isSuperAdmin.value) {
+      const scope = userScope.value
+
+      if (scope.scopeType === 'property' && scope.scopePropertyIds?.length > 0) {
+        baseQuery = baseQuery.in('property_id', scope.scopePropertyIds)
+      }
+      else if (scope.scopeType === 'community' && scope.scopeCommunityIds?.length > 0) {
+        baseQuery = baseQuery.in('community_id', scope.scopeCommunityIds)
+      }
+      else if (isResident.value && userData.value?.id) {
+        baseQuery = baseQuery.eq('host_uid', userData.value.id)
+      }
     }
 
     const { data, error } = await baseQuery
@@ -361,6 +432,7 @@ const resolveTypeVariant = (type: string) => {
 
 // Lifecycle
 onMounted(() => {
+  loadTranslations()
   fetchVisitors()
   fetchCommunities()
   fetchStats()
@@ -457,7 +529,7 @@ const widgetData = computed(() => [
             cols="12"
             sm="4"
           >
-            <AppSelect
+            <AppAutocomplete
               v-model="selectedCommunity"
               placeholder="Filter by Community"
               :items="communities"
@@ -548,13 +620,16 @@ const widgetData = computed(() => [
       <VDataTableServer
         v-model:items-per-page="itemsPerPage"
         v-model:page="page"
+        v-model:expanded="expandedRows"
         :items="visitors"
         item-value="id"
         :items-length="totalVisitors"
         :headers="headers"
         :loading="isLoading"
-        class="text-no-wrap"
+        show-expand
+        class="text-no-wrap cursor-pointer"
         @update:options="updateOptions"
+        @click:row="(_event: Event, row: any) => toggleRowExpansion(row.item.id)"
       >
         <!-- Visitor -->
         <template #item.visitor="{ item }">
@@ -588,40 +663,6 @@ const widgetData = computed(() => [
           </div>
         </template>
 
-        <!-- Community -->
-        <template #item.community="{ item }">
-          <VChip
-            v-if="item.community?.name"
-            size="small"
-            color="primary"
-            variant="tonal"
-            label
-          >
-            {{ item.community.name }}
-          </VChip>
-          <span
-            v-else
-            class="text-disabled"
-          >N/A</span>
-        </template>
-
-        <!-- Property -->
-        <template #item.property="{ item }">
-          <VChip
-            v-if="item.property?.name"
-            size="small"
-            color="success"
-            variant="tonal"
-            label
-          >
-            {{ item.property.name }}
-          </VChip>
-          <span
-            v-else
-            class="text-disabled"
-          >N/A</span>
-        </template>
-
         <!-- Type -->
         <template #item.visitor_type="{ item }">
           <div class="d-flex align-center gap-x-2">
@@ -630,7 +671,7 @@ const widgetData = computed(() => [
               :color="resolveTypeVariant(item.visitor_type).color"
               size="20"
             />
-            <span class="text-body-1">{{ item.visitor_type }}</span>
+            <span class="text-body-1">{{ translateVisitorType(item.visitor_type) }}</span>
           </div>
         </template>
 
@@ -691,6 +732,72 @@ const widgetData = computed(() => [
           </IconBtn>
         </template>
 
+        <!-- Expanded Row Details -->
+        <template #expanded-row="{ item }">
+          <tr class="v-data-table__tr--expanded">
+            <td :colspan="headers.length + 1">
+              <div class="pa-4 d-flex flex-wrap gap-6">
+                <!-- Community -->
+                <div class="d-flex align-center gap-2">
+                  <VIcon
+                    icon="tabler-building-community"
+                    size="18"
+                    class="text-disabled"
+                  />
+                  <span class="text-body-2 text-disabled">Community:</span>
+                  <VChip
+                    v-if="item.community?.name"
+                    size="small"
+                    color="primary"
+                    variant="tonal"
+                    label
+                  >
+                    {{ item.community.name }}
+                  </VChip>
+                  <span
+                    v-else
+                    class="text-disabled"
+                  >N/A</span>
+                </div>
+
+                <!-- Property -->
+                <div class="d-flex align-center gap-2">
+                  <VIcon
+                    icon="tabler-home"
+                    size="18"
+                    class="text-disabled"
+                  />
+                  <span class="text-body-2 text-disabled">Property:</span>
+                  <VChip
+                    v-if="item.property?.name"
+                    size="small"
+                    color="success"
+                    variant="tonal"
+                    label
+                  >
+                    {{ item.property.name }}
+                  </VChip>
+                  <span
+                    v-else
+                    class="text-disabled"
+                  >N/A</span>
+                </div>
+
+                <!-- Entries -->
+                <div class="d-flex align-center gap-2">
+                  <VIcon
+                    icon="tabler-login"
+                    size="18"
+                    class="text-disabled"
+                  />
+                  <span class="text-body-2 text-disabled">Entries:</span>
+                  <span class="text-body-2">{{ formatEntries(item) }}</span>
+                </div>
+              </div>
+            </td>
+          </tr>
+        </template>
+
         <!-- Pagination -->
         <template #bottom>
           <TablePagination
@@ -705,7 +812,7 @@ const widgetData = computed(() => [
     <!-- View Visitor Dialog -->
     <VDialog
       v-model="isViewDialogVisible"
-      max-width="500"
+      max-width="700"
     >
       <VCard v-if="selectedVisitor">
         <VCardTitle class="d-flex justify-space-between align-center pa-6">
@@ -722,126 +829,125 @@ const widgetData = computed(() => [
         <VDivider />
 
         <VCardText class="pa-6">
-          <!-- QR Code -->
-          <div class="d-flex justify-center mb-6">
-            <QRCodeDisplay
-              :value="selectedVisitor.record_url || `https://qr.portun.app/${selectedVisitor.record_uid}`"
-              :size="180"
+          <VRow>
+            <!-- Left Column: QR Code -->
+            <VCol
+              cols="12"
+              md="5"
+              class="d-flex flex-column align-center"
+            >
+              <QRCodeDisplay
+                :value="selectedVisitor.record_url || `https://qr.portun.app/${selectedVisitor.record_uid}`"
+                :size="180"
+              />
+              <div class="text-center mt-4">
+                <h6 class="text-h6">
+                  {{ selectedVisitor.visitor_name }}
+                </h6>
+                <span class="text-body-2 text-disabled">{{ selectedVisitor.record_uid }}</span>
+              </div>
+            </VCol>
+
+            <VDivider
+              vertical
+              class="d-none d-md-block"
             />
-          </div>
 
-          <VDivider class="mb-4" />
+            <!-- Right Column: Details -->
+            <VCol
+              cols="12"
+              md="6"
+            >
+              <VList
+                density="compact"
+                class="card-list"
+              >
+                <VListItem>
+                  <template #prepend>
+                    <VIcon
+                      icon="tabler-user-check"
+                      size="20"
+                      class="me-2"
+                    />
+                  </template>
+                  <VListItemTitle>Host</VListItemTitle>
+                  <VListItemSubtitle>{{ selectedVisitor.host?.display_name || 'N/A' }}</VListItemSubtitle>
+                </VListItem>
 
-          <!-- Visitor Info -->
-          <VList class="card-list">
-            <VListItem>
-              <template #prepend>
-                <VIcon
-                  icon="tabler-user"
-                  size="20"
-                  class="me-2"
-                />
-              </template>
-              <VListItemTitle>Visitor Name</VListItemTitle>
-              <VListItemSubtitle>{{ selectedVisitor.visitor_name }}</VListItemSubtitle>
-            </VListItem>
+                <VListItem>
+                  <template #prepend>
+                    <VIcon
+                      icon="tabler-building-community"
+                      size="20"
+                      class="me-2"
+                    />
+                  </template>
+                  <VListItemTitle>Community</VListItemTitle>
+                  <VListItemSubtitle>{{ selectedVisitor.community?.name || selectedVisitor.community_id }}</VListItemSubtitle>
+                </VListItem>
 
-            <VListItem>
-              <template #prepend>
-                <VIcon
-                  icon="tabler-hash"
-                  size="20"
-                  class="me-2"
-                />
-              </template>
-              <VListItemTitle>Pass Code</VListItemTitle>
-              <VListItemSubtitle>{{ selectedVisitor.record_uid }}</VListItemSubtitle>
-            </VListItem>
+                <VListItem>
+                  <template #prepend>
+                    <VIcon
+                      icon="tabler-home"
+                      size="20"
+                      class="me-2"
+                    />
+                  </template>
+                  <VListItemTitle>Property</VListItemTitle>
+                  <VListItemSubtitle>{{ selectedVisitor.property?.name || selectedVisitor.property_id }}</VListItemSubtitle>
+                </VListItem>
 
-            <VListItem>
-              <template #prepend>
-                <VIcon
-                  icon="tabler-home"
-                  size="20"
-                  class="me-2"
-                />
-              </template>
-              <VListItemTitle>Host</VListItemTitle>
-              <VListItemSubtitle>{{ selectedVisitor.host?.display_name || 'N/A' }}</VListItemSubtitle>
-            </VListItem>
+                <VListItem>
+                  <template #prepend>
+                    <VIcon
+                      icon="tabler-category"
+                      size="20"
+                      class="me-2"
+                    />
+                  </template>
+                  <VListItemTitle>Type</VListItemTitle>
+                  <VListItemSubtitle>{{ translateVisitorType(selectedVisitor.visitor_type) }}</VListItemSubtitle>
+                </VListItem>
 
-            <VListItem>
-              <template #prepend>
-                <VIcon
-                  icon="tabler-building-community"
-                  size="20"
-                  class="me-2"
-                />
-              </template>
-              <VListItemTitle>Community</VListItemTitle>
-              <VListItemSubtitle>{{ selectedVisitor.community?.name || selectedVisitor.community_id }}</VListItemSubtitle>
-            </VListItem>
+                <VListItem>
+                  <template #prepend>
+                    <VIcon
+                      icon="tabler-calendar"
+                      size="20"
+                      class="me-2"
+                    />
+                  </template>
+                  <VListItemTitle>Valid Until</VListItemTitle>
+                  <VListItemSubtitle>{{ formatDate(selectedVisitor.validity_end) }}</VListItemSubtitle>
+                </VListItem>
 
-            <VListItem>
-              <template #prepend>
-                <VIcon
-                  icon="tabler-door"
-                  size="20"
-                  class="me-2"
-                />
-              </template>
-              <VListItemTitle>Property</VListItemTitle>
-              <VListItemSubtitle>{{ selectedVisitor.property?.name || selectedVisitor.property_id }}</VListItemSubtitle>
-            </VListItem>
+                <VListItem>
+                  <template #prepend>
+                    <VIcon
+                      icon="tabler-login"
+                      size="20"
+                      class="me-2"
+                    />
+                  </template>
+                  <VListItemTitle>Entries</VListItemTitle>
+                  <VListItemSubtitle>{{ formatEntries(selectedVisitor) }}</VListItemSubtitle>
+                </VListItem>
 
-            <VListItem>
-              <template #prepend>
-                <VIcon
-                  icon="tabler-category"
-                  size="20"
-                  class="me-2"
-                />
-              </template>
-              <VListItemTitle>Type</VListItemTitle>
-              <VListItemSubtitle>{{ selectedVisitor.visitor_type }}</VListItemSubtitle>
-            </VListItem>
-
-            <VListItem>
-              <template #prepend>
-                <VIcon
-                  icon="tabler-calendar"
-                  size="20"
-                  class="me-2"
-                />
-              </template>
-              <VListItemTitle>Valid Until</VListItemTitle>
-              <VListItemSubtitle>{{ formatDate(selectedVisitor.validity_end) }}</VListItemSubtitle>
-            </VListItem>
-
-            <VListItem>
-              <template #prepend>
-                <VIcon
-                  icon="tabler-login"
-                  size="20"
-                  class="me-2"
-                />
-              </template>
-              <VListItemTitle>Entries</VListItemTitle>
-              <VListItemSubtitle>{{ formatEntries(selectedVisitor) }}</VListItemSubtitle>
-            </VListItem>
-
-            <VListItem v-if="selectedVisitor.notes">
-              <template #prepend>
-                <VIcon
-                  icon="tabler-notes"
-                  size="20"
-                  class="me-2"
-                />
-              </template>
-              <VListItemTitle>Notes</VListItemTitle>
-              <VListItemSubtitle>{{ selectedVisitor.notes }}</VListItemSubtitle>
-            </VListItem>
-          </VList>
+                <VListItem v-if="selectedVisitor.notes">
+                  <template #prepend>
+                    <VIcon
+                      icon="tabler-notes"
+                      size="20"
+                      class="me-2"
+                    />
+                  </template>
+                  <VListItemTitle>Notes</VListItemTitle>
+                  <VListItemSubtitle>{{ selectedVisitor.notes }}</VListItemSubtitle>
+                </VListItem>
+              </VList>
+            </VCol>
+          </VRow>
         </VCardText>
 
         <VDivider />
@@ -915,8 +1021,3 @@ const widgetData = computed(() => [
     </VSnackbar>
   </section>
 </template>
-
-<route lang="yaml">
-meta:
-  navActiveLink: apps-visitor-list
-</route>

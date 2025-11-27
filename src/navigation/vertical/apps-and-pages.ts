@@ -46,15 +46,14 @@ export default [
     ],
   },
 
-  // Access Logs
-  {
-    title: 'Access Logs',
-    icon: { icon: 'tabler-list-check' },
-    // TODO: Create this page
-    to: 'apps-logs',
-    badgeContent: 'Soon',
-    badgeClass: 'bg-light-primary text-primary',
-  },
+  // Access Logs - TODO: Create this page
+  // {
+  //   title: 'Access Logs',
+  //   icon: { icon: 'tabler-list-check' },
+  //   to: 'apps-logs',
+  //   badgeContent: 'Soon',
+  //   badgeClass: 'bg-light-primary text-primary',
+  // },
 
   { heading: 'Automation' },
 
@@ -70,9 +69,13 @@ export default [
     ],
   },
 
-  { heading: 'Access Control' },
+  {
+    heading: 'Access Control',
+    action: 'manage',
+    subject: 'all',
+  },
 
-  // Roles & Permissions - Admin only
+  // Roles & Permissions - Super Admin only
   {
     title: 'Roles',
     icon: { icon: 'tabler-shield-check' },

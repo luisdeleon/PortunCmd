@@ -50,8 +50,8 @@ const { data: permissionsData } = await useApi<any>(createUrl('/apps/permissions
   },
 }))
 
-const permissions = computed((): Permission[] => permissionsData.value.permissions)
-const totalPermissions = computed(() => permissionsData.value.totalPermissions)
+const permissions = computed((): Permission[] => permissionsData.value?.permissions ?? [])
+const totalPermissions = computed(() => permissionsData.value?.totalPermissions ?? 0)
 
 const editPermission = (name: string) => {
   isPermissionDialogVisible.value = true

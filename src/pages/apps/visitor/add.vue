@@ -5,6 +5,7 @@ import QRCodeDisplay from '@/components/QRCodeDisplay.vue'
 definePage({
   meta: {
     public: false,
+    navActiveLink: 'apps-visitor-add',
   },
 })
 
@@ -215,7 +216,13 @@ const calculateValidityEnd = () => {
       weekLater.setDate(weekLater.getDate() + 7)
       return weekLater
     case 'custom':
-      return form.value.validity_end
+      // Handle string or Date from date picker
+      if (form.value.validity_end) {
+        return form.value.validity_end instanceof Date
+          ? form.value.validity_end
+          : new Date(form.value.validity_end)
+      }
+      return now
     case 'unlimited':
       // Far future date
       return new Date(2099, 11, 31, 23, 59, 59)
@@ -728,8 +735,3 @@ onMounted(() => {
     </VSnackbar>
   </section>
 </template>
-
-<route lang="yaml">
-meta:
-  navActiveLink: apps-visitor-list
-</route>
