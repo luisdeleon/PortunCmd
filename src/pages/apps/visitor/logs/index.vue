@@ -54,6 +54,7 @@ const currentImageTimestamp = computed(() => currentImageLog.value?.in_time || n
 // Stats
 const totalEntries = ref(0)
 const todayEntries = ref(0)
+const weeklyEntries = ref(0)
 const withPhotos = ref(0)
 
 // Headers
@@ -258,6 +259,7 @@ const fetchStats = async () => {
   try {
     const now = new Date()
     const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+    const weekStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7)
 
     const { data, error } = await supabase
       .from('visitor_record_logs')
@@ -270,6 +272,7 @@ const fetchStats = async () => {
 
     totalEntries.value = data?.length || 0
     todayEntries.value = data?.filter(log => new Date(log.in_time) >= todayStart).length || 0
+    weeklyEntries.value = data?.filter(log => new Date(log.in_time) >= weekStart).length || 0
     withPhotos.value = data?.filter(log =>
       log.doc1_upload_url || log.doc2_upload_url || log.doc3_upload_url || log.doc4_upload_url
     ).length || 0
@@ -395,16 +398,22 @@ watch([searchQuery, selectedCommunity, page, itemsPerPage, sortBy, orderBy], () 
 // Widget data
 const widgetData = computed(() => [
   {
-    title: 'Total Entries',
-    value: totalEntries.value.toLocaleString(),
-    icon: 'tabler-login',
-    iconColor: 'primary',
-  },
-  {
     title: 'Today',
     value: todayEntries.value.toLocaleString(),
     icon: 'tabler-calendar-check',
     iconColor: 'success',
+  },
+  {
+    title: 'This Week',
+    value: weeklyEntries.value.toLocaleString(),
+    icon: 'tabler-calendar-week',
+    iconColor: 'warning',
+  },
+  {
+    title: 'Total Entries',
+    value: totalEntries.value.toLocaleString(),
+    icon: 'tabler-login',
+    iconColor: 'primary',
   },
   {
     title: 'With Photos',
@@ -426,7 +435,7 @@ const widgetData = computed(() => [
         >
           <VCol
             cols="12"
-            md="4"
+            md="3"
             sm="6"
           >
             <VCard>
