@@ -7,6 +7,8 @@ import { useCountriesStates } from '@/composables/useCountriesStates'
 definePage({
   meta: {
     public: false, // Requires authentication
+    action: 'read',
+    subject: 'users',
   },
 })
 

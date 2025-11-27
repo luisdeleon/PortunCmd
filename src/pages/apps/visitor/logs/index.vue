@@ -214,6 +214,9 @@ const fetchLogs = async () => {
       .sort((a, b) => new Date(b.in_time).getTime() - new Date(a.in_time).getTime())
 
     totalLogs.value = groupedLogs.value.length
+
+    // Compute stats from filtered data
+    computeStats()
   } catch (err) {
     console.error('Error in fetchLogs:', err)
   } finally {
@@ -254,31 +257,18 @@ const fetchCommunities = async () => {
   }
 }
 
-// Fetch stats
-const fetchStats = async () => {
-  try {
-    const now = new Date()
-    const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate())
-    const weekStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7)
+// Compute stats from filtered logs data (respects role-based scoping)
+const computeStats = () => {
+  const now = new Date()
+  const todayStart = new Date(now.getFullYear(), now.getMonth(), now.getDate())
+  const weekStart = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 7)
 
-    const { data, error } = await supabase
-      .from('visitor_record_logs')
-      .select('in_time, doc1_upload_url, doc2_upload_url, doc3_upload_url, doc4_upload_url')
+  const filteredData = logs.value
 
-    if (error) {
-      console.error('Error fetching stats:', error)
-      return
-    }
-
-    totalEntries.value = data?.length || 0
-    todayEntries.value = data?.filter(log => new Date(log.in_time) >= todayStart).length || 0
-    weeklyEntries.value = data?.filter(log => new Date(log.in_time) >= weekStart).length || 0
-    withPhotos.value = data?.filter(log =>
-      log.doc1_upload_url || log.doc2_upload_url || log.doc3_upload_url || log.doc4_upload_url
-    ).length || 0
-  } catch (err) {
-    console.error('Error in fetchStats:', err)
-  }
+  totalEntries.value = filteredData.length
+  todayEntries.value = filteredData.filter(log => new Date(log.in_time) >= todayStart).length
+  weeklyEntries.value = filteredData.filter(log => new Date(log.in_time) >= weekStart).length
+  withPhotos.value = filteredData.filter(log => log.hasEvidence).length
 }
 
 // View log details
@@ -387,7 +377,6 @@ const getEvidenceUrls = (log: any) => {
 onMounted(() => {
   fetchLogs()
   fetchCommunities()
-  fetchStats()
 })
 
 // Watch for filter changes
@@ -529,7 +518,7 @@ const widgetData = computed(() => [
             variant="tonal"
             color="default"
             icon="tabler-refresh"
-            @click="fetchLogs(); fetchStats()"
+            @click="fetchLogs()"
           />
         </div>
       </VCardText>
@@ -547,7 +536,6 @@ const widgetData = computed(() => [
         :headers="headers"
         :loading="isLoading"
         class="text-no-wrap"
-        show-expand
         @update:options="updateOptions"
         @click:row="(_: any, row: any) => row.item.totalEntries > 1 && toggleRowExpansion(row.item.record_uid)"
       >
@@ -692,15 +680,15 @@ const widgetData = computed(() => [
         </template>
 
         <!-- Expand icon - only show if more than 1 entry -->
-        <template #item.data-table-expand="{ item, isExpanded, toggleExpand }">
+        <template #item.data-table-expand="{ item }">
           <VBtn
             v-if="item.totalEntries > 1"
             icon
             variant="text"
             size="small"
-            @click.stop="toggleExpand(item)"
+            @click.stop="toggleRowExpansion(item.record_uid)"
           >
-            <VIcon :icon="isExpanded(item) ? 'tabler-chevron-up' : 'tabler-chevron-down'" />
+            <VIcon :icon="expandedRows.includes(item.record_uid) ? 'tabler-chevron-up' : 'tabler-chevron-down'" />
           </VBtn>
         </template>
 
@@ -727,7 +715,17 @@ const widgetData = computed(() => [
                       v-for="entry in item.previousEntries"
                       :key="entry.id"
                     >
-                      <td>{{ formatDateTime(entry.in_time) }}</td>
+                      <td>
+                        <VChip
+                          size="x-small"
+                          color="primary"
+                          variant="tonal"
+                          label
+                          prepend-icon="tabler-login"
+                        >
+                          {{ formatDateTime(entry.in_time) }}
+                        </VChip>
+                      </td>
                       <td>
                         <VChip
                           v-if="entry.out_time"
@@ -735,6 +733,7 @@ const widgetData = computed(() => [
                           color="success"
                           variant="tonal"
                           label
+                          prepend-icon="tabler-logout"
                         >
                           {{ formatDateTime(entry.out_time) }}
                         </VChip>
@@ -744,6 +743,7 @@ const widgetData = computed(() => [
                           color="warning"
                           variant="tonal"
                           label
+                          prepend-icon="tabler-clock"
                         >
                           Still Inside
                         </VChip>

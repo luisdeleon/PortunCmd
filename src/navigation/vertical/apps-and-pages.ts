@@ -23,13 +23,15 @@ export default [
     ],
   },
 
-  // Users
+  // Users - Hidden from Guard and Resident
   {
     title: 'Users',
     icon: { icon: 'tabler-users' },
+    action: 'read',
+    subject: 'users',
     children: [
-      { title: 'List', to: 'apps-user-list' },
-      { title: 'Add', to: 'apps-user-add' },
+      { title: 'List', to: 'apps-user-list', action: 'read', subject: 'users' },
+      { title: 'Add', to: 'apps-user-add', action: 'read', subject: 'users' },
     ],
   },
 
@@ -41,7 +43,7 @@ export default [
     icon: { icon: 'tabler-ticket' },
     children: [
       { title: 'Active Passes', to: 'apps-visitor-list' },
-      { title: 'Create Pass', to: 'apps-visitor-add' },
+      { title: 'Create Pass', to: 'apps-visitor-add', action: 'create', subject: 'visitor_pass' },
       { title: 'Access Logs', to: 'apps-visitor-logs' },
       // { title: 'Scanner', to: 'apps-visitor-scanner' }, // For guards - TODO
     ],

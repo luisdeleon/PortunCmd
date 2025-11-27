@@ -37,6 +37,51 @@ const canManage = computed(() => {
   return role && !['Guard', 'Resident'].includes(role)
 })
 
+// Check if viewing user is the currently logged-in user (cannot delete/disable own account)
+const isCurrentUser = computed(() => {
+  return currentUserData.value?.id === props.userData?.id
+})
+
+// Role hierarchy - lower number = higher rank
+const roleHierarchy: Record<string, number> = {
+  'Super Admin': 1,
+  'Mega Dealer': 2,
+  'Dealer': 3,
+  'Administrator': 4,
+  'Guard': 5,
+  'Client': 5,
+  'Resident': 6,
+}
+
+// Check if target user has higher or equal rank (cannot manage them)
+const isHigherOrEqualRank = computed(() => {
+  const currentUserRole = currentUserData.value?.role
+  const targetRole = props.userData?.role
+  const currentRank = roleHierarchy[currentUserRole] || 999
+  const targetRank = roleHierarchy[targetRole] || 999
+  return targetRank <= currentRank
+})
+
+// Check if user can manage target user (not self, not higher rank)
+// Exception: Super Admin can manage anyone including themselves
+const canManageUser = computed(() => {
+  const currentRole = currentUserData.value?.role
+
+  // Super Admin can manage anyone
+  if (currentRole === 'Super Admin') return true
+
+  if (isCurrentUser.value) return false
+  if (isHigherOrEqualRank.value) return false
+  return true
+})
+
+// Get reason why user cannot be managed
+const cannotManageReason = computed(() => {
+  if (isCurrentUser.value) return 'own account'
+  if (isHigherOrEqualRank.value) return 'higher rank'
+  return ''
+})
+
 // 👉 Dynamic counts from database
 const communitiesCount = ref(0)
 const propertiesCount = ref(0)
@@ -450,18 +495,34 @@ const toggleUserStatus = async () => {
             v-if="canManage"
             variant="tonal"
             color="error"
+            :disabled="!canManageUser"
             @click="isDeleteDialogVisible = true"
           >
             Delete
+            <VTooltip
+              v-if="!canManageUser"
+              activator="parent"
+              location="top"
+            >
+              You cannot delete {{ cannotManageReason === 'own account' ? 'your own account' : 'a user with higher rank' }}
+            </VTooltip>
           </VBtn>
 
           <VBtn
             v-if="canManage"
             variant="tonal"
             :color="props.userData.enabled ? 'warning' : 'success'"
+            :disabled="!canManageUser"
             @click="isToggleStatusDialogVisible = true"
           >
             {{ props.userData.enabled ? 'Disable' : 'Enable' }}
+            <VTooltip
+              v-if="!canManageUser"
+              activator="parent"
+              location="top"
+            >
+              You cannot {{ props.userData.enabled ? 'disable' : 'enable' }} {{ cannotManageReason === 'own account' ? 'your own account' : 'a user with higher rank' }}
+            </VTooltip>
           </VBtn>
         </VCardText>
       </VCard>

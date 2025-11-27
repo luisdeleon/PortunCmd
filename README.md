@@ -91,6 +91,7 @@ Comprehensive guides are available in the [`/docs`](./docs/) folder:
 - 🗄️ [Supabase Schema](./docs/SUPABASE_SCHEMA.md) - Complete database schema
 - 💻 [Supabase Usage](./docs/SUPABASE_USAGE.md) - Code examples and patterns
 - 🔐 [RBAC Guide](./docs/RBAC_GUIDE.md) - Role-based access control implementation guide
+- 🛡️ [Supabase RLS Policies](./docs/SUPABASE_RLS_POLICIES.md) - **NEW!** Row Level Security reference
 - 🔒 **[Scope Visual Reference](./docs/SCOPE_VISUAL_REFERENCE.md)** - **ALL 4 scopes explained visually**
 - 🔒 [Scope System Guide](./docs/SCOPE_SYSTEM_GUIDE.md) - Complete scope-based access control reference
 - 🏢 [Community-User-Property Guide](./docs/COMMUNITY_USER_PROPERTY_GUIDE.md) - Understanding the database design
@@ -379,6 +380,13 @@ All project documentation is available in the [`/docs`](./docs/) directory:
   - Database schema enhancements
   - Implementation phases and migration
   - Code examples and best practices
+- **[Supabase RLS Policies](./docs/SUPABASE_RLS_POLICIES.md)** - **NEW!** Complete Row Level Security reference
+  - RLS status for all 17 tables (enabled/disabled)
+  - 50+ policies documented with explanations
+  - Policy details for profile, community, property, visitor_records_uid, automation_devices
+  - Common policy patterns and SQL examples
+  - Recommendations for securing exposed tables
+  - Role hierarchy and scope resolution diagrams
 - **[Scope Visual Reference](./docs/SCOPE_VISUAL_REFERENCE.md)** - ⭐ **START HERE!** Visual guide to ALL 4 scopes
   - **1️⃣ Global Scope** - Super Admin (entire system)
   - **2️⃣ Dealer Scope** - Dealer (their communities)

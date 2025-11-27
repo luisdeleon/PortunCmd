@@ -6,6 +6,8 @@ definePage({
   meta: {
     public: false,
     navActiveLink: 'apps-visitor-add',
+    action: 'create',
+    subject: 'visitor_pass',
   },
 })
 

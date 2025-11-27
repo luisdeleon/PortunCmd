@@ -10,6 +10,8 @@ import StatusChangeDialog from '@/components/StatusChangeDialog.vue'
 definePage({
   meta: {
     public: false, // Requires authentication
+    action: 'read',
+    subject: 'users',
   },
 })
 
@@ -21,6 +23,43 @@ const canManage = computed(() => {
   const role = userData.value?.role
   return role && !['Guard', 'Resident'].includes(role)
 })
+
+// Check if user is the currently logged-in user (cannot change own status)
+const isCurrentUser = (userId: string) => {
+  return userData.value?.id === userId
+}
+
+// Role hierarchy - lower number = higher rank
+const roleHierarchy: Record<string, number> = {
+  'Super Admin': 1,
+  'Mega Dealer': 2,
+  'Dealer': 3,
+  'Administrator': 4,
+  'Guard': 5,
+  'Client': 5,
+  'Resident': 6,
+}
+
+// Check if target user has higher or equal rank (cannot manage them)
+const isHigherOrEqualRank = (targetRole: string) => {
+  const currentUserRole = userData.value?.role
+  const currentRank = roleHierarchy[currentUserRole] || 999
+  const targetRank = roleHierarchy[targetRole] || 999
+  return targetRank <= currentRank
+}
+
+// Check if user can manage target user (not self, not higher rank)
+// Exception: Super Admin can manage anyone including themselves
+const canManageUser = (userId: string, userRole: string) => {
+  const currentUserRole = userData.value?.role
+
+  // Super Admin can manage anyone
+  if (currentUserRole === 'Super Admin') return true
+
+  if (isCurrentUser(userId)) return false
+  if (isHigherOrEqualRank(userRole)) return false
+  return true
+}
 
 // 👉 i18n
 const { t } = useI18n()
@@ -128,10 +167,8 @@ const fetchUsers = async () => {
       // We'll need to filter client-side since role is in a nested join
     }
 
-    // Apply community filter
-    if (selectedCommunity.value) {
-      query = query.eq('def_community_id', selectedCommunity.value)
-    }
+    // Community filter moved to client-side to check all community sources
+    // (def_community_id, scope_community_ids, property_owner)
 
     // Apply status filter
     if (selectedStatus.value) {
@@ -227,7 +264,19 @@ const fetchUsers = async () => {
       allData = allData.filter(user => user.role === selectedRole.value)
     }
 
-    // Role hierarchy order for sorting
+    // Client-side community filter (checks all community sources)
+    if (selectedCommunity.value) {
+      allData = allData.filter(user => {
+        // Check communityList (contains communities from scope_community_ids and property_owner)
+        if (user.communityList?.some((c: any) =>
+          c.id === selectedCommunity.value || c.name === selectedCommunity.value
+        )) return true
+
+        return false
+      })
+    }
+
+    // Role hierarchy order for sorting and filtering
     const roleOrder: Record<string, number> = {
       'Super Admin': 1,
       'Mega Dealer': 2,
@@ -238,6 +287,19 @@ const fetchUsers = async () => {
       'Resident': 7,
     }
 
+    // Filter out users with higher or equal rank (users can only see lower rank users)
+    const currentUserRole = userData.value?.role
+    const currentUserRank = roleOrder[currentUserRole] || 999
+
+    // Only filter if user is not Super Admin (Super Admin sees everyone)
+    if (currentUserRole !== 'Super Admin') {
+      allData = allData.filter(user => {
+        const userRank = roleOrder[user.role] || 999
+        // Show only users with lower rank (higher number = lower rank)
+        return userRank > currentUserRank
+      })
+    }
+
     // Sort by role hierarchy
     const sortedData = allData.sort((a, b) => {
       const orderA = roleOrder[a.role] || 999
@@ -245,8 +307,8 @@ const fetchUsers = async () => {
       return orderA - orderB
     })
 
-    // Apply client-side pagination if role filter is active
-    if (selectedRole.value && itemsPerPage.value !== -1) {
+    // Apply client-side pagination if role OR community filter is active
+    if ((selectedRole.value || selectedCommunity.value) && itemsPerPage.value !== -1) {
       const start = (page.value - 1) * itemsPerPage.value
       const end = start + itemsPerPage.value
       users.value = sortedData.slice(start, end)
@@ -255,7 +317,7 @@ const fetchUsers = async () => {
     }
 
     // Update total count based on filtered results
-    totalUsers.value = selectedRole.value ? allData.length : (count || 0)
+    totalUsers.value = (selectedRole.value || selectedCommunity.value) ? allData.length : (count || 0)
   } catch (err) {
     console.error('Error in fetchUsers:', err)
   } finally {
@@ -775,13 +837,23 @@ const bulkUpdateStatus = async () => {
   try {
     let successCount = 0
     let errorCount = 0
+    let skippedCount = 0
 
     // Get current user id for status_changed_by
     const { data: { user } } = await supabase.auth.getUser()
     const userId = user?.id
 
-    // Update each selected user
+    // Update each selected user (skip current user and higher ranks)
     for (const profileId of selectedRows.value) {
+      // Find user in list to get their role
+      const targetUser = users.value.find(u => u.id === profileId)
+      const targetRole = targetUser?.role || ''
+
+      // Skip the currently logged-in user or higher rank users
+      if (!canManageUser(profileId, targetRole)) {
+        skippedCount++
+        continue
+      }
       try {
         const { error } = await supabase
           .from('profile')
@@ -806,25 +878,26 @@ const bulkUpdateStatus = async () => {
     }
 
     // Show result message
-    if (errorCount === 0) {
-      snackbar.value = {
-        show: true,
-        message: `Successfully updated status for ${successCount} ${successCount === 1 ? 'user' : 'users'}`,
-        color: 'success',
-      }
+    let message = ''
+    let color = 'success'
+
+    if (errorCount === 0 && skippedCount === 0) {
+      message = `Successfully updated status for ${successCount} ${successCount === 1 ? 'user' : 'users'}`
+    } else if (successCount === 0 && skippedCount > 0) {
+      message = `Skipped ${skippedCount} ${skippedCount === 1 ? 'user' : 'users'} (own account or higher rank)`
+      color = 'warning'
     } else if (successCount === 0) {
-      snackbar.value = {
-        show: true,
-        message: `Failed to update status for ${errorCount} ${errorCount === 1 ? 'user' : 'users'}`,
-        color: 'error',
-      }
+      message = `Failed to update status for ${errorCount} ${errorCount === 1 ? 'user' : 'users'}`
+      color = 'error'
     } else {
-      snackbar.value = {
-        show: true,
-        message: `Updated ${successCount} ${successCount === 1 ? 'user' : 'users'}, ${errorCount} failed`,
-        color: 'warning',
-      }
+      const parts = [`Updated ${successCount}`]
+      if (errorCount > 0) parts.push(`${errorCount} failed`)
+      if (skippedCount > 0) parts.push(`${skippedCount} skipped (own account or higher rank)`)
+      message = parts.join(', ')
+      color = errorCount > 0 ? 'warning' : 'success'
     }
+
+    snackbar.value = { show: true, message, color }
 
     // Clear selection
     selectedRows.value = []
@@ -1186,8 +1259,8 @@ const widgetData = computed(() => {
           <StatusBadge
             :status="item.status"
             entity-type="user"
-            :style="canManage ? 'cursor: pointer' : ''"
-            @click="canManage && openStatusChangeDialog(item)"
+            :style="canManage && canManageUser(item.id, item.role) ? 'cursor: pointer' : ''"
+            @click="canManage && canManageUser(item.id, item.role) && openStatusChangeDialog(item)"
           />
         </template>
 
@@ -1213,7 +1286,8 @@ const widgetData = computed(() => {
             <IconBtn
               v-if="canManage"
               size="small"
-              @click="openAssignRoleDialog(item.id)"
+              :disabled="!canManageUser(item.id, item.role)"
+              @click="canManageUser(item.id, item.role) && openAssignRoleDialog(item.id)"
             >
               <VIcon
                 icon="tabler-shield-plus"
@@ -1223,7 +1297,7 @@ const widgetData = computed(() => {
                 activator="parent"
                 location="top"
               >
-                Assign Role
+                {{ canManageUser(item.id, item.role) ? 'Assign Role' : (isCurrentUser(item.id) ? 'Cannot modify own role' : 'Cannot modify higher rank') }}
               </VTooltip>
             </IconBtn>
 
@@ -1247,7 +1321,8 @@ const widgetData = computed(() => {
             <IconBtn
               v-if="canManage"
               size="small"
-              @click="openStatusChangeDialog(item)"
+              :disabled="!canManageUser(item.id, item.role)"
+              @click="canManageUser(item.id, item.role) && openStatusChangeDialog(item)"
             >
               <VIcon
                 icon="tabler-replace"
@@ -1257,14 +1332,15 @@ const widgetData = computed(() => {
                 activator="parent"
                 location="top"
               >
-                Change Status
+                {{ canManageUser(item.id, item.role) ? 'Change Status' : (isCurrentUser(item.id) ? 'Cannot change own status' : 'Cannot modify higher rank') }}
               </VTooltip>
             </IconBtn>
 
             <IconBtn
               v-if="canManage"
               size="small"
-              @click="openDeleteDialog(item)"
+              :disabled="!canManageUser(item.id, item.role)"
+              @click="canManageUser(item.id, item.role) && openDeleteDialog(item)"
             >
               <VIcon
                 icon="tabler-trash"
@@ -1274,17 +1350,17 @@ const widgetData = computed(() => {
                 activator="parent"
                 location="top"
               >
-                Delete User
+                {{ canManageUser(item.id, item.role) ? 'Delete User' : (isCurrentUser(item.id) ? 'Cannot delete own account' : 'Cannot delete higher rank') }}
               </VTooltip>
             </IconBtn>
           </div>
         </template>
 
         <!-- Expanded Row Details -->
-        <template #expanded-row="{ item }">
+        <template #expanded-row="{ columns, item }">
           <tr class="v-data-table__tr--expanded">
-            <td :colspan="headers.length + 2">
-              <div class="pa-4 d-flex flex-wrap gap-6">
+            <td :colspan="columns.length" class="pa-0">
+              <div class="py-3 d-flex flex-wrap gap-6" style="padding-left: 72px;">
                 <!-- All Communities -->
                 <div
                   v-if="item.communityList && item.communityList.length > 0"
