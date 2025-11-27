@@ -40,10 +40,9 @@ export default [
     title: 'Visitors',
     icon: { icon: 'tabler-ticket' },
     children: [
-      // TODO: Create these pages
-      { title: 'Active Passes', to: 'apps-visitor-list', badgeContent: 'Soon', badgeClass: 'bg-light-primary text-primary' },
-      { title: 'Create Pass', to: 'apps-visitor-add', badgeContent: 'Soon', badgeClass: 'bg-light-primary text-primary' },
-      // { title: 'Scanner', to: 'apps-visitor-scanner' }, // For guards
+      { title: 'Active Passes', to: 'apps-visitor-list' },
+      { title: 'Create Pass', to: 'apps-visitor-add' },
+      // { title: 'Scanner', to: 'apps-visitor-scanner' }, // For guards - TODO
     ],
   },
 

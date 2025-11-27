@@ -67,6 +67,79 @@
   "Access Logs": "Registros de Acceso",
   "Devices": "Dispositivos",
   "Gate Control": "Control de Portón",
+  "visitorList": {
+    "title": "Pases de Visitantes",
+    "widgets": {
+      "activePasses": "Pases Activos",
+      "expired": "Expirados",
+      "used": "Utilizados",
+      "createdToday": "Creados Hoy"
+    },
+    "filters": {
+      "title": "Filtros",
+      "filterByCommunity": "Filtrar por Comunidad",
+      "filterByType": "Filtrar por Tipo",
+      "filterByStatus": "Filtrar por Estado"
+    },
+    "table": {
+      "visitor": "Visitante",
+      "host": "Anfitrión",
+      "community": "Comunidad",
+      "property": "Propiedad",
+      "type": "Tipo",
+      "status": "Estado",
+      "validUntil": "Válido Hasta",
+      "actions": "Acciones"
+    },
+    "status": {
+      "active": "Activo",
+      "expired": "Expirado",
+      "used": "Utilizado"
+    },
+    "types": {
+      "guest": "Invitado",
+      "party": "Fiesta",
+      "delivery": "Entrega",
+      "service": "Servicio",
+      "contractor": "Contratista"
+    },
+    "buttons": {
+      "createPass": "Crear Pase",
+      "refresh": "Actualizar"
+    },
+    "search": {
+      "placeholder": "Buscar visitante o código..."
+    }
+  },
+  "visitorAdd": {
+    "title": "Crear Pase de Visitante",
+    "success": {
+      "title": "¡Pase Creado!",
+      "message": "El pase de visitante para {name} ha sido creado exitosamente."
+    },
+    "form": {
+      "visitorName": "Nombre del Visitante",
+      "visitorType": "Tipo de Visitante",
+      "community": "Comunidad",
+      "property": "Propiedad",
+      "passValidity": "Validez del Pase",
+      "validUntil": "Válido Hasta",
+      "entriesAllowed": "Entradas Permitidas"
+    },
+    "validity": {
+      "single": "Una Entrada",
+      "day": "Solo Hoy",
+      "week": "Una Semana",
+      "custom": "Fecha Personalizada",
+      "unlimited": "Ilimitado"
+    },
+    "buttons": {
+      "generatePass": "Generar Pase",
+      "createAnother": "Crear Otro",
+      "viewAllPasses": "Ver Todos los Pases",
+      "cancel": "Cancelar"
+    }
+  },
   "Email": "Correo electrónico",
   "Password": "Contraseña",
   "Chat": "Chat",

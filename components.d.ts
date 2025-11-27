@@ -378,6 +378,7 @@ declare module 'vue' {
     PaymentProvidersDialog: typeof import('./src/components/dialogs/PaymentProvidersDialog.vue')['default']
     PricingPlanDialog: typeof import('./src/components/dialogs/PricingPlanDialog.vue')['default']
     ProductDescriptionEditor: typeof import('./src/@core/components/ProductDescriptionEditor.vue')['default']
+    QRCodeDisplay: typeof import('./src/components/QRCodeDisplay.vue')['default']
     ReferAndEarnDialog: typeof import('./src/components/dialogs/ReferAndEarnDialog.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']
     RouterView: typeof import('vue-router')['RouterView']

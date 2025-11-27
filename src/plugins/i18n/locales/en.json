@@ -67,6 +67,120 @@
   "Access Logs": "Access Logs",
   "Devices": "Devices",
   "Gate Control": "Gate Control",
+  "visitorList": {
+    "title": "Visitor Passes",
+    "widgets": {
+      "activePasses": "Active Passes",
+      "expired": "Expired",
+      "used": "Used",
+      "createdToday": "Created Today"
+    },
+    "filters": {
+      "title": "Filters",
+      "filterByCommunity": "Filter by Community",
+      "filterByType": "Filter by Type",
+      "filterByStatus": "Filter by Status"
+    },
+    "table": {
+      "visitor": "Visitor",
+      "host": "Host",
+      "community": "Community",
+      "property": "Property",
+      "type": "Type",
+      "status": "Status",
+      "validUntil": "Valid Until",
+      "actions": "Actions"
+    },
+    "status": {
+      "active": "Active",
+      "expired": "Expired",
+      "used": "Used"
+    },
+    "types": {
+      "guest": "Guest",
+      "party": "Party",
+      "delivery": "Delivery",
+      "service": "Service",
+      "contractor": "Contractor"
+    },
+    "actions": {
+      "viewQR": "View QR Code",
+      "viewDetails": "View Details",
+      "delete": "Delete"
+    },
+    "buttons": {
+      "createPass": "Create Pass",
+      "refresh": "Refresh"
+    },
+    "search": {
+      "placeholder": "Search visitor or code..."
+    },
+    "dialog": {
+      "title": "Visitor Pass Details",
+      "visitorName": "Visitor Name",
+      "passCode": "Pass Code",
+      "host": "Host",
+      "community": "Community",
+      "property": "Property",
+      "type": "Type",
+      "validUntil": "Valid Until",
+      "entries": "Entries",
+      "notes": "Notes",
+      "close": "Close"
+    },
+    "deleteDialog": {
+      "title": "Delete Visitor Pass",
+      "message": "Are you sure you want to delete the visitor pass for {name}? This action cannot be undone.",
+      "confirm": "Delete",
+      "cancel": "Cancel"
+    },
+    "messages": {
+      "deleteSuccess": "Visitor pass deleted successfully",
+      "deleteFailed": "Failed to delete visitor pass"
+    }
+  },
+  "visitorAdd": {
+    "title": "Create Visitor Pass",
+    "success": {
+      "title": "Pass Created!",
+      "message": "Visitor pass for {name} has been created successfully."
+    },
+    "form": {
+      "visitorName": "Visitor Name",
+      "visitorNamePlaceholder": "Enter visitor's full name",
+      "visitorType": "Visitor Type",
+      "community": "Community",
+      "property": "Property",
+      "passValidity": "Pass Validity",
+      "validUntil": "Valid Until",
+      "entriesAllowed": "Entries Allowed",
+      "documentNumber": "Document Number (Optional)",
+      "notes": "Notes (Optional)"
+    },
+    "validity": {
+      "single": "Single Entry",
+      "day": "Today Only",
+      "week": "One Week",
+      "custom": "Custom Date",
+      "unlimited": "Unlimited"
+    },
+    "buttons": {
+      "generatePass": "Generate Pass",
+      "createAnother": "Create Another",
+      "viewAllPasses": "View All Passes",
+      "cancel": "Cancel"
+    },
+    "validation": {
+      "visitorNameRequired": "Please enter visitor name",
+      "communityRequired": "Please select a community",
+      "propertyRequired": "Please select a property",
+      "validityEndRequired": "Please select a validity end date"
+    },
+    "messages": {
+      "createSuccess": "Visitor pass created successfully!",
+      "createFailed": "Failed to create visitor pass"
+    }
+  },
   "Email": "Email",
   "Password": "Password",
   "Chat": "Chat",

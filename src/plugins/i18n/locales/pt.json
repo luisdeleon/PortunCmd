@@ -616,5 +616,156 @@
       "confirm": "Alterar Status",
       "cancel": "Cancelar"
     }
+  },
+  "visitorList": {
+    "title": "Passes de Visitante",
+    "widgets": {
+      "activePasses": "Passes Ativos",
+      "expiredPasses": "Passes Expirados",
+      "usedPasses": "Passes Usados",
+      "createdToday": "Criados Hoje",
+      "validPasses": "Passes válidos",
+      "noLongerValid": "Não mais válido",
+      "usedAtLeastOnce": "Usado pelo menos uma vez",
+      "createdIn24h": "Criado nas últimas 24h"
+    },
+    "filters": {
+      "title": "Filtros",
+      "filterByCommunity": "Filtrar por Comunidade",
+      "filterByType": "Filtrar por Tipo",
+      "filterByStatus": "Filtrar por Status"
+    },
+    "table": {
+      "visitor": "Visitante",
+      "type": "Tipo",
+      "community": "Comunidade",
+      "property": "Propriedade",
+      "createdBy": "Criado Por",
+      "validUntil": "Válido Até",
+      "status": "Status",
+      "actions": "Ações"
+    },
+    "buttons": {
+      "export": "Exportar",
+      "createPass": "Criar Passe"
+    },
+    "search": {
+      "placeholder": "Buscar Visitante"
+    },
+    "types": {
+      "visitor": "Visitante",
+      "delivery": "Entrega",
+      "service": "Serviço",
+      "contractor": "Empreiteiro",
+      "family": "Família",
+      "guest": "Convidado"
+    },
+    "status": {
+      "active": "Ativo",
+      "expired": "Expirado",
+      "used": "Usado",
+      "revoked": "Revogado"
+    },
+    "actions": {
+      "view": "Visualizar",
+      "revoke": "Revogar",
+      "delete": "Excluir"
+    },
+    "deleteDialog": {
+      "title": "Excluir Passe de Visitante",
+      "message": "Tem certeza de que deseja excluir o passe para {name}? Esta ação não pode ser desfeita.",
+      "confirm": "Excluir",
+      "cancel": "Cancelar"
+    },
+    "viewDialog": {
+      "title": "Detalhes do Passe de Visitante",
+      "visitorName": "Nome do Visitante",
+      "type": "Tipo",
+      "community": "Comunidade",
+      "property": "Propriedade",
+      "createdBy": "Criado Por",
+      "createdAt": "Criado Em",
+      "validFrom": "Válido De",
+      "validUntil": "Válido Até",
+      "status": "Status",
+      "qrCode": "Código QR",
+      "downloadQR": "Baixar QR",
+      "close": "Fechar"
+    },
+    "messages": {
+      "deleteSuccess": "Passe de visitante excluído com sucesso",
+      "deleteFailed": "Falha ao excluir passe de visitante. Por favor, tente novamente.",
+      "revokeSuccess": "Passe de visitante revogado com sucesso",
+      "revokeFailed": "Falha ao revogar passe de visitante. Por favor, tente novamente."
+    },
+    "emptyState": {
+      "title": "Nenhum passe de visitante encontrado",
+      "description": "Crie seu primeiro passe de visitante para começar."
+    }
+  },
+  "visitorAdd": {
+    "title": "Criar Passe de Visitante",
+    "subtitle": "Crie um novo passe de acesso para visitantes",
+    "form": {
+      "visitorInfo": "Informações do Visitante",
+      "visitorName": "Nome do Visitante",
+      "visitorNameHint": "Nome completo do visitante",
+      "visitorType": "Tipo de Visitante",
+      "visitorTypeHint": "Selecione o tipo de visitante",
+      "accessDetails": "Detalhes de Acesso",
+      "community": "Comunidade",
+      "communityHint": "Selecione a comunidade",
+      "property": "Propriedade",
+      "propertyHint": "Selecione a propriedade",
+      "validity": "Validade",
+      "validityHint": "Selecione o período de validade",
+      "customDates": "Datas Personalizadas",
+      "validFrom": "Válido De",
+      "validUntil": "Válido Até",
+      "notes": "Notas",
+      "notesHint": "Notas ou instruções opcionais para o visitante"
+    },
+    "validityOptions": {
+      "single": "Uso Único",
+      "day": "1 Dia",
+      "week": "1 Semana",
+      "custom": "Personalizado",
+      "unlimited": "Ilimitado"
+    },
+    "types": {
+      "visitor": "Visitante",
+      "delivery": "Entrega",
+      "service": "Serviço",
+      "contractor": "Empreiteiro",
+      "family": "Família",
+      "guest": "Convidado"
+    },
+    "buttons": {
+      "create": "Criar Passe",
+      "cancel": "Cancelar",
+      "reset": "Limpar",
+      "createAnother": "Criar Outro",
+      "viewPasses": "Ver Passes"
+    },
+    "success": {
+      "title": "Passe Criado com Sucesso!",
+      "message": "O passe de visitante foi criado. Compartilhe o código QR com seu visitante.",
+      "visitorName": "Nome do Visitante",
+      "validUntil": "Válido Até",
+      "downloadQR": "Baixar QR"
+    },
+    "validation": {
+      "visitorNameRequired": "Nome do visitante é obrigatório",
+      "visitorTypeRequired": "Tipo de visitante é obrigatório",
+      "communityRequired": "Comunidade é obrigatória",
+      "propertyRequired": "Propriedade é obrigatória",
+      "validFromRequired": "Data de início é obrigatória",
+      "validUntilRequired": "Data de término é obrigatória",
+      "validUntilAfterFrom": "Data de término deve ser após a data de início"
+    },
+    "messages": {
+      "createSuccess": "Passe de visitante criado com sucesso",
+      "createFailed": "Falha ao criar passe de visitante. Por favor, tente novamente."
+    }
   }
 }
