@@ -38,6 +38,18 @@ const sortBy = ref()
 const orderBy = ref()
 const selectedRows = ref([])
 
+// Expanded rows for additional details (only one at a time)
+const expandedRows = ref<string[]>([])
+
+// Toggle row expansion on click (collapse others, only one open at a time)
+const toggleRowExpansion = (id: string) => {
+  if (expandedRows.value.includes(id)) {
+    expandedRows.value = []
+  } else {
+    expandedRows.value = [id]
+  }
+}
+
 // Update data table options
 const updateOptions = (options: any) => {
   console.log('updateOptions called with:', options)
@@ -1061,14 +1073,17 @@ const widgetData = computed(() => {
         v-model:items-per-page="itemsPerPage"
         v-model:model-value="selectedRows"
         v-model:page="page"
+        v-model:expanded="expandedRows"
         :items="users"
         item-value="id"
         :items-length="totalUsers"
         :headers="headers"
         :loading="isLoading"
-        class="text-no-wrap"
+        class="text-no-wrap cursor-pointer"
         show-select
+        show-expand
         @update:options="updateOptions"
+        @click:row="(_event: Event, row: any) => toggleRowExpansion(row.item.id)"
       >
         <!-- User -->
         <template #item.user="{ item }">
@@ -1102,26 +1117,24 @@ const widgetData = computed(() => {
 
         <!-- 👉 Community -->
         <template #item.community="{ item }">
-          <div class="d-flex flex-wrap gap-1">
+          <div class="d-flex align-center gap-1">
             <template v-if="item.communityList && item.communityList.length > 0">
               <VChip
-                v-for="comm in item.communityList.slice(0, 3)"
-                :key="comm.id"
                 size="small"
                 color="primary"
                 variant="tonal"
                 label
               >
-                {{ comm.name || comm.id }}
+                {{ item.communityList[0].name || item.communityList[0].id }}
               </VChip>
               <VChip
-                v-if="item.communityList.length > 3"
+                v-if="item.communityList.length > 1"
                 size="small"
                 color="secondary"
                 variant="tonal"
                 label
               >
-                +{{ item.communityList.length - 3 }}
+                +{{ item.communityList.length - 1 }}
               </VChip>
             </template>
             <span v-else class="text-body-2 text-disabled">N/A</span>
@@ -1144,26 +1157,24 @@ const widgetData = computed(() => {
 
         <!-- 👉 Property -->
         <template #item.property="{ item }">
-          <div class="d-flex flex-wrap gap-1">
+          <div class="d-flex align-center gap-1">
             <template v-if="item.propertyList && item.propertyList.length > 0">
               <VChip
-                v-for="prop in item.propertyList.slice(0, 3)"
-                :key="prop.id"
                 size="small"
                 color="success"
                 variant="tonal"
                 label
               >
-                {{ prop.name || prop.id }}
+                {{ item.propertyList[0].name || item.propertyList[0].id }}
               </VChip>
               <VChip
-                v-if="item.propertyList.length > 3"
+                v-if="item.propertyList.length > 1"
                 size="small"
                 color="secondary"
                 variant="tonal"
                 label
               >
-                +{{ item.propertyList.length - 3 }}
+                +{{ item.propertyList.length - 1 }}
               </VChip>
             </template>
             <span v-else class="text-body-2 text-disabled">N/A</span>
@@ -1182,67 +1193,176 @@ const widgetData = computed(() => {
 
         <!-- Actions -->
         <template #item.actions="{ item }">
-          <IconBtn :to="{ name: 'apps-user-view-id', params: { id: item.id } }">
-            <VIcon icon="tabler-eye" />
-            <VTooltip
-              activator="parent"
-              location="top"
+          <div class="d-flex">
+            <IconBtn
+              size="small"
+              :to="{ name: 'apps-user-view-id', params: { id: item.id } }"
             >
-              View User
-            </VTooltip>
-          </IconBtn>
+              <VIcon
+                icon="tabler-eye"
+                size="20"
+              />
+              <VTooltip
+                activator="parent"
+                location="top"
+              >
+                View User
+              </VTooltip>
+            </IconBtn>
 
-          <IconBtn
-            v-if="canManage"
-            @click="openAssignRoleDialog(item.id)"
-          >
-            <VIcon icon="tabler-shield-plus" />
-            <VTooltip
-              activator="parent"
-              location="top"
+            <IconBtn
+              v-if="canManage"
+              size="small"
+              @click="openAssignRoleDialog(item.id)"
             >
-              Assign Role
-            </VTooltip>
-          </IconBtn>
+              <VIcon
+                icon="tabler-shield-plus"
+                size="20"
+              />
+              <VTooltip
+                activator="parent"
+                location="top"
+              >
+                Assign Role
+              </VTooltip>
+            </IconBtn>
 
-          <IconBtn
-            v-if="canManage"
-            :to="{ name: 'apps-user-view-id', params: { id: item.id } }"
-          >
-            <VIcon icon="tabler-pencil" />
-            <VTooltip
-              activator="parent"
-              location="top"
+            <IconBtn
+              v-if="canManage"
+              size="small"
+              :to="{ name: 'apps-user-view-id', params: { id: item.id } }"
             >
-              Edit User
-            </VTooltip>
-          </IconBtn>
+              <VIcon
+                icon="tabler-pencil"
+                size="20"
+              />
+              <VTooltip
+                activator="parent"
+                location="top"
+              >
+                Edit User
+              </VTooltip>
+            </IconBtn>
 
-          <IconBtn
-            v-if="canManage"
-            @click="openStatusChangeDialog(item)"
-          >
-            <VIcon icon="tabler-replace" />
-            <VTooltip
-              activator="parent"
-              location="top"
+            <IconBtn
+              v-if="canManage"
+              size="small"
+              @click="openStatusChangeDialog(item)"
             >
-              Change Status
-            </VTooltip>
-          </IconBtn>
+              <VIcon
+                icon="tabler-replace"
+                size="20"
+              />
+              <VTooltip
+                activator="parent"
+                location="top"
+              >
+                Change Status
+              </VTooltip>
+            </IconBtn>
 
-          <IconBtn
-            v-if="canManage"
-            @click="openDeleteDialog(item)"
-          >
-            <VIcon icon="tabler-trash" />
-            <VTooltip
-              activator="parent"
-              location="top"
+            <IconBtn
+              v-if="canManage"
+              size="small"
+              @click="openDeleteDialog(item)"
             >
-              Delete User
-            </VTooltip>
-          </IconBtn>
+              <VIcon
+                icon="tabler-trash"
+                size="20"
+              />
+              <VTooltip
+                activator="parent"
+                location="top"
+              >
+                Delete User
+              </VTooltip>
+            </IconBtn>
+          </div>
+        </template>
+
+        <!-- Expanded Row Details -->
+        <template #expanded-row="{ item }">
+          <tr class="v-data-table__tr--expanded">
+            <td :colspan="headers.length + 2">
+              <div class="pa-4 d-flex flex-wrap gap-6">
+                <!-- All Communities -->
+                <div
+                  v-if="item.communityList && item.communityList.length > 0"
+                  class="d-flex flex-column gap-2"
+                >
+                  <div class="d-flex align-center gap-2">
+                    <VIcon
+                      icon="tabler-building-community"
+                      size="18"
+                      class="text-disabled"
+                    />
+                    <span class="text-body-2 text-disabled">Communities ({{ item.communityList.length }}):</span>
+                  </div>
+                  <div class="d-flex flex-wrap gap-1 ml-6">
+                    <VChip
+                      v-for="comm in item.communityList"
+                      :key="comm.id"
+                      size="small"
+                      color="primary"
+                      variant="tonal"
+                      label
+                    >
+                      {{ comm.name || comm.id }}
+                    </VChip>
+                  </div>
+                </div>
+
+                <!-- All Properties -->
+                <div
+                  v-if="item.propertyList && item.propertyList.length > 0"
+                  class="d-flex flex-column gap-2"
+                >
+                  <div class="d-flex align-center gap-2">
+                    <VIcon
+                      icon="tabler-home"
+                      size="18"
+                      class="text-disabled"
+                    />
+                    <span class="text-body-2 text-disabled">Properties ({{ item.propertyList.length }}):</span>
+                  </div>
+                  <div class="d-flex flex-wrap gap-1 ml-6">
+                    <VChip
+                      v-for="prop in item.propertyList"
+                      :key="prop.id"
+                      size="small"
+                      color="success"
+                      variant="tonal"
+                      label
+                    >
+                      {{ prop.name || prop.id }}
+                    </VChip>
+                  </div>
+                </div>
+
+                <!-- Scope Type -->
+                <div class="d-flex flex-column gap-2">
+                  <div class="d-flex align-center gap-2">
+                    <VIcon
+                      icon="tabler-hierarchy"
+                      size="18"
+                      class="text-disabled"
+                    />
+                    <span class="text-body-2 text-disabled">Scope:</span>
+                  </div>
+                  <div class="d-flex flex-wrap gap-1 ml-6">
+                    <VChip
+                      size="small"
+                      color="info"
+                      variant="tonal"
+                      label
+                    >
+                      {{ item.scopeType || 'N/A' }}
+                    </VChip>
+                  </div>
+                </div>
+              </div>
+            </td>
+          </tr>
         </template>
 
         <!-- pagination -->

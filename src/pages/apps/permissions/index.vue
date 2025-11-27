@@ -148,24 +148,23 @@ const editPermission = (name: string) => {
 
           <!-- Actions -->
           <template #item.actions="{ item }">
-            <VBtn
-              icon
-              size="small"
-              color="medium-emphasis"
-              variant="text"
-              @click="editPermission(item.name)"
-            >
-              <VIcon
-                size="22"
-                icon="tabler-edit"
-              />
-            </VBtn>
-            <IconBtn>
-              <VIcon
-                icon="tabler-dots-vertical"
-                size="22"
-              />
-            </IconBtn>
+            <div class="d-flex">
+              <IconBtn
+                size="small"
+                @click="editPermission(item.name)"
+              >
+                <VIcon
+                  size="20"
+                  icon="tabler-edit"
+                />
+              </IconBtn>
+              <IconBtn size="small">
+                <VIcon
+                  icon="tabler-dots-vertical"
+                  size="20"
+                />
+              </IconBtn>
+            </div>
           </template>
         </VDataTableServer>
       </VCard>

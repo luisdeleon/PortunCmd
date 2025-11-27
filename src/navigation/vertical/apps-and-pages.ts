@@ -42,27 +42,25 @@ export default [
     children: [
       { title: 'Active Passes', to: 'apps-visitor-list' },
       { title: 'Create Pass', to: 'apps-visitor-add' },
+      { title: 'Access Logs', to: 'apps-visitor-logs' },
       // { title: 'Scanner', to: 'apps-visitor-scanner' }, // For guards - TODO
     ],
   },
 
-  // Access Logs - TODO: Create this page
-  // {
-  //   title: 'Access Logs',
-  //   icon: { icon: 'tabler-list-check' },
-  //   to: 'apps-logs',
-  //   badgeContent: 'Soon',
-  //   badgeClass: 'bg-light-primary text-primary',
-  // },
-
-  { heading: 'Automation' },
+  {
+    heading: 'Automation',
+    action: 'read',
+    subject: 'automation',
+  },
 
   // Devices / IoT
   {
     title: 'Devices',
     icon: { icon: 'tabler-device-desktop' },
+    action: 'read',
+    subject: 'automation',
     children: [
-      { title: 'List', to: 'apps-devices-list' },
+      { title: 'List', to: 'apps-devices-list', action: 'read', subject: 'automation' },
       // { title: 'Add', to: 'apps-devices-add' },
       // { title: 'Gate Control', to: 'apps-devices-gate-control' },
     ],

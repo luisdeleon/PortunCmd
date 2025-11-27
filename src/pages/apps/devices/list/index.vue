@@ -7,6 +7,8 @@ definePage({
   meta: {
     public: false,
     navActiveLink: 'apps-devices-list',
+    action: 'read',
+    subject: 'automation',
   },
 })
 
@@ -862,54 +864,74 @@ const getDirectionColor = (direction: string) => {
 
         <!-- Actions -->
         <template #item.actions="{ item }">
-          <IconBtn @click="openViewDeviceDialog(item)">
-            <VIcon icon="tabler-eye" />
-            <VTooltip
-              activator="parent"
-              location="top"
+          <div class="d-flex">
+            <IconBtn
+              size="small"
+              @click="openViewDeviceDialog(item)"
             >
-              View Device
-            </VTooltip>
-          </IconBtn>
+              <VIcon
+                icon="tabler-eye"
+                size="20"
+              />
+              <VTooltip
+                activator="parent"
+                location="top"
+              >
+                View Device
+              </VTooltip>
+            </IconBtn>
 
-          <IconBtn
-            v-if="canManage"
-            @click="openEditDeviceDialog(item)"
-          >
-            <VIcon icon="tabler-pencil" />
-            <VTooltip
-              activator="parent"
-              location="top"
+            <IconBtn
+              v-if="canManage"
+              size="small"
+              @click="openEditDeviceDialog(item)"
             >
-              Edit Device
-            </VTooltip>
-          </IconBtn>
+              <VIcon
+                icon="tabler-pencil"
+                size="20"
+              />
+              <VTooltip
+                activator="parent"
+                location="top"
+              >
+                Edit Device
+              </VTooltip>
+            </IconBtn>
 
-          <IconBtn
-            v-if="canManage"
-            @click="openDuplicateDeviceDialog(item)"
-          >
-            <VIcon icon="tabler-copy" />
-            <VTooltip
-              activator="parent"
-              location="top"
+            <IconBtn
+              v-if="canManage"
+              size="small"
+              @click="openDuplicateDeviceDialog(item)"
             >
-              Duplicate Device
-            </VTooltip>
-          </IconBtn>
+              <VIcon
+                icon="tabler-copy"
+                size="20"
+              />
+              <VTooltip
+                activator="parent"
+                location="top"
+              >
+                Duplicate Device
+              </VTooltip>
+            </IconBtn>
 
-          <IconBtn
-            v-if="canManage"
-            @click="openDeleteDialog(item)"
-          >
-            <VIcon icon="tabler-trash" />
-            <VTooltip
-              activator="parent"
-              location="top"
+            <IconBtn
+              v-if="canManage"
+              size="small"
+              @click="openDeleteDialog(item)"
             >
-              Delete Device
-            </VTooltip>
-          </IconBtn>
+              <VIcon
+                icon="tabler-trash"
+                size="20"
+              />
+              <VTooltip
+                activator="parent"
+                location="top"
+              >
+                Delete Device
+              </VTooltip>
+            </IconBtn>
+          </div>
         </template>
 
         <!-- pagination -->

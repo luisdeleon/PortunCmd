@@ -885,54 +885,74 @@ const widgetData = computed(() => {
 
         <!-- Actions -->
         <template #item.actions="{ item }">
-          <IconBtn @click="openViewCommunityDialog(item)">
-            <VIcon icon="tabler-eye" />
-            <VTooltip
-              activator="parent"
-              location="top"
+          <div class="d-flex">
+            <IconBtn
+              size="small"
+              @click="openViewCommunityDialog(item)"
             >
-              View Community
-            </VTooltip>
-          </IconBtn>
+              <VIcon
+                icon="tabler-eye"
+                size="20"
+              />
+              <VTooltip
+                activator="parent"
+                location="top"
+              >
+                View Community
+              </VTooltip>
+            </IconBtn>
 
-          <IconBtn
-            v-if="canManage"
-            @click="openEditCommunityDialog(item)"
-          >
-            <VIcon icon="tabler-pencil" />
-            <VTooltip
-              activator="parent"
-              location="top"
+            <IconBtn
+              v-if="canManage"
+              size="small"
+              @click="openEditCommunityDialog(item)"
             >
-              Edit Community
-            </VTooltip>
-          </IconBtn>
+              <VIcon
+                icon="tabler-pencil"
+                size="20"
+              />
+              <VTooltip
+                activator="parent"
+                location="top"
+              >
+                Edit Community
+              </VTooltip>
+            </IconBtn>
 
-          <IconBtn
-            v-if="canManage"
-            @click="openStatusChangeDialog(item)"
-          >
-            <VIcon icon="tabler-replace" />
-            <VTooltip
-              activator="parent"
-              location="top"
+            <IconBtn
+              v-if="canManage"
+              size="small"
+              @click="openStatusChangeDialog(item)"
             >
-              Change Status
-            </VTooltip>
-          </IconBtn>
+              <VIcon
+                icon="tabler-replace"
+                size="20"
+              />
+              <VTooltip
+                activator="parent"
+                location="top"
+              >
+                Change Status
+              </VTooltip>
+            </IconBtn>
 
-          <IconBtn
-            v-if="canManage"
-            @click="openDeleteDialog(item)"
-          >
-            <VIcon icon="tabler-trash" />
-            <VTooltip
-              activator="parent"
-              location="top"
+            <IconBtn
+              v-if="canManage"
+              size="small"
+              @click="openDeleteDialog(item)"
             >
-              Delete Community
-            </VTooltip>
-          </IconBtn>
+              <VIcon
+                icon="tabler-trash"
+                size="20"
+              />
+              <VTooltip
+                activator="parent"
+                location="top"
+              >
+                Delete Community
+              </VTooltip>
+            </IconBtn>
+          </div>
         </template>
 
         <!-- pagination -->

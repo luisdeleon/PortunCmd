@@ -82,21 +82,15 @@ const totalExpired = ref(0)
 const totalUsed = ref(0)
 const totalToday = ref(0)
 
-// Devices data
-const devices = ref<any[]>([])
-const totalDevices = ref(0)
-const isLoadingDevices = ref(false)
-
-// Expanded rows for additional details
+// Expanded rows for additional details (only one at a time)
 const expandedRows = ref<string[]>([])
 
-// Toggle row expansion on click
+// Toggle row expansion on click (collapse others, only one open at a time)
 const toggleRowExpansion = (id: string) => {
-  const index = expandedRows.value.indexOf(id)
-  if (index === -1) {
-    expandedRows.value = [...expandedRows.value, id]
+  if (expandedRows.value.includes(id)) {
+    expandedRows.value = []
   } else {
-    expandedRows.value = expandedRows.value.filter(rowId => rowId !== id)
+    expandedRows.value = [id]
   }
 }
 
@@ -326,52 +320,6 @@ const fetchStats = async () => {
   }
 }
 
-// Fetch devices for the user's communities
-const fetchDevices = async () => {
-  try {
-    isLoadingDevices.value = true
-
-    let query = supabase
-      .from('automation_devices')
-      .select(`
-        id,
-        device_name,
-        device_brand,
-        device_model,
-        direction_type,
-        community_id,
-        enabled,
-        guest_access,
-        community:community_id(id, name)
-      `, { count: 'exact' })
-
-    // Apply role-based scoping
-    if (!isSuperAdmin.value) {
-      const scope = userScope.value
-
-      if (scope.scopeCommunityIds?.length > 0) {
-        query = query.in('community_id', scope.scopeCommunityIds)
-      }
-    }
-
-    query = query.order('device_name')
-
-    const { data, error, count } = await query
-
-    if (error) {
-      console.error('Error fetching devices:', error)
-      return
-    }
-
-    devices.value = data || []
-    totalDevices.value = count || 0
-  } catch (err) {
-    console.error('Error in fetchDevices:', err)
-  } finally {
-    isLoadingDevices.value = false
-  }
-}
-
 // View visitor details
 const viewVisitor = (visitor: any) => {
   selectedVisitor.value = visitor
@@ -487,7 +435,6 @@ onMounted(() => {
   fetchVisitors()
   fetchCommunities()
   fetchStats()
-  fetchDevices()
 })
 
 // Watch for filter changes
@@ -567,130 +514,6 @@ const widgetData = computed(() => [
         </template>
       </VRow>
     </div>
-
-    <!-- Devices Card -->
-    <VCard
-      v-if="totalDevices > 0"
-      class="mb-6"
-    >
-      <VCardItem class="pb-2">
-        <template #prepend>
-          <VAvatar
-            color="primary"
-            variant="tonal"
-            rounded
-            size="42"
-          >
-            <VIcon
-              icon="tabler-device-desktop"
-              size="26"
-            />
-          </VAvatar>
-        </template>
-        <VCardTitle>Automation Devices</VCardTitle>
-        <VCardSubtitle>{{ totalDevices }} device{{ totalDevices === 1 ? '' : 's' }} in your communities</VCardSubtitle>
-        <template #append>
-          <VBtn
-            variant="tonal"
-            color="primary"
-            size="small"
-            to="/apps/devices/list"
-          >
-            View All
-          </VBtn>
-        </template>
-      </VCardItem>
-
-      <VDivider />
-
-      <VCardText class="pa-0">
-        <VTable
-          density="comfortable"
-          class="text-no-wrap"
-        >
-          <thead>
-            <tr>
-              <th>Device</th>
-              <th>Community</th>
-              <th>Direction</th>
-              <th>Status</th>
-              <th>Guest Access</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr
-              v-for="device in devices.slice(0, 5)"
-              :key="device.id"
-            >
-              <td>
-                <div class="d-flex align-center gap-2">
-                  <VAvatar
-                    size="30"
-                    color="primary"
-                    variant="tonal"
-                  >
-                    <VIcon
-                      icon="tabler-device-desktop"
-                      size="18"
-                    />
-                  </VAvatar>
-                  <div>
-                    <span class="text-body-1 font-weight-medium">{{ device.device_name || 'Unnamed' }}</span>
-                    <div class="text-sm text-disabled">{{ device.device_brand }} {{ device.device_model }}</div>
-                  </div>
-                </div>
-              </td>
-              <td>{{ device.community?.name || device.community_id || 'N/A' }}</td>
-              <td>
-                <VChip
-                  :color="device.direction_type === 'Enter' ? 'success' : device.direction_type === 'Exit' ? 'warning' : 'info'"
-                  size="small"
-                  label
-                >
-                  {{ device.direction_type || 'N/A' }}
-                </VChip>
-              </td>
-              <td>
-                <VChip
-                  :color="device.enabled ? 'success' : 'error'"
-                  size="small"
-                  label
-                >
-                  {{ device.enabled ? 'Enabled' : 'Disabled' }}
-                </VChip>
-              </td>
-              <td>
-                <VChip
-                  :color="device.guest_access ? 'info' : 'warning'"
-                  size="small"
-                  label
-                >
-                  {{ device.guest_access ? 'Allowed' : 'Denied' }}
-                </VChip>
-              </td>
-            </tr>
-          </tbody>
-        </VTable>
-        <div
-          v-if="totalDevices > 5"
-          class="text-center py-3"
-        >
-          <VBtn
-            variant="text"
-            color="primary"
-            size="small"
-            to="/apps/devices/list"
-          >
-            View all {{ totalDevices }} devices
-            <VIcon
-              icon="tabler-arrow-right"
-              size="18"
-              class="ml-1"
-            />
-          </VBtn>
-        </div>
-      </VCardText>
-    </VCard>
 
     <!-- Filters Card -->
     <VCard class="mb-6">
@@ -874,38 +697,56 @@ const widgetData = computed(() => [
 
         <!-- Actions -->
         <template #item.actions="{ item }">
-          <IconBtn @click="viewVisitor(item)">
-            <VIcon icon="tabler-qrcode" />
-            <VTooltip
-              activator="parent"
-              location="top"
+          <div class="d-flex">
+            <IconBtn
+              size="small"
+              @click="viewVisitor(item)"
             >
-              View QR Code
-            </VTooltip>
-          </IconBtn>
+              <VIcon
+                icon="tabler-qrcode"
+                size="20"
+              />
+              <VTooltip
+                activator="parent"
+                location="top"
+              >
+                View QR Code
+              </VTooltip>
+            </IconBtn>
 
-          <IconBtn @click="viewVisitor(item)">
-            <VIcon icon="tabler-eye" />
-            <VTooltip
-              activator="parent"
-              location="top"
+            <IconBtn
+              size="small"
+              @click="viewVisitor(item)"
             >
-              View Details
-            </VTooltip>
-          </IconBtn>
+              <VIcon
+                icon="tabler-eye"
+                size="20"
+              />
+              <VTooltip
+                activator="parent"
+                location="top"
+              >
+                View Details
+              </VTooltip>
+            </IconBtn>
 
-          <IconBtn
-            v-if="canManage || item.host_uid === userData?.id"
-            @click="openDeleteDialog(item)"
-          >
-            <VIcon icon="tabler-trash" />
-            <VTooltip
-              activator="parent"
-              location="top"
+            <IconBtn
+              v-if="canManage || item.host_uid === userData?.id"
+              size="small"
+              @click="openDeleteDialog(item)"
             >
-              Delete
-            </VTooltip>
-          </IconBtn>
+              <VIcon
+                icon="tabler-trash"
+                size="20"
+              />
+              <VTooltip
+                activator="parent"
+                location="top"
+              >
+                Delete
+              </VTooltip>
+            </IconBtn>
+          </div>
         </template>
 
         <!-- Expanded Row Details -->
