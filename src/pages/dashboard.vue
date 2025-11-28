@@ -3,7 +3,7 @@
 import PortunCmdCommunitiesCard from '@/views/dashboards/portuncmd/PortunCmdCommunitiesCard.vue'
 import PortunCmdPropertiesCard from '@/views/dashboards/portuncmd/PortunCmdPropertiesCard.vue'
 import PortunCmdUsersCard from '@/views/dashboards/portuncmd/PortunCmdUsersCard.vue'
-import PortunCmdRolesCard from '@/views/dashboards/portuncmd/PortunCmdRolesCard.vue'
+import PortunCmdActiveVisitorsCard from '@/views/dashboards/portuncmd/PortunCmdActiveVisitorsCard.vue'
 import PortunCmdCommunitiesByCountry from '@/views/dashboards/portuncmd/PortunCmdCommunitiesByCountry.vue'
 import PortunCmdCommunitiesStatusCard from '@/views/dashboards/portuncmd/PortunCmdCommunitiesStatusCard.vue'
 import PortunCmdPropertiesStatusCard from '@/views/dashboards/portuncmd/PortunCmdPropertiesStatusCard.vue'
@@ -51,14 +51,14 @@ definePage({
       <PortunCmdUsersCard />
     </VCol>
 
-    <!-- 👉 Roles Card with Area Chart -->
+    <!-- 👉 Active Visitors Card with Area Chart -->
     <VCol
       cols="12"
       md="6"
       sm="6"
       lg="3"
     >
-      <PortunCmdRolesCard />
+      <PortunCmdActiveVisitorsCard />
     </VCol>
 
     <!-- 👉 Communities by Country -->

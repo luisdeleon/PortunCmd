@@ -168,6 +168,8 @@ const assignProperties = async () => {
     const newIds = [...new Set([...existingIds, ...selectedProperties.value])]
 
     // Update profile_role with new property IDs
+    // Note: scope_type should be set when assigning communities, not properties
+    // Properties are secondary to communities for scope
     const { error: updateError } = await supabase
       .from('profile_role')
       .update({ scope_property_ids: newIds })

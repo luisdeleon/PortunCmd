@@ -190,75 +190,37 @@ const onSubmit = async () => {
   try {
     isSaving.value = true
 
-    // First, create the user in Supabase Auth using signUp
-    const { data: authData, error: authError } = await supabase.auth.signUp({
-      email: userForm.value.email,
-      password: userForm.value.password,
-      options: {
-        data: {
-          full_name: userForm.value.display_name,
-        },
+    // Get the current session token for authorization
+    const { data: sessionData } = await supabase.auth.getSession()
+    if (!sessionData.session) {
+      throw new Error('Not authenticated')
+    }
+
+    // Call the Edge Function to create user (doesn't affect current session)
+    const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-user`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `Bearer ${sessionData.session.access_token}`,
       },
-    })
-
-    if (authError) throw authError
-    if (!authData.user) throw new Error('User creation failed')
-
-    const userId = authData.user.id
-
-    // Update profile (profile is auto-created by trigger, so we update it)
-    const { error: profileError } = await supabase
-      .from('profile')
-      .update({
+      body: JSON.stringify({
+        email: userForm.value.email,
+        password: userForm.value.password,
         display_name: userForm.value.display_name,
         enabled: userForm.value.enabled,
         language: userForm.value.language,
         def_community_id: userForm.value.def_community_id || null,
         def_property_id: userForm.value.def_property_id || null,
-      })
-      .eq('id', userId)
+        communities: userForm.value.communities,
+        properties: userForm.value.properties,
+        roles: userForm.value.roles,
+      }),
+    })
 
-    if (profileError) throw profileError
+    const result = await response.json()
 
-    // Assign roles
-    if (userForm.value.roles.length > 0) {
-      const roleAssignments = userForm.value.roles.map(roleId => ({
-        profile_id: userId,
-        role_id: roleId,
-      }))
-
-      const { error: roleError } = await supabase
-        .from('profile_role')
-        .insert(roleAssignments)
-
-      if (roleError) throw roleError
-    }
-
-    // Assign properties (via property_owner table)
-    // Note: Community assignments via community_manager require specific property context
-    // and should be done separately after user creation
-    if (userForm.value.properties.length > 0) {
-      // First, get the community_id for each property
-      const { data: propertyData, error: fetchError } = await supabase
-        .from('property')
-        .select('id, community_id')
-        .in('id', userForm.value.properties)
-
-      if (fetchError) throw fetchError
-
-      const propertyAssignments = propertyData?.map(property => ({
-        profile_id: userId,
-        property_id: property.id,
-        community_id: property.community_id,
-      })) || []
-
-      if (propertyAssignments.length > 0) {
-        const { error: propertyError } = await supabase
-          .from('property_owner')
-          .insert(propertyAssignments)
-
-        if (propertyError) throw propertyError
-      }
+    if (!response.ok) {
+      throw new Error(result.error || 'Failed to create user')
     }
 
     // Success

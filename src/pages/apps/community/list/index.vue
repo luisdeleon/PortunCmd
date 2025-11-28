@@ -1083,19 +1083,19 @@ const widgetData = computed(() => {
 
           <div class="d-flex gap-4 justify-center">
             <VBtn
-              color="error"
-              variant="elevated"
-              @click="bulkDeleteCommunities"
-            >
-              Delete All
-            </VBtn>
-
-            <VBtn
               color="secondary"
               variant="tonal"
               @click="cancelBulkDelete"
             >
               Cancel
+            </VBtn>
+
+            <VBtn
+              color="error"
+              variant="elevated"
+              @click="bulkDeleteCommunities"
+            >
+              Delete All
             </VBtn>
           </div>
         </VCardText>

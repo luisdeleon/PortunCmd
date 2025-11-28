@@ -73,8 +73,13 @@ const statusOptions = [
 // Dialog state
 const isViewDialogVisible = ref(false)
 const isDeleteDialogVisible = ref(false)
+const isBulkDeleteDialogVisible = ref(false)
 const selectedVisitor = ref<any>(null)
 const snackbar = ref({ show: false, message: '', color: 'success' })
+
+// Bulk selection
+const selectedRows = ref<string[]>([])
+const isDeleting = ref(false)
 
 // Stats
 const totalActive = ref(0)
@@ -332,11 +337,25 @@ const openDeleteDialog = (visitor: any) => {
   isDeleteDialogVisible.value = true
 }
 
-// Delete visitor pass
+// Delete visitor pass (with cascade delete for logs)
 const deleteVisitor = async () => {
   if (!selectedVisitor.value) return
 
   try {
+    isDeleting.value = true
+
+    // First, delete associated logs (cascade)
+    const { error: logsError } = await supabase
+      .from('visitor_record_logs')
+      .delete()
+      .eq('record_uid', selectedVisitor.value.record_uid)
+
+    if (logsError) {
+      console.error('Error deleting visitor logs:', logsError)
+      // Continue even if logs deletion fails (may not have any logs)
+    }
+
+    // Then delete the visitor record
     const { error } = await supabase
       .from('visitor_records_uid')
       .delete()
@@ -369,6 +388,76 @@ const deleteVisitor = async () => {
       message: 'Failed to delete visitor pass',
       color: 'error',
     }
+  } finally {
+    isDeleting.value = false
+  }
+}
+
+// Open bulk delete dialog
+const openBulkDeleteDialog = () => {
+  if (selectedRows.value.length === 0) return
+  isBulkDeleteDialogVisible.value = true
+}
+
+// Bulk delete visitor passes (with cascade delete for logs)
+const bulkDeleteVisitors = async () => {
+  if (selectedRows.value.length === 0) return
+
+  try {
+    isDeleting.value = true
+
+    // Get the record_uids for the selected visitors to delete their logs
+    const selectedVisitors = visitors.value.filter(v => selectedRows.value.includes(v.id))
+    const recordUids = selectedVisitors.map(v => v.record_uid).filter(Boolean)
+
+    // First, delete associated logs for all selected visitors (cascade)
+    if (recordUids.length > 0) {
+      const { error: logsError } = await supabase
+        .from('visitor_record_logs')
+        .delete()
+        .in('record_uid', recordUids)
+
+      if (logsError) {
+        console.error('Error deleting visitor logs:', logsError)
+        // Continue even if logs deletion fails
+      }
+    }
+
+    // Then delete the visitor records
+    const { error } = await supabase
+      .from('visitor_records_uid')
+      .delete()
+      .in('id', selectedRows.value)
+
+    if (error) {
+      console.error('Error bulk deleting visitors:', error)
+      snackbar.value = {
+        show: true,
+        message: 'Failed to delete visitor passes',
+        color: 'error',
+      }
+      return
+    }
+
+    snackbar.value = {
+      show: true,
+      message: `Successfully deleted ${selectedRows.value.length} visitor pass(es)`,
+      color: 'success',
+    }
+
+    isBulkDeleteDialogVisible.value = false
+    selectedRows.value = []
+    fetchVisitors()
+    fetchStats()
+  } catch (err) {
+    console.error('Error in bulkDeleteVisitors:', err)
+    snackbar.value = {
+      show: true,
+      message: 'Failed to delete visitor passes',
+      color: 'error',
+    }
+  } finally {
+    isDeleting.value = false
   }
 }
 
@@ -595,6 +684,17 @@ const widgetData = computed(() => [
             />
           </div>
 
+          <!-- Bulk delete button (visible when rows selected) -->
+          <VBtn
+            v-if="canManage && selectedRows.length > 0"
+            color="error"
+            variant="tonal"
+            prepend-icon="tabler-trash"
+            @click="openBulkDeleteDialog"
+          >
+            Delete ({{ selectedRows.length }})
+          </VBtn>
+
           <!-- Refresh button -->
           <VBtn
             variant="tonal"
@@ -620,12 +720,14 @@ const widgetData = computed(() => [
         v-model:items-per-page="itemsPerPage"
         v-model:page="page"
         v-model:expanded="expandedRows"
+        v-model="selectedRows"
         :items="visitors"
         item-value="id"
         :items-length="totalVisitors"
         :headers="headers"
         :loading="isLoading"
         show-expand
+        show-select
         class="text-no-wrap cursor-pointer"
         @update:options="updateOptions"
         @click:row="(_event: Event, row: any) => toggleRowExpansion(row.item.id)"
@@ -1018,9 +1120,65 @@ const widgetData = computed(() => [
             <VBtn
               color="error"
               variant="elevated"
+              :loading="isDeleting"
               @click="deleteVisitor"
             >
               Delete
+            </VBtn>
+          </div>
+        </VCardText>
+      </VCard>
+    </VDialog>
+
+    <!-- Bulk Delete Confirmation Dialog -->
+    <VDialog
+      v-model="isBulkDeleteDialogVisible"
+      max-width="500"
+    >
+      <VCard>
+        <VCardText class="text-center px-10 py-6">
+          <VIcon
+            icon="tabler-trash"
+            color="error"
+            size="56"
+            class="my-4"
+          />
+
+          <h6 class="text-h6 mb-4">
+            Delete Multiple Visitor Passes
+          </h6>
+
+          <p class="text-body-1 mb-4">
+            Are you sure you want to delete <strong>{{ selectedRows.length }}</strong> visitor pass(es)?
+            This action cannot be undone.
+          </p>
+
+          <VAlert
+            color="warning"
+            variant="tonal"
+            class="mb-6 text-start"
+          >
+            <div class="text-body-2">
+              All associated entry/exit logs will also be deleted.
+            </div>
+          </VAlert>
+
+          <div class="d-flex gap-4 justify-center">
+            <VBtn
+              color="secondary"
+              variant="tonal"
+              @click="isBulkDeleteDialogVisible = false"
+            >
+              Cancel
+            </VBtn>
+
+            <VBtn
+              color="error"
+              variant="elevated"
+              :loading="isDeleting"
+              @click="bulkDeleteVisitors"
+            >
+              Delete All
             </VBtn>
           </div>
         </VCardText>

@@ -660,10 +660,10 @@ const deleteUser = async () => {
 
     // Check if the function returned an error
     if (data && !data.success) {
-      console.error('Error deleting user:', data.message)
+      console.error('Error deleting user:', data.error)
       snackbar.value = {
         show: true,
-        message: data.message || t('userList.messages.deleteFailed'),
+        message: data.error || t('userList.messages.deleteFailed'),
         color: 'error',
       }
       isDeleteDialogVisible.value = false
@@ -776,7 +776,7 @@ const bulkDeleteUsers = async () => {
           errors.push(`Failed to delete user ${userId}: ${error.message}`)
         } else if (data && !data.success) {
           errorCount++
-          errors.push(`Failed to delete user ${userId}: ${data.message}`)
+          errors.push(`Failed to delete user ${userId}: ${data.error}`)
         } else {
           successCount++
         }
@@ -1190,15 +1190,20 @@ const widgetData = computed(() => {
 
         <!-- 👉 Community -->
         <template #item.community="{ item }">
-          <div class="d-flex align-center gap-1">
+          <div class="d-flex align-center gap-1" style="max-width: 180px;">
             <template v-if="item.communityList && item.communityList.length > 0">
               <VChip
                 size="small"
                 color="primary"
                 variant="tonal"
                 label
+                class="text-truncate"
+                style="max-width: 120px;"
               >
-                {{ item.communityList[0].name || item.communityList[0].id }}
+                <span class="text-truncate">{{ item.communityList[0].name || item.communityList[0].id }}</span>
+                <VTooltip activator="parent" location="top">
+                  {{ item.communityList[0].name || item.communityList[0].id }}
+                </VTooltip>
               </VChip>
               <VChip
                 v-if="item.communityList.length > 1"
@@ -1230,15 +1235,20 @@ const widgetData = computed(() => {
 
         <!-- 👉 Property -->
         <template #item.property="{ item }">
-          <div class="d-flex align-center gap-1">
+          <div class="d-flex align-center gap-1" style="max-width: 180px;">
             <template v-if="item.propertyList && item.propertyList.length > 0">
               <VChip
                 size="small"
                 color="success"
                 variant="tonal"
                 label
+                class="text-truncate"
+                style="max-width: 120px;"
               >
-                {{ item.propertyList[0].name || item.propertyList[0].id }}
+                <span class="text-truncate">{{ item.propertyList[0].name || item.propertyList[0].id }}</span>
+                <VTooltip activator="parent" location="top">
+                  {{ item.propertyList[0].name || item.propertyList[0].id }}
+                </VTooltip>
               </VChip>
               <VChip
                 v-if="item.propertyList.length > 1"
@@ -1562,19 +1572,19 @@ const widgetData = computed(() => {
 
           <div class="d-flex gap-4 justify-center">
             <VBtn
-              color="error"
-              variant="elevated"
-              @click="bulkDeleteUsers"
-            >
-              Delete All
-            </VBtn>
-
-            <VBtn
               color="secondary"
               variant="tonal"
               @click="cancelBulkDelete"
             >
               Cancel
+            </VBtn>
+
+            <VBtn
+              color="error"
+              variant="elevated"
+              @click="bulkDeleteUsers"
+            >
+              Delete All
             </VBtn>
           </div>
         </VCardText>

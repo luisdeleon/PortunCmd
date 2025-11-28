@@ -129,10 +129,13 @@ const assignCommunities = async () => {
     const existingIds = profileRole.scope_community_ids || []
     const newIds = [...new Set([...existingIds, ...selectedCommunities.value])]
 
-    // Update profile_role with new community IDs
+    // Update profile_role with new community IDs and set scope_type to 'community'
     const { error: updateError } = await supabase
       .from('profile_role')
-      .update({ scope_community_ids: newIds })
+      .update({
+        scope_community_ids: newIds,
+        scope_type: 'community'
+      })
       .eq('id', profileRole.id)
 
     if (updateError) {
