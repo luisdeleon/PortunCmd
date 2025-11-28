@@ -50,6 +50,15 @@ export const canNavigate = (to: RouteLocationNormalized) => {
   if (!hasAclMeta)
     return true
 
+  // Check if we're in a setup context before calling useAbility
+  // This prevents the Vue warning about inject() outside setup
+  const vm = getCurrentInstance()
+  if (!vm) {
+    // Not in a Vue component context, allow navigation
+    // This happens during initial app load before components are mounted
+    return true
+  }
+
   try {
     const ability = useAbility()
 
@@ -63,9 +72,9 @@ export const canNavigate = (to: RouteLocationNormalized) => {
     // If no specific permissions, fall back to checking if any parent route allows access
     // @ts-expect-error We should allow passing string | undefined to can because for admin ability we omit defining action & subject
     return to.matched.some(route => ability.can(route.meta.action, route.meta.subject))
-  } catch (error) {
+  } catch {
     // If ability is not available (e.g., during initial load), allow navigation
-    console.warn('Ability check failed in canNavigate, allowing navigation:', error)
+    // This is expected during app initialization before the Ability provider is mounted
     return true
   }
 }

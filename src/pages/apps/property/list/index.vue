@@ -57,17 +57,17 @@ const bulkStatusForm = ref({
 })
 
 // Status filter options
-const statusOptions = [
-  { title: 'Active', value: 'active' },
-  { title: 'Vacant', value: 'vacant' },
-  { title: 'Access Restricted', value: 'access-restricted' },
-  { title: 'Maintenance', value: 'maintenance' },
-  { title: 'Emergency Lockdown', value: 'emergency-lockdown' },
-  { title: 'Guest Mode', value: 'guest-mode' },
-  { title: 'Out of Service', value: 'out-of-service' },
-  { title: 'Deactivated', value: 'deactivated' },
-  { title: 'Archived', value: 'archived' },
-]
+const statusOptions = computed(() => [
+  { title: t('propertyList.status.active'), value: 'active' },
+  { title: t('propertyList.status.vacant'), value: 'vacant' },
+  { title: t('propertyList.status.accessRestricted'), value: 'access-restricted' },
+  { title: t('propertyList.status.maintenance'), value: 'maintenance' },
+  { title: t('propertyList.status.emergencyLockdown'), value: 'emergency-lockdown' },
+  { title: t('propertyList.status.guestMode'), value: 'guest-mode' },
+  { title: t('propertyList.status.outOfService'), value: 'out-of-service' },
+  { title: t('propertyList.status.deactivated'), value: 'deactivated' },
+  { title: t('propertyList.status.archived'), value: 'archived' },
+])
 
 // Computed property for bulk delete button visibility
 const hasSelectedRows = computed(() => selectedRows.value.length > 0)
@@ -79,14 +79,14 @@ const updateOptions = (options: any) => {
 }
 
 // Headers
-const headers = [
-  { title: 'Community', key: 'community_id' },
-  { title: 'Property ID', key: 'id' },
-  { title: 'Name', key: 'name' },
-  { title: 'Address', key: 'address' },
-  { title: 'Status', key: 'status' },
-  { title: 'Actions', key: 'actions', sortable: false },
-]
+const headers = computed(() => [
+  { title: t('propertyList.table.community'), key: 'community_id' },
+  { title: t('propertyList.table.propertyId'), key: 'id' },
+  { title: t('propertyList.table.name'), key: 'name' },
+  { title: t('propertyList.table.address'), key: 'address' },
+  { title: t('propertyList.table.status'), key: 'status' },
+  { title: t('propertyList.table.actions'), key: 'actions', sortable: false },
+])
 
 // 👉 Fetching properties from Supabase
 const properties = ref([])
@@ -537,10 +537,10 @@ const widgetData = computed(() => {
 
   return [
     {
-      title: 'Total Properties',
+      title: t('propertyList.widgets.totalProperties'),
       value: totalProperties.value.toLocaleString(),
       change: growthPercentage,
-      desc: 'Last 30 days growth',
+      desc: t('propertyList.widgets.last30DaysGrowth'),
       icon: 'tabler-home',
       iconColor: 'success'
     },
@@ -605,7 +605,7 @@ const widgetData = computed(() => {
 
     <VCard class="mb-6">
       <VCardItem class="pb-4">
-        <VCardTitle>Properties</VCardTitle>
+        <VCardTitle>{{ t('propertyList.title') }}</VCardTitle>
       </VCardItem>
 
       <VCardText>
@@ -617,7 +617,7 @@ const widgetData = computed(() => {
           >
             <AppSelect
               v-model="selectedCommunity"
-              placeholder="Filter by Community"
+              :placeholder="t('propertyList.filters.filterByCommunity')"
               :items="communities"
               clearable
               clear-icon="tabler-x"
@@ -630,7 +630,7 @@ const widgetData = computed(() => {
           >
             <AppSelect
               v-model="selectedStatus"
-              placeholder="Filter by Status"
+              :placeholder="t('propertyList.filters.filterByStatus')"
               :items="statusOptions"
               clearable
               clear-icon="tabler-x"
@@ -664,7 +664,7 @@ const widgetData = computed(() => {
             prepend-icon="tabler-replace"
             @click="openBulkStatusUpdateDialog"
           >
-            Update Status ({{ selectedRows.length }})
+            {{ t('propertyList.buttons.updateStatus') }} ({{ selectedRows.length }})
           </VBtn>
 
           <!-- 👉 Bulk Delete button (shown when items are selected) -->
@@ -675,7 +675,7 @@ const widgetData = computed(() => {
             prepend-icon="tabler-trash"
             @click="openBulkDeleteDialog"
           >
-            Delete ({{ selectedRows.length }})
+            {{ t('propertyList.buttons.delete') }} ({{ selectedRows.length }})
           </VBtn>
         </div>
         <VSpacer />
@@ -685,7 +685,7 @@ const widgetData = computed(() => {
           <div style="inline-size: 15.625rem;">
             <AppTextField
               v-model="searchQuery"
-              placeholder="Search properties..."
+              :placeholder="t('propertyList.search.placeholder')"
               clearable
               clear-icon="tabler-x"
             />
@@ -707,7 +707,7 @@ const widgetData = computed(() => {
             prepend-icon="tabler-download"
             @click="openImportDialog"
           >
-            Import
+            {{ t('propertyList.buttons.import') }}
           </VBtn>
 
           <!-- 👉 Add property button -->
@@ -716,7 +716,7 @@ const widgetData = computed(() => {
             prepend-icon="tabler-plus"
             @click="openAddPropertyDialog"
           >
-            Add Property
+            {{ t('propertyList.buttons.addProperty') }}
           </VBtn>
         </div>
       </VCardText>
@@ -810,7 +810,7 @@ const widgetData = computed(() => {
                 activator="parent"
                 location="top"
               >
-                View Property
+                {{ t('propertyList.actions.view') }}
               </VTooltip>
             </IconBtn>
 
@@ -827,7 +827,7 @@ const widgetData = computed(() => {
                 activator="parent"
                 location="top"
               >
-                Edit Property
+                {{ t('propertyList.actions.edit') }}
               </VTooltip>
             </IconBtn>
 
@@ -844,7 +844,7 @@ const widgetData = computed(() => {
                 activator="parent"
                 location="top"
               >
-                Change Status
+                {{ t('propertyList.actions.changeStatus') }}
               </VTooltip>
             </IconBtn>
 
@@ -861,7 +861,7 @@ const widgetData = computed(() => {
                 activator="parent"
                 location="top"
               >
-                Delete Property
+                {{ t('propertyList.actions.delete') }}
               </VTooltip>
             </IconBtn>
           </div>
@@ -935,12 +935,11 @@ const widgetData = computed(() => {
           </VBtn>
 
           <h6 class="text-h6 mb-4">
-            Delete Property
+            {{ t('propertyList.deleteDialog.title') }}
           </h6>
 
           <p class="text-body-1 mb-6">
-            Are you sure you want to delete <strong>{{ propertyToDelete?.name }}</strong>?
-            This action cannot be undone.
+            {{ t('propertyList.deleteDialog.message', { name: propertyToDelete?.name }) }}
           </p>
 
           <div class="d-flex gap-4 justify-center">
@@ -949,7 +948,7 @@ const widgetData = computed(() => {
               variant="tonal"
               @click="cancelDelete"
             >
-              Cancel
+              {{ t('propertyList.deleteDialog.cancel') }}
             </VBtn>
 
             <VBtn
@@ -957,7 +956,7 @@ const widgetData = computed(() => {
               variant="elevated"
               @click="deleteProperty"
             >
-              Delete
+              {{ t('propertyList.deleteDialog.confirm') }}
             </VBtn>
           </div>
         </VCardText>
@@ -979,13 +978,11 @@ const widgetData = computed(() => {
           />
 
           <h6 class="text-h6 mb-4">
-            Delete Multiple Properties
+            {{ t('propertyList.bulkDeleteDialog.title') }}
           </h6>
 
           <p class="text-body-1 mb-6">
-            Are you sure you want to delete <strong>{{ selectedRows.length }}</strong>
-            {{ selectedRows.length === 1 ? 'property' : 'properties' }}?
-            This action cannot be undone.
+            {{ t('propertyList.bulkDeleteDialog.message', { count: selectedRows.length, entity: selectedRows.length === 1 ? t('common.property') : t('common.properties') }) }}
           </p>
 
           <VAlert
@@ -994,9 +991,7 @@ const widgetData = computed(() => {
             class="mb-6 text-start"
           >
             <div class="text-body-2">
-              You are about to permanently delete <strong>{{ selectedRows.length }}</strong>
-              {{ selectedRows.length === 1 ? 'property' : 'properties' }}.
-              This will remove all associated data.
+              {{ t('propertyList.bulkDeleteDialog.warning', { count: selectedRows.length, entity: selectedRows.length === 1 ? t('common.property') : t('common.properties') }) }}
             </div>
           </VAlert>
 
@@ -1006,7 +1001,7 @@ const widgetData = computed(() => {
               variant="tonal"
               @click="cancelBulkDelete"
             >
-              Cancel
+              {{ t('propertyList.bulkDeleteDialog.cancel') }}
             </VBtn>
 
             <VBtn
@@ -1014,7 +1009,7 @@ const widgetData = computed(() => {
               variant="elevated"
               @click="bulkDeleteProperties"
             >
-              Delete All
+              {{ t('propertyList.bulkDeleteDialog.confirm') }}
             </VBtn>
           </div>
         </VCardText>
@@ -1034,7 +1029,7 @@ const widgetData = computed(() => {
               size="24"
               color="warning"
             />
-            Update Status for {{ selectedRows.length }} {{ selectedRows.length === 1 ? 'Property' : 'Properties' }}
+            {{ t('propertyList.bulkStatusDialog.title', { count: selectedRows.length, entity: selectedRows.length === 1 ? t('common.property') : t('common.properties') }) }}
           </div>
         </VCardTitle>
 
@@ -1049,8 +1044,7 @@ const widgetData = computed(() => {
                 class="mb-4"
               >
                 <div class="text-body-2">
-                  You are about to update the status for <strong>{{ selectedRows.length }}</strong>
-                  {{ selectedRows.length === 1 ? 'property' : 'properties' }}.
+                  {{ t('propertyList.bulkStatusDialog.message', { count: selectedRows.length, entity: selectedRows.length === 1 ? t('common.property') : t('common.properties') }) }}
                 </div>
               </VAlert>
             </VCol>
@@ -1059,8 +1053,8 @@ const widgetData = computed(() => {
             <VCol cols="12">
               <AppSelect
                 v-model="bulkStatusForm.newStatus"
-                label="New Status *"
-                placeholder="Select new status"
+                :label="t('propertyList.bulkStatusDialog.newStatus')"
+                :placeholder="t('propertyList.bulkStatusDialog.selectStatus')"
                 :items="statusOptions"
               >
                 <template #prepend-inner>
@@ -1073,8 +1067,8 @@ const widgetData = computed(() => {
             <VCol cols="12">
               <AppTextarea
                 v-model="bulkStatusForm.reason"
-                label="Reason (Optional)"
-                placeholder="Enter reason for status change"
+                :label="t('propertyList.bulkStatusDialog.reason')"
+                :placeholder="t('propertyList.bulkStatusDialog.reasonPlaceholder')"
                 rows="3"
               >
                 <template #prepend-inner>
@@ -1094,7 +1088,7 @@ const widgetData = computed(() => {
             variant="tonal"
             @click="cancelBulkStatusUpdate"
           >
-            Cancel
+            {{ t('propertyList.bulkStatusDialog.cancel') }}
           </VBtn>
           <VBtn
             color="warning"
@@ -1102,7 +1096,7 @@ const widgetData = computed(() => {
             :disabled="!bulkStatusForm.newStatus"
             @click="bulkUpdateStatus"
           >
-            Update All
+            {{ t('propertyList.bulkStatusDialog.confirm') }}
           </VBtn>
         </VCardActions>
       </VCard>

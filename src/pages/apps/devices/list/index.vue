@@ -3,6 +3,8 @@ import { supabase } from '@/lib/supabase'
 import AddEditDeviceDialog from '@/components/dialogs/AddEditDeviceDialog.vue'
 import ViewDeviceDialog from '@/components/dialogs/ViewDeviceDialog.vue'
 
+const { t } = useI18n({ useScope: 'global' })
+
 definePage({
   meta: {
     public: false,
@@ -46,15 +48,15 @@ const updateOptions = (options: any) => {
 }
 
 // Headers
-const headers = [
-  { title: 'Device Name', key: 'device_name' },
-  { title: 'Community', key: 'community_id' },
-  { title: 'Brand / Model', key: 'device_brand', sortable: false },
-  { title: 'Direction', key: 'direction_type' },
-  { title: 'Status', key: 'enabled' },
-  { title: 'Guest Access', key: 'guest_access' },
-  { title: 'Actions', key: 'actions', sortable: false },
-]
+const headers = computed(() => [
+  { title: t('deviceList.table.deviceName'), key: 'device_name' },
+  { title: t('deviceList.table.community'), key: 'community_id' },
+  { title: t('deviceList.table.brandModel'), key: 'device_brand', sortable: false },
+  { title: t('deviceList.table.direction'), key: 'direction_type' },
+  { title: t('deviceList.table.status'), key: 'enabled' },
+  { title: t('deviceList.table.guestAccess'), key: 'guest_access' },
+  { title: t('deviceList.table.actions'), key: 'actions', sortable: false },
+])
 
 // 👉 Fetching devices from Supabase
 const devices = ref<any[]>([])
@@ -192,17 +194,17 @@ const communities = ref<{ title: string; value: string }[]>([])
 const brands = ref<{ title: string; value: string }[]>([])
 
 // Direction options
-const directionOptions = [
-  { title: 'Enter', value: 'Enter' },
-  { title: 'Exit', value: 'Exit' },
-  { title: 'Both', value: 'Both' },
-]
+const directionOptions = computed(() => [
+  { title: t('deviceList.direction.enter'), value: 'Enter' },
+  { title: t('deviceList.direction.exit'), value: 'Exit' },
+  { title: t('deviceList.direction.both'), value: 'Both' },
+])
 
 // Status filter options
-const statusOptions = [
-  { title: 'Enabled', value: 'enabled' },
-  { title: 'Disabled', value: 'disabled' },
-]
+const statusOptions = computed(() => [
+  { title: t('deviceList.status.enabled'), value: 'enabled' },
+  { title: t('deviceList.status.disabled'), value: 'disabled' },
+])
 
 // Fetch unique communities for filter (scoped by user role)
 const fetchCommunities = async () => {
@@ -555,18 +557,18 @@ const widgetData = computed(() => {
 
   return [
     {
-      title: 'Total Devices',
+      title: t('deviceList.widgets.totalDevices'),
       value: totalDevices.value.toLocaleString(),
       change: growthPercentage,
-      desc: 'Last 30 days growth',
+      desc: t('deviceList.widgets.last30DaysGrowth'),
       icon: 'tabler-device-desktop',
       iconColor: 'primary',
     },
     {
-      title: 'Active Devices',
+      title: t('deviceList.widgets.activeDevices'),
       value: enabledCount.toLocaleString(),
       change: totalDevices.value > 0 ? Math.round((enabledCount / totalDevices.value) * 100) : 0,
-      desc: 'Of total devices',
+      desc: t('deviceList.widgets.ofTotalDevices'),
       icon: 'tabler-toggle-right',
       iconColor: 'success',
     },
@@ -645,7 +647,7 @@ const getDirectionColor = (direction: string) => {
 
     <VCard class="mb-6">
       <VCardItem class="pb-4">
-        <VCardTitle>Automation Devices</VCardTitle>
+        <VCardTitle>{{ t('deviceList.title') }}</VCardTitle>
       </VCardItem>
 
       <VCardText>
@@ -657,7 +659,7 @@ const getDirectionColor = (direction: string) => {
           >
             <VAutocomplete
               v-model="selectedCommunity"
-              placeholder="Filter by Community"
+              :placeholder="t('deviceList.filters.filterByCommunity')"
               :items="communities"
               clearable
               clear-icon="tabler-x"
@@ -671,7 +673,7 @@ const getDirectionColor = (direction: string) => {
           >
             <AppSelect
               v-model="selectedBrand"
-              placeholder="Filter by Brand"
+              :placeholder="t('deviceList.filters.filterByBrand')"
               :items="brands"
               clearable
               clear-icon="tabler-x"
@@ -684,7 +686,7 @@ const getDirectionColor = (direction: string) => {
           >
             <AppSelect
               v-model="selectedDirection"
-              placeholder="Filter by Direction"
+              :placeholder="t('deviceList.filters.filterByDirection')"
               :items="directionOptions"
               clearable
               clear-icon="tabler-x"
@@ -697,7 +699,7 @@ const getDirectionColor = (direction: string) => {
           >
             <AppSelect
               v-model="selectedStatus"
-              placeholder="Filter by Status"
+              :placeholder="t('deviceList.filters.filterByStatus')"
               :items="statusOptions"
               clearable
               clear-icon="tabler-x"
@@ -731,7 +733,7 @@ const getDirectionColor = (direction: string) => {
             prepend-icon="tabler-trash"
             @click="openBulkDeleteDialog"
           >
-            Delete ({{ selectedRows.length }})
+            {{ t('Delete') }} ({{ selectedRows.length }})
           </VBtn>
         </div>
         <VSpacer />
@@ -741,7 +743,7 @@ const getDirectionColor = (direction: string) => {
           <div style="inline-size: 15.625rem;">
             <AppTextField
               v-model="searchQuery"
-              placeholder="Search devices..."
+              :placeholder="t('deviceList.search.placeholder')"
               clearable
               clear-icon="tabler-x"
             />
@@ -761,7 +763,7 @@ const getDirectionColor = (direction: string) => {
             prepend-icon="tabler-plus"
             @click="openAddDeviceDialog"
           >
-            Add Device
+            {{ t('deviceList.buttons.addDevice') }}
           </VBtn>
         </div>
       </VCardText>
@@ -845,7 +847,7 @@ const getDirectionColor = (direction: string) => {
             :style="canManage ? 'cursor: pointer' : ''"
             @click="canManage && toggleDeviceStatus(item)"
           >
-            {{ item.enabled ? 'Enabled' : 'Disabled' }}
+            {{ item.enabled ? t('deviceList.status.enabled') : t('deviceList.status.disabled') }}
           </VChip>
         </template>
 
@@ -858,7 +860,7 @@ const getDirectionColor = (direction: string) => {
             :style="canManage ? 'cursor: pointer' : ''"
             @click="canManage && toggleGuestAccess(item)"
           >
-            {{ item.guest_access ? 'Allowed' : 'Denied' }}
+            {{ item.guest_access ? t('deviceList.guestAccess.allowed') : t('deviceList.guestAccess.denied') }}
           </VChip>
         </template>
 
@@ -877,7 +879,7 @@ const getDirectionColor = (direction: string) => {
                 activator="parent"
                 location="top"
               >
-                View Device
+                {{ t('deviceList.actions.view') }}
               </VTooltip>
             </IconBtn>
 
@@ -894,7 +896,7 @@ const getDirectionColor = (direction: string) => {
                 activator="parent"
                 location="top"
               >
-                Edit Device
+                {{ t('deviceList.actions.edit') }}
               </VTooltip>
             </IconBtn>
 
@@ -911,7 +913,7 @@ const getDirectionColor = (direction: string) => {
                 activator="parent"
                 location="top"
               >
-                Duplicate Device
+                {{ t('deviceList.actions.duplicate') }}
               </VTooltip>
             </IconBtn>
 
@@ -928,7 +930,7 @@ const getDirectionColor = (direction: string) => {
                 activator="parent"
                 location="top"
               >
-                Delete Device
+                {{ t('deviceList.actions.delete') }}
               </VTooltip>
             </IconBtn>
           </div>
@@ -983,11 +985,11 @@ const getDirectionColor = (direction: string) => {
           />
 
           <h6 class="text-h6 mb-4">
-            Delete Device
+            {{ t('deviceList.deleteDialog.title') }}
           </h6>
 
           <p class="text-body-1 mb-6">
-            Are you sure you want to delete <strong>{{ deviceToDelete?.name }}</strong>? This action cannot be undone.
+            {{ t('deviceList.deleteDialog.message', { name: deviceToDelete?.name }) }}
           </p>
 
           <div class="d-flex gap-4 justify-center">
@@ -996,7 +998,7 @@ const getDirectionColor = (direction: string) => {
               variant="tonal"
               @click="cancelDelete"
             >
-              Cancel
+              {{ t('deviceList.deleteDialog.cancel') }}
             </VBtn>
 
             <VBtn
@@ -1004,7 +1006,7 @@ const getDirectionColor = (direction: string) => {
               variant="elevated"
               @click="deleteDevice"
             >
-              Delete
+              {{ t('deviceList.deleteDialog.confirm') }}
             </VBtn>
           </div>
         </VCardText>
@@ -1026,13 +1028,11 @@ const getDirectionColor = (direction: string) => {
           />
 
           <h6 class="text-h6 mb-4">
-            Delete Multiple Devices
+            {{ t('deviceList.bulkDeleteDialog.title') }}
           </h6>
 
           <p class="text-body-1 mb-6">
-            Are you sure you want to delete <strong>{{ selectedRows.length }}</strong>
-            {{ selectedRows.length === 1 ? 'device' : 'devices' }}?
-            This action cannot be undone.
+            {{ t('deviceList.bulkDeleteDialog.message', { count: selectedRows.length, entity: selectedRows.length === 1 ? 'device' : 'devices' }) }}
           </p>
 
           <VAlert
@@ -1041,8 +1041,7 @@ const getDirectionColor = (direction: string) => {
             class="mb-6 text-start"
           >
             <div class="text-body-2">
-              You are about to permanently delete <strong>{{ selectedRows.length }}</strong>
-              {{ selectedRows.length === 1 ? 'device' : 'devices' }}.
+              {{ t('deviceList.bulkDeleteDialog.warning', { count: selectedRows.length, entity: selectedRows.length === 1 ? 'device' : 'devices' }) }}
             </div>
           </VAlert>
 
@@ -1052,7 +1051,7 @@ const getDirectionColor = (direction: string) => {
               variant="tonal"
               @click="cancelBulkDelete"
             >
-              Cancel
+              {{ t('deviceList.bulkDeleteDialog.cancel') }}
             </VBtn>
 
             <VBtn
@@ -1060,7 +1059,7 @@ const getDirectionColor = (direction: string) => {
               variant="elevated"
               @click="bulkDeleteDevices"
             >
-              Delete All
+              {{ t('deviceList.bulkDeleteDialog.confirm') }}
             </VBtn>
           </div>
         </VCardText>

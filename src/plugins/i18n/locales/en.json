@@ -1220,7 +1220,12 @@
     "error": "Error",
     "success": "Success",
     "warning": "Warning",
-    "info": "Info"
+    "info": "Info",
+    "property": "property",
+    "properties": "properties",
+    "community": "community",
+    "communities": "communities",
+    "notAvailable": "N/A"
   },
 
   "status": {
@@ -1385,6 +1390,269 @@
       "showVolume": "Show Volume",
       "enterFullscreen": "Enter Fullscreen",
       "volume": "Volume"
+    }
+  },
+
+  "communityDialog": {
+    "addTitle": "Add New Community",
+    "editTitle": "Edit Community",
+    "addSubtitle": "Create a new community",
+    "editSubtitle": "Update community information",
+    "sections": {
+      "basicInfo": "Basic Information",
+      "location": "Location Details",
+      "mapsCoordinates": "Maps & Coordinates"
+    },
+    "fields": {
+      "communityId": "Community ID",
+      "communityIdPlaceholder": "Leave empty for auto-generated ID",
+      "communityIdHint": "Optional: Enter a custom ID or leave empty for auto-generation",
+      "communityName": "Community Name",
+      "communityNamePlaceholder": "Enter community name",
+      "streetAddress": "Street Address",
+      "streetAddressPlaceholder": "Enter street address",
+      "city": "City",
+      "cityPlaceholder": "Enter city",
+      "postalCode": "Postal Code",
+      "postalCodePlaceholder": "Enter postal code",
+      "stateProvince": "State/Province",
+      "stateProvincePlaceholder": "Select or search state",
+      "stateProvinceRegion": "State/Province/Region",
+      "stateProvinceRegionPlaceholder": "Enter state, province, or region",
+      "country": "Country",
+      "countryPlaceholder": "Select or search country",
+      "geolocation": "Geolocation",
+      "geolocationPlaceholder": "Enter coordinates (e.g., 40.7128, -74.0060)",
+      "geolocationHint": "Format: latitude, longitude",
+      "googleMapsUrl": "Google Maps URL",
+      "googleMapsUrlPlaceholder": "https://maps.google.com/..."
+    },
+    "buttons": {
+      "cancel": "Cancel",
+      "create": "Create Community",
+      "update": "Update Community",
+      "saving": "Saving..."
+    },
+    "validation": {
+      "required": "This field is required"
+    }
+  },
+
+  "propertyDialog": {
+    "addTitle": "Add New Property",
+    "editTitle": "Edit Property",
+    "addSubtitle": "Create a new property",
+    "editSubtitle": "Update property information",
+    "sections": {
+      "basicInfo": "Basic Information",
+      "communityAssignment": "Community Assignment"
+    },
+    "fields": {
+      "propertyId": "Property ID",
+      "propertyIdPlaceholder": "Leave empty for auto-generated ID",
+      "propertyIdHint": "Optional: Enter a custom ID or leave empty for auto-generation",
+      "propertyName": "Property Name",
+      "propertyNamePlaceholder": "Enter property name (e.g., Apt 101, House 5)",
+      "address": "Address",
+      "addressPlaceholder": "Enter property address",
+      "community": "Community",
+      "communityPlaceholder": "Select community",
+      "communityHint": "Every property must belong to a community"
+    },
+    "buttons": {
+      "cancel": "Cancel",
+      "create": "Create Property",
+      "update": "Update Property",
+      "saving": "Saving..."
+    },
+    "validation": {
+      "required": "This field is required"
+    }
+  },
+
+  "userForm": {
+    "title": "Add New User",
+    "subtitle": "Create a new user account and assign communities, properties, and roles",
+    "addTitle": "Add New User",
+    "editTitle": "Edit User",
+    "addSubtitle": "Create a new user account and assign communities, properties, and roles",
+    "editSubtitle": "Update user account information",
+    "sections": {
+      "basicInfo": "Basic Information",
+      "roleAssignment": "Role Assignment",
+      "communityPropertyAssignment": "Communities & Properties Assignment",
+      "communitiesPropertiesAssignment": "Communities & Properties Assignment"
+    },
+    "fields": {
+      "email": "Email *",
+      "emailPlaceholder": "Enter email address",
+      "displayName": "Display Name *",
+      "displayNamePlaceholder": "Enter display name",
+      "password": "Password *",
+      "passwordPlaceholder": "Enter password (min. 8 characters)",
+      "verifyPassword": "Verify Password *",
+      "verifyPasswordPlaceholder": "Re-enter password",
+      "language": "Language",
+      "userEnabled": "User Enabled",
+      "roles": "Roles",
+      "rolesPlaceholder": "Select roles",
+      "rolesHint": "Select one or more roles for this user",
+      "defaultCommunity": "Default Community",
+      "defaultCommunityPlaceholder": "Select default community",
+      "communities": "Communities",
+      "communitiesPlaceholder": "Select communities",
+      "communitiesHint": "Assign this user to one or more communities",
+      "defaultProperty": "Default Property",
+      "defaultPropertyPlaceholder": "Select default property",
+      "properties": "Properties",
+      "propertiesPlaceholder": "Select properties",
+      "propertiesHint": "Assign this user to one or more properties"
+    },
+    "languages": {
+      "english": "English",
+      "spanish": "Spanish",
+      "portuguese": "Portuguese"
+    },
+    "buttons": {
+      "cancel": "Cancel",
+      "create": "Create User",
+      "creating": "Creating User...",
+      "update": "Update User",
+      "saving": "Saving..."
+    },
+    "validation": {
+      "required": "This field is required",
+      "invalidEmail": "Invalid email address",
+      "emailInvalid": "Please enter a valid email address",
+      "passwordRequired": "Password is required",
+      "passwordMinLength": "Password must be at least 8 characters",
+      "passwordMin": "Password must be at least 8 characters",
+      "verifyPassword": "Please verify your password",
+      "passwordMismatch": "Passwords do not match",
+      "passwordsMatch": "Passwords must match"
+    },
+    "messages": {
+      "noPermission": "You do not have permission to create users",
+      "createSuccess": "User created successfully",
+      "createError": "Failed to create user"
+    }
+  },
+
+  "importPropertyDialog": {
+    "title": "Import Properties",
+    "subtitle": "Upload a CSV file to bulk import properties",
+    "previewTitle": "Preview Import Data",
+    "previewSubtitle": "Review the data before importing",
+    "instructions": {
+      "title": "Instructions",
+      "step1": "Download the CSV template to see the required format",
+      "step2": "Fill in the property details (ID is optional)",
+      "step3": "Required columns: name, address, community_id",
+      "step4": "Save the file and upload it below",
+      "step5": "Existing properties (by ID) will be updated, new ones will be created"
+    },
+    "upload": {
+      "dropOrClick": "Drop CSV file here or click to browse",
+      "supportedFormat": "Supported format: .csv"
+    },
+    "preview": {
+      "willBeImported": "will be imported",
+      "reviewData": "Review the data below and click \"Confirm Import\" to proceed."
+    },
+    "table": {
+      "propertyId": "Property ID",
+      "name": "Name",
+      "address": "Address",
+      "communityId": "Community ID",
+      "autoGenerated": "Auto-generated"
+    },
+    "results": {
+      "success": "Import Completed Successfully",
+      "withErrors": "Import Completed with Errors",
+      "totalRows": "Total rows",
+      "successfullyImported": "Successfully imported",
+      "failed": "Failed",
+      "viewErrorDetails": "View Error Details",
+      "row": "Row",
+      "data": "Data"
+    },
+    "errors": {
+      "parseError": "Failed to Parse CSV"
+    },
+    "buttons": {
+      "downloadTemplate": "Download CSV Template",
+      "removeFile": "Remove File",
+      "cancel": "Cancel",
+      "back": "Back",
+      "close": "Close",
+      "previewData": "Preview Data",
+      "confirmImport": "Confirm Import",
+      "importing": "Importing...",
+      "done": "Done"
+    }
+  },
+
+  "deviceDialog": {
+    "addTitle": "Add New Device",
+    "editTitle": "Edit Device",
+    "addSubtitle": "Configure a new automation device",
+    "editSubtitle": "Update automation device configuration",
+    "sections": {
+      "basicInfo": "Basic Information",
+      "deviceIdentifiers": "Device Identifiers",
+      "apiConfiguration": "API Configuration",
+      "relayConfiguration": "Relay Configuration",
+      "location": "Location",
+      "statusAccess": "Status & Access"
+    },
+    "fields": {
+      "deviceName": "Device Name *",
+      "deviceNamePlaceholder": "Enter device name",
+      "community": "Community *",
+      "communityPlaceholder": "Select community",
+      "brand": "Brand",
+      "brandPlaceholder": "Select brand",
+      "model": "Model",
+      "modelPlaceholder": "Select model",
+      "deviceIdIn": "Device ID (In)",
+      "deviceIdInHint": "Hardware ID for entry relay",
+      "deviceIdOut": "Device ID (Out)",
+      "deviceIdOutHint": "Hardware ID for exit relay",
+      "apiUrl": "API URL",
+      "apiEndpoint": "API Endpoint",
+      "authKey": "Auth Key",
+      "authKeyPlaceholder": "Enter authentication key",
+      "authKeyProtectedHint": "Auth key is protected. Click eye to reveal partial key.",
+      "directionType": "Direction Type",
+      "directionTypePlaceholder": "Select direction",
+      "turnAction": "Turn Action",
+      "turnActionPlaceholder": "Select action",
+      "entryChannel": "Entry Channel",
+      "exitChannel": "Exit Channel",
+      "channelPlaceholder": "Select channel",
+      "geolocation": "Geolocation",
+      "geolocationHint": "Format: latitude, longitude",
+      "deviceEnabled": "Device Enabled",
+      "guestAccessAllowed": "Guest Access Allowed"
+    },
+    "options": {
+      "other": "Other",
+      "enter": "Enter",
+      "exit": "Exit",
+      "both": "Both",
+      "on": "On",
+      "off": "Off",
+      "toggle": "Toggle",
+      "channel": "Channel {n}"
+    },
+    "buttons": {
+      "cancel": "Cancel",
+      "create": "Create Device",
+      "update": "Update Device",
+      "saving": "Saving..."
+    },
+    "validation": {
+      "required": "This field is required"
     }
   }
 }

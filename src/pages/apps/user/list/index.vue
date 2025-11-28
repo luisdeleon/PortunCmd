@@ -91,10 +91,8 @@ const toggleRowExpansion = (id: string) => {
 
 // Update data table options
 const updateOptions = (options: any) => {
-  console.log('updateOptions called with:', options)
   sortBy.value = options.sortBy[0]?.key
   orderBy.value = options.sortBy[0]?.order
-  console.log('sortBy:', sortBy.value, 'orderBy:', orderBy.value)
 }
 
 // Headers
@@ -188,11 +186,9 @@ const fetchUsers = async () => {
 
       const dbColumn = columnMap[sortBy.value] || sortBy.value
       const ascending = orderBy.value !== 'desc'
-      console.log(`Sorting by: ${dbColumn}, ascending: ${ascending}`)
       query = query.order(dbColumn, { ascending })
     } else {
       // Default sorting by display_name
-      console.log('Using default sort: display_name ascending')
       query = query.order('display_name', { ascending: true })
     }
 

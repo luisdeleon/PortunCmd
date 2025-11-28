@@ -116,7 +116,7 @@ const chartConfig = computed(() => ({
     borderRadius: 4,
   },
   stroke: {
-    curve: 'smooth',
+    curve: ['smooth', 'monotoneCubic'],
     width: [0, 3],
     lineCap: 'round',
   },

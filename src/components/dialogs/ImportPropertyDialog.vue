@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { usePropertyImport, type ImportResult, type PropertyImportRow } from '@/composables/usePropertyImport'
 
+const { t } = useI18n({ useScope: 'global' })
+
 interface Props {
   isDialogVisible: boolean
 }
@@ -164,12 +166,12 @@ const downloadTemplateFile = () => {
 }
 
 // Data table headers for preview
-const previewHeaders = [
-  { title: 'Property ID', key: 'id', width: '150px' },
-  { title: 'Name', key: 'name', width: '200px' },
-  { title: 'Address', key: 'address', width: '300px' },
-  { title: 'Community ID', key: 'community_id', width: '150px' },
-]
+const previewHeaders = computed(() => [
+  { title: t('importPropertyDialog.table.propertyId'), key: 'id', width: '150px' },
+  { title: t('importPropertyDialog.table.name'), key: 'name', width: '200px' },
+  { title: t('importPropertyDialog.table.address'), key: 'address', width: '300px' },
+  { title: t('importPropertyDialog.table.communityId'), key: 'community_id', width: '150px' },
+])
 </script>
 
 <template>
@@ -197,10 +199,10 @@ const previewHeaders = [
             />
           </VAvatar>
           <h4 class="text-h4 mb-2">
-            {{ showPreview ? 'Preview Import Data' : 'Import Properties' }}
+            {{ showPreview ? t('importPropertyDialog.previewTitle') : t('importPropertyDialog.title') }}
           </h4>
           <p class="text-body-1 text-medium-emphasis">
-            {{ showPreview ? 'Review the data before importing' : 'Upload a CSV file to bulk import properties' }}
+            {{ showPreview ? t('importPropertyDialog.previewSubtitle') : t('importPropertyDialog.subtitle') }}
           </p>
         </div>
 
@@ -212,21 +214,21 @@ const previewHeaders = [
           class="mb-6"
         >
           <VAlertTitle class="mb-2">
-            {{ importResult.success ? 'Import Completed Successfully' : 'Import Completed with Errors' }}
+            {{ importResult.success ? t('importPropertyDialog.results.success') : t('importPropertyDialog.results.withErrors') }}
           </VAlertTitle>
 
           <div class="text-body-2">
             <div class="mb-2">
-              <strong>Total rows:</strong> {{ importResult.totalRows }}
+              <strong>{{ t('importPropertyDialog.results.totalRows') }}:</strong> {{ importResult.totalRows }}
             </div>
             <div class="mb-2">
-              <strong>Successfully imported:</strong> {{ importResult.successCount }}
+              <strong>{{ t('importPropertyDialog.results.successfullyImported') }}:</strong> {{ importResult.successCount }}
             </div>
             <div
               v-if="importResult.errorCount > 0"
               class="mb-2"
             >
-              <strong>Failed:</strong> {{ importResult.errorCount }}
+              <strong>{{ t('importPropertyDialog.results.failed') }}:</strong> {{ importResult.errorCount }}
             </div>
           </div>
 
@@ -237,7 +239,7 @@ const previewHeaders = [
           >
             <VExpansionPanels>
               <VExpansionPanel
-                title="View Error Details"
+                :title="t('importPropertyDialog.results.viewErrorDetails')"
                 expand-icon="tabler-chevron-down"
               >
                 <VExpansionPanelText>
@@ -248,13 +250,13 @@ const previewHeaders = [
                     style="background-color: rgba(var(--v-theme-error), 0.1); border-radius: 4px;"
                   >
                     <div class="text-caption">
-                      <strong>Row {{ error.row }}:</strong> {{ error.error }}
+                      <strong>{{ t('importPropertyDialog.results.row') }} {{ error.row }}:</strong> {{ error.error }}
                     </div>
                     <div
                       v-if="error.data"
                       class="text-caption text-medium-emphasis mt-1"
                     >
-                      Data: {{ JSON.stringify(error.data) }}
+                      {{ t('importPropertyDialog.results.data') }}: {{ JSON.stringify(error.data) }}
                     </div>
                   </div>
                 </VExpansionPanelText>
@@ -271,7 +273,7 @@ const previewHeaders = [
           class="mb-6"
         >
           <VAlertTitle class="mb-2">
-            Failed to Parse CSV
+            {{ t('importPropertyDialog.errors.parseError') }}
           </VAlertTitle>
           <div class="text-body-2">
             {{ parseError }}
@@ -292,8 +294,8 @@ const previewHeaders = [
                   size="20"
                 />
                 <div class="text-body-2">
-                  <strong>{{ previewData.length }}</strong> {{ previewData.length === 1 ? 'property' : 'properties' }} will be imported.
-                  Review the data below and click <strong>"Confirm Import"</strong> to proceed.
+                  <strong>{{ previewData.length }}</strong> {{ previewData.length === 1 ? t('common.property') : t('common.properties') }} {{ t('importPropertyDialog.preview.willBeImported') }}.
+                  {{ t('importPropertyDialog.preview.reviewData') }}
                 </div>
               </div>
             </VCardText>
@@ -323,7 +325,7 @@ const previewHeaders = [
                     color="secondary"
                     variant="tonal"
                   >
-                    Auto-generated
+                    {{ t('importPropertyDialog.table.autoGenerated') }}
                   </VChip>
                 </div>
               </template>
@@ -373,15 +375,15 @@ const previewHeaders = [
                   size="20"
                 />
                 <h6 class="text-h6">
-                  Instructions
+                  {{ t('importPropertyDialog.instructions.title') }}
                 </h6>
               </div>
               <ul class="text-body-2">
-                <li>Download the CSV template to see the required format</li>
-                <li>Fill in the property details (ID is optional)</li>
-                <li>Required columns: name, address, community_id</li>
-                <li>Save the file and upload it below</li>
-                <li>Existing properties (by ID) will be updated, new ones will be created</li>
+                <li>{{ t('importPropertyDialog.instructions.step1') }}</li>
+                <li>{{ t('importPropertyDialog.instructions.step2') }}</li>
+                <li>{{ t('importPropertyDialog.instructions.step3') }}</li>
+                <li>{{ t('importPropertyDialog.instructions.step4') }}</li>
+                <li>{{ t('importPropertyDialog.instructions.step5') }}</li>
               </ul>
             </VCardText>
           </VCard>
@@ -394,7 +396,7 @@ const previewHeaders = [
               prepend-icon="tabler-download"
               @click="downloadTemplateFile"
             >
-              Download CSV Template
+              {{ t('importPropertyDialog.buttons.downloadTemplate') }}
             </VBtn>
           </div>
 
@@ -426,10 +428,10 @@ const previewHeaders = [
                 class="mb-4"
               />
               <h6 class="text-h6 mb-2">
-                Drop CSV file here or click to browse
+                {{ t('importPropertyDialog.upload.dropOrClick') }}
               </h6>
               <p class="text-body-2 text-medium-emphasis">
-                Supported format: .csv
+                {{ t('importPropertyDialog.upload.supportedFormat') }}
               </p>
             </div>
 
@@ -456,7 +458,7 @@ const previewHeaders = [
                 prepend-icon="tabler-x"
                 @click.stop="removeFile"
               >
-                Remove File
+                {{ t('importPropertyDialog.buttons.removeFile') }}
               </VBtn>
             </div>
           </div>
@@ -477,7 +479,7 @@ const previewHeaders = [
               block
               @click="showPreview ? cancelPreview() : closeDialog()"
             >
-              {{ showPreview ? 'Back' : (showResults ? 'Close' : 'Cancel') }}
+              {{ showPreview ? t('importPropertyDialog.buttons.back') : (showResults ? t('importPropertyDialog.buttons.close') : t('importPropertyDialog.buttons.cancel')) }}
             </VBtn>
           </VCol>
           <VCol
@@ -494,7 +496,7 @@ const previewHeaders = [
               block
               @click="previewCSV"
             >
-              Preview Data
+              {{ t('importPropertyDialog.buttons.previewData') }}
             </VBtn>
 
             <!-- Confirm Import Button (when previewing) -->
@@ -508,7 +510,7 @@ const previewHeaders = [
               block
               @click="confirmImport"
             >
-              {{ isImporting ? 'Importing...' : 'Confirm Import' }}
+              {{ isImporting ? t('importPropertyDialog.buttons.importing') : t('importPropertyDialog.buttons.confirmImport') }}
             </VBtn>
 
             <!-- Close Button (when showing results) -->
@@ -520,7 +522,7 @@ const previewHeaders = [
               block
               @click="closeDialog"
             >
-              Done
+              {{ t('importPropertyDialog.buttons.done') }}
             </VBtn>
           </VCol>
         </VRow>

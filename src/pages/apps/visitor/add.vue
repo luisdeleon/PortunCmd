@@ -2,6 +2,8 @@
 import { supabase } from '@/lib/supabase'
 import QRCodeDisplay from '@/components/QRCodeDisplay.vue'
 
+const { t } = useI18n({ useScope: 'global' })
+
 definePage({
   meta: {
     public: false,
@@ -42,14 +44,14 @@ const form = ref({
 const communities = ref<{ title: string; value: string }[]>([])
 const properties = ref<{ title: string; value: string }[]>([])
 
-const visitorTypes = [
-  { title: 'Guest', value: 'Guest', icon: 'tabler-user-check', color: 'primary' },
-  { title: 'Family', value: 'Family', icon: 'tabler-users-group', color: 'success' },
-  { title: 'Party', value: 'Party', icon: 'tabler-confetti', color: 'warning' },
-  { title: 'Delivery', value: 'Delivery', icon: 'tabler-truck-delivery', color: 'info' },
-  { title: 'Service', value: 'Service', icon: 'tabler-tools', color: 'secondary' },
-  { title: 'Contractor', value: 'Contractor', icon: 'tabler-helmet', color: 'error' },
-]
+const visitorTypes = computed(() => [
+  { title: t('visitorList.types.guest'), value: 'Guest', icon: 'tabler-user-check', color: 'primary' },
+  { title: t('visitorList.types.family'), value: 'Family', icon: 'tabler-users-group', color: 'success' },
+  { title: t('visitorList.types.party'), value: 'Party', icon: 'tabler-confetti', color: 'warning' },
+  { title: t('visitorList.types.delivery'), value: 'Delivery', icon: 'tabler-truck-delivery', color: 'info' },
+  { title: t('visitorList.types.service'), value: 'Service', icon: 'tabler-tools', color: 'secondary' },
+  { title: t('visitorList.types.contractor'), value: 'Contractor', icon: 'tabler-helmet', color: 'error' },
+])
 
 // Resolve visitor type icon and color
 const resolveTypeVariant = (type: string) => {
@@ -69,13 +71,13 @@ const resolveTypeVariant = (type: string) => {
   return { color: 'primary', icon: 'tabler-user-check' }
 }
 
-const validityOptions = [
-  { title: 'Single Entry', value: 'single', description: 'Valid for one entry only' },
-  { title: 'Today Only', value: 'day', description: 'Valid until end of today' },
-  { title: 'One Week', value: 'week', description: 'Valid for 7 days' },
-  { title: 'Custom Date', value: 'custom', description: 'Choose a specific end date' },
-  { title: 'Unlimited', value: 'unlimited', description: 'No expiration (unlimited entries)' },
-]
+const validityOptions = computed(() => [
+  { title: t('visitorAdd.validity.single'), value: 'single' },
+  { title: t('visitorAdd.validity.day'), value: 'day' },
+  { title: t('visitorAdd.validity.week'), value: 'week' },
+  { title: t('visitorAdd.validity.custom'), value: 'custom' },
+  { title: t('visitorAdd.validity.unlimited'), value: 'unlimited' },
+])
 
 // Fetch communities for user scope
 const fetchCommunities = async () => {
@@ -249,19 +251,19 @@ const calculateEntriesAllowed = () => {
 const submitForm = async () => {
   // Validation
   if (!form.value.visitor_name.trim()) {
-    snackbar.value = { show: true, message: 'Please enter visitor name', color: 'error' }
+    snackbar.value = { show: true, message: t('visitorAdd.validation.visitorNameRequired'), color: 'error' }
     return
   }
   if (!form.value.community_id) {
-    snackbar.value = { show: true, message: 'Please select a community', color: 'error' }
+    snackbar.value = { show: true, message: t('visitorAdd.validation.communityRequired'), color: 'error' }
     return
   }
   if (!form.value.property_id) {
-    snackbar.value = { show: true, message: 'Please select a property', color: 'error' }
+    snackbar.value = { show: true, message: t('visitorAdd.validation.propertyRequired'), color: 'error' }
     return
   }
   if (form.value.validity_type === 'custom' && !form.value.validity_end) {
-    snackbar.value = { show: true, message: 'Please select a validity end date', color: 'error' }
+    snackbar.value = { show: true, message: t('visitorAdd.validation.validityEndRequired'), color: 'error' }
     return
   }
 
@@ -303,16 +305,16 @@ const submitForm = async () => {
 
     if (error) {
       console.error('Error creating visitor pass:', error)
-      snackbar.value = { show: true, message: 'Failed to create visitor pass', color: 'error' }
+      snackbar.value = { show: true, message: t('visitorAdd.messages.createFailed'), color: 'error' }
       return
     }
 
     createdVisitor.value = data
     isSuccess.value = true
-    snackbar.value = { show: true, message: 'Visitor pass created successfully!', color: 'success' }
+    snackbar.value = { show: true, message: t('visitorAdd.messages.createSuccess'), color: 'success' }
   } catch (err) {
     console.error('Error in submitForm:', err)
-    snackbar.value = { show: true, message: 'An error occurred', color: 'error' }
+    snackbar.value = { show: true, message: t('common.error'), color: 'error' }
   } finally {
     isSubmitting.value = false
   }
@@ -341,7 +343,7 @@ const formatDate = (dateStr: string) => {
   const date = new Date(dateStr)
   const now = new Date()
 
-  if (date.getFullYear() >= 2099) return 'Unlimited'
+  if (date.getFullYear() >= 2099) return t('Unlimited')
 
   // Check if date is in a different year or more than 12 months away
   const monthsDiff = (date.getFullYear() - now.getFullYear()) * 12 + (date.getMonth() - now.getMonth())
@@ -385,11 +387,11 @@ onMounted(() => {
         />
 
         <h4 class="text-h4 mb-2">
-          Pass Created!
+          {{ t('visitorAdd.success.title') }}
         </h4>
 
         <p class="text-body-1 text-medium-emphasis mb-6">
-          Visitor pass for <strong>{{ createdVisitor.visitor_name }}</strong> has been created successfully.
+          {{ t('visitorAdd.success.message', { name: createdVisitor.visitor_name }) }}
         </p>
 
         <!-- QR Code -->
@@ -412,7 +414,7 @@ onMounted(() => {
                 class="py-2"
               >
                 <div class="text-caption text-disabled">
-                  Pass Code
+                  {{ t('visitorList.dialog.passCode') }}
                 </div>
                 <div class="text-h6 font-weight-bold">
                   {{ createdVisitor.record_uid }}
@@ -423,7 +425,7 @@ onMounted(() => {
                 class="py-2"
               >
                 <div class="text-caption text-disabled">
-                  Type
+                  {{ t('visitorList.dialog.type') }}
                 </div>
                 <div class="text-body-1">
                   {{ createdVisitor.visitor_type }}
@@ -434,7 +436,7 @@ onMounted(() => {
                 class="py-2"
               >
                 <div class="text-caption text-disabled">
-                  Community
+                  {{ t('visitorList.dialog.community') }}
                 </div>
                 <div class="text-body-1">
                   {{ createdVisitor.community?.name || createdVisitor.community_id }}
@@ -445,7 +447,7 @@ onMounted(() => {
                 class="py-2"
               >
                 <div class="text-caption text-disabled">
-                  Property
+                  {{ t('visitorList.dialog.property') }}
                 </div>
                 <div class="text-body-1">
                   {{ createdVisitor.property?.name || createdVisitor.property_id }}
@@ -456,7 +458,7 @@ onMounted(() => {
                 class="py-2"
               >
                 <div class="text-caption text-disabled">
-                  Valid Until
+                  {{ t('visitorList.dialog.validUntil') }}
                 </div>
                 <div class="text-body-1">
                   {{ formatDate(createdVisitor.validity_end) }}
@@ -467,10 +469,10 @@ onMounted(() => {
                 class="py-2"
               >
                 <div class="text-caption text-disabled">
-                  Entries Allowed
+                  {{ t('visitorAdd.form.entriesAllowed') }}
                 </div>
                 <div class="text-body-1">
-                  {{ createdVisitor.entries_allowed === 9999 ? 'Unlimited' : createdVisitor.entries_allowed }}
+                  {{ createdVisitor.entries_allowed === 9999 ? t('Unlimited') : createdVisitor.entries_allowed }}
                 </div>
               </VCol>
             </VRow>
@@ -485,7 +487,7 @@ onMounted(() => {
             prepend-icon="tabler-plus"
             @click="createAnother"
           >
-            Create Another
+            {{ t('visitorAdd.buttons.createAnother') }}
           </VBtn>
 
           <VBtn
@@ -494,7 +496,7 @@ onMounted(() => {
             prepend-icon="tabler-list"
             :to="{ name: 'apps-visitor-list' }"
           >
-            View All Passes
+            {{ t('visitorAdd.buttons.viewAllPasses') }}
           </VBtn>
         </div>
       </VCardText>
@@ -513,7 +515,7 @@ onMounted(() => {
             size="28"
             color="primary"
           />
-          <span>Create Visitor Pass</span>
+          <span>{{ t('visitorAdd.title') }}</span>
         </div>
       </VCardTitle>
 
@@ -529,9 +531,9 @@ onMounted(() => {
             >
               <AppTextField
                 v-model="form.visitor_name"
-                label="Visitor Name *"
-                placeholder="Enter visitor's full name"
-                :rules="[v => !!v || 'Visitor name is required']"
+                :label="t('visitorAdd.form.visitorName') + ' *'"
+                :placeholder="t('visitorAdd.form.visitorNamePlaceholder')"
+                :rules="[v => !!v || t('visitorAdd.validation.visitorNameRequired')]"
               >
                 <template #prepend-inner>
                   <VIcon icon="tabler-user" />
@@ -546,9 +548,8 @@ onMounted(() => {
             >
               <AppSelect
                 v-model="form.visitor_type"
-                label="Visitor Type *"
+                :label="t('visitorAdd.form.visitorType') + ' *'"
                 :items="visitorTypes"
-                placeholder="Select type"
               >
                 <template #prepend-inner>
                   <VIcon
@@ -577,11 +578,10 @@ onMounted(() => {
             >
               <AppSelect
                 v-model="form.community_id"
-                label="Community *"
+                :label="t('visitorAdd.form.community') + ' *'"
                 :items="communities"
-                placeholder="Select community"
                 :loading="isLoading"
-                :rules="[v => !!v || 'Community is required']"
+                :rules="[v => !!v || t('visitorAdd.validation.communityRequired')]"
               >
                 <template #prepend-inner>
                   <VIcon icon="tabler-building-community" />
@@ -596,11 +596,10 @@ onMounted(() => {
             >
               <AppSelect
                 v-model="form.property_id"
-                label="Property *"
+                :label="t('visitorAdd.form.property') + ' *'"
                 :items="properties"
-                placeholder="Select property"
                 :disabled="!form.community_id"
-                :rules="[v => !!v || 'Property is required']"
+                :rules="[v => !!v || t('visitorAdd.validation.propertyRequired')]"
               >
                 <template #prepend-inner>
                   <VIcon icon="tabler-home" />
@@ -611,7 +610,7 @@ onMounted(() => {
             <!-- Validity Type -->
             <VCol cols="12">
               <div class="text-body-1 font-weight-medium mb-3">
-                Pass Validity
+                {{ t('visitorAdd.form.passValidity') }}
               </div>
               <VRadioGroup
                 v-model="form.validity_type"
@@ -634,8 +633,7 @@ onMounted(() => {
             >
               <AppDateTimePicker
                 v-model="form.validity_end"
-                label="Valid Until *"
-                placeholder="Select end date and time"
+                :label="t('visitorAdd.form.validUntil') + ' *'"
                 :config="{ enableTime: true, minDate: 'today' }"
               >
                 <template #prepend-inner>
@@ -652,11 +650,10 @@ onMounted(() => {
             >
               <AppTextField
                 v-model.number="form.entries_allowed"
-                label="Entries Allowed"
+                :label="t('visitorAdd.form.entriesAllowed')"
                 type="number"
                 min="1"
                 max="100"
-                placeholder="Number of allowed entries"
               >
                 <template #prepend-inner>
                   <VIcon icon="tabler-login" />
@@ -671,7 +668,7 @@ onMounted(() => {
             >
               <AppTextField
                 v-model="form.document_num"
-                label="Document Number (Optional)"
+                :label="t('visitorAdd.form.documentNumber')"
                 placeholder="ID or license number"
               >
                 <template #prepend-inner>
@@ -684,8 +681,7 @@ onMounted(() => {
             <VCol cols="12">
               <AppTextarea
                 v-model="form.notes"
-                label="Notes (Optional)"
-                placeholder="Additional notes about the visitor"
+                :label="t('visitorAdd.form.notes')"
                 rows="3"
               >
                 <template #prepend-inner>
@@ -705,7 +701,7 @@ onMounted(() => {
           variant="tonal"
           :to="{ name: 'apps-visitor-list' }"
         >
-          Cancel
+          {{ t('visitorAdd.buttons.cancel') }}
         </VBtn>
 
         <VSpacer />
@@ -721,7 +717,7 @@ onMounted(() => {
             icon="tabler-qrcode"
             class="me-2"
           />
-          Generate Pass
+          {{ t('visitorAdd.buttons.generatePass') }}
         </VBtn>
       </VCardActions>
     </VCard>

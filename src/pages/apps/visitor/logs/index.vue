@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { supabase } from '@/lib/supabase'
 
+const { t } = useI18n({ useScope: 'global' })
+
 definePage({
   meta: {
     public: false,
@@ -59,14 +61,14 @@ const withPhotos = ref(0)
 
 // Headers
 const headers = computed(() => [
-  { title: 'Visitor', key: 'visitor' },
-  { title: 'Last Entry', key: 'in_time' },
-  { title: 'Exit', key: 'out_time' },
-  { title: 'Host', key: 'host' },
-  { title: 'Community', key: 'community' },
-  { title: 'Entries', key: 'entries', sortable: false },
-  { title: 'Evidence', key: 'evidence', sortable: false },
-  { title: 'Actions', key: 'actions', sortable: false },
+  { title: t('visitorLogs.table.visitor'), key: 'visitor' },
+  { title: t('visitorLogs.table.lastEntry'), key: 'in_time' },
+  { title: t('visitorLogs.table.exit'), key: 'out_time' },
+  { title: t('visitorLogs.table.host'), key: 'host' },
+  { title: t('visitorLogs.table.community'), key: 'community' },
+  { title: t('visitorLogs.table.entries'), key: 'entries', sortable: false },
+  { title: t('visitorLogs.table.evidence'), key: 'evidence', sortable: false },
+  { title: t('visitorLogs.table.actions'), key: 'actions', sortable: false },
   { title: '', key: 'data-table-expand' },
 ])
 
@@ -387,25 +389,25 @@ watch([searchQuery, selectedCommunity, page, itemsPerPage, sortBy, orderBy], () 
 // Widget data
 const widgetData = computed(() => [
   {
-    title: 'Today',
+    title: t('visitorLogs.widgets.today'),
     value: todayEntries.value.toLocaleString(),
     icon: 'tabler-calendar-check',
     iconColor: 'success',
   },
   {
-    title: 'This Week',
+    title: t('visitorLogs.widgets.thisWeek'),
     value: weeklyEntries.value.toLocaleString(),
     icon: 'tabler-calendar-week',
     iconColor: 'warning',
   },
   {
-    title: 'Total Entries',
+    title: t('visitorLogs.widgets.totalEntries'),
     value: totalEntries.value.toLocaleString(),
     icon: 'tabler-login',
     iconColor: 'primary',
   },
   {
-    title: 'With Photos',
+    title: t('visitorLogs.widgets.withPhotos'),
     value: withPhotos.value.toLocaleString(),
     icon: 'tabler-photo',
     iconColor: 'info',
@@ -460,7 +462,7 @@ const widgetData = computed(() => [
     <!-- Filters Card -->
     <VCard class="mb-6">
       <VCardItem class="pb-4">
-        <VCardTitle>Access Logs</VCardTitle>
+        <VCardTitle>{{ t('visitorLogs.title') }}</VCardTitle>
       </VCardItem>
 
       <VCardText>
@@ -472,7 +474,7 @@ const widgetData = computed(() => [
           >
             <AppAutocomplete
               v-model="selectedCommunity"
-              placeholder="Filter by Community"
+              :placeholder="t('visitorLogs.filters.filterByCommunity')"
               :items="communities"
               clearable
               clear-icon="tabler-x"
@@ -485,7 +487,7 @@ const widgetData = computed(() => [
           >
             <AppTextField
               v-model="searchQuery"
-              placeholder="Search visitor name or code..."
+              :placeholder="t('visitorLogs.search.placeholder')"
               clearable
               clear-icon="tabler-x"
             />
@@ -594,13 +596,13 @@ const widgetData = computed(() => [
             variant="tonal"
             label
           >
-            Still Inside
+            {{ t('visitorLogs.dialog.stillInside') }}
           </VChip>
         </template>
 
         <!-- Host -->
         <template #item.host="{ item }">
-          <span class="text-body-2">{{ item.host?.display_name || 'N/A' }}</span>
+          <span class="text-body-2">{{ item.host?.display_name || t('common.notAvailable') }}</span>
         </template>
 
         <!-- Community -->
@@ -617,7 +619,7 @@ const widgetData = computed(() => [
           <span
             v-else
             class="text-disabled"
-          >N/A</span>
+          >{{ t('common.notAvailable') }}</span>
         </template>
 
         <!-- Entries Count -->
@@ -628,7 +630,7 @@ const widgetData = computed(() => [
             variant="tonal"
             label
           >
-            {{ item.totalEntries }} {{ item.totalEntries === 1 ? 'entry' : 'entries' }}
+            {{ item.totalEntries }} {{ item.totalEntries === 1 ? t('visitorLogs.labels.entry') : t('visitorLogs.labels.entries') }}
           </VChip>
         </template>
 
@@ -644,7 +646,7 @@ const widgetData = computed(() => [
             prepend-icon="tabler-camera"
             @click.stop="viewImage(getEvidenceUrls(item)[0], getEvidenceUrls(item), item)"
           >
-            {{ item.evidenceCount }} {{ item.evidenceCount === 1 ? 'photo' : 'photos' }}
+            {{ item.evidenceCount }} {{ item.evidenceCount === 1 ? t('visitorLogs.labels.photo') : t('visitorLogs.labels.photos') }}
           </VChip>
           <VChip
             v-else
@@ -654,7 +656,7 @@ const widgetData = computed(() => [
             label
             prepend-icon="tabler-camera-off"
           >
-            No photos
+            {{ t('visitorLogs.dialog.noPhotos') }}
           </VChip>
         </template>
 
@@ -673,7 +675,7 @@ const widgetData = computed(() => [
                 activator="parent"
                 location="top"
               >
-                View Details
+                {{ t('visitorLogs.buttons.viewDetails') }}
               </VTooltip>
             </IconBtn>
           </div>
@@ -698,16 +700,16 @@ const widgetData = computed(() => [
             <td :colspan="columns.length" class="pa-0">
               <div class="px-4 py-3 bg-var-theme-background">
                 <div class="text-body-2 font-weight-medium mb-3">
-                  Previous Entries ({{ item.previousEntries.length }})
+                  {{ t('visitorLogs.dialog.previousEntries') }} ({{ item.previousEntries.length }})
                 </div>
                 <VTable density="compact" class="rounded border">
                   <thead>
                     <tr>
-                      <th>Entry</th>
-                      <th>Exit</th>
-                      <th>Duration</th>
-                      <th>Evidence</th>
-                      <th>Actions</th>
+                      <th>{{ t('visitorLogs.dialog.entryTime') }}</th>
+                      <th>{{ t('visitorLogs.dialog.exitTime') }}</th>
+                      <th>{{ t('visitorLogs.dialog.duration') }}</th>
+                      <th>{{ t('visitorLogs.table.evidence') }}</th>
+                      <th>{{ t('visitorLogs.table.actions') }}</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -1071,3 +1073,25 @@ const widgetData = computed(() => [
     </VDialog>
   </section>
 </template>
+
+<style lang="scss" scoped>
+// Prevent horizontal scroll
+:deep(.v-data-table) {
+  overflow-x: hidden !important;
+}
+
+:deep(.v-table__wrapper) {
+  overflow-x: auto;
+}
+
+// Truncate long community names
+:deep(.v-chip) {
+  max-inline-size: 160px;
+
+  .v-chip__content {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+</style>

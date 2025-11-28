@@ -3,6 +3,8 @@ import RoleCards from '@/views/apps/roles/RoleCards.vue'
 import PermissionMatrix from '@/views/apps/roles/PermissionMatrix.vue'
 import UserList from '@/views/apps/roles/UserList.vue'
 
+const { t } = useI18n({ useScope: 'global' })
+
 definePage({
   meta: {
     public: false, // Requires authentication
@@ -16,10 +18,10 @@ const currentTab = ref('roles')
   <VRow>
     <VCol cols="12">
       <h4 class="text-h4 mb-1">
-        Roles List
+        {{ t('rolesList.title') }}
       </h4>
       <p class="text-body-1 mb-0">
-        A role provided access to predefined menus and features so that depending on assigned role an administrator can have access to what he need
+        {{ t('rolesList.description') }}
       </p>
     </VCol>
 
@@ -31,21 +33,21 @@ const currentTab = ref('roles')
             start
             icon="tabler-crown"
           />
-          Role Cards
+          {{ t('rolesList.tabs.roleCards') }}
         </VTab>
         <VTab value="matrix">
           <VIcon
             start
             icon="tabler-table"
           />
-          Permission Matrix
+          {{ t('rolesList.tabs.permissionMatrix') }}
         </VTab>
         <VTab value="users">
           <VIcon
             start
             icon="tabler-users"
           />
-          User Assignments
+          {{ t('rolesList.tabs.userAssignments') }}
         </VTab>
       </VTabs>
     </VCol>
@@ -66,10 +68,10 @@ const currentTab = ref('roles')
         <!-- Users Tab -->
         <VWindowItem value="users">
           <h4 class="text-h4 mb-1 mt-2">
-            Total users with their roles
+            {{ t('rolesList.totalUsers') }}
           </h4>
           <p class="text-body-1 mb-6">
-            Find all of your company's administrator accounts and their associate roles.
+            {{ t('rolesList.usersDescription') }}
           </p>
           <UserList />
         </VWindowItem>

@@ -4,6 +4,8 @@ import { supabase } from '@/lib/supabase'
 import { useRouter } from 'vue-router'
 import { useCountriesStates } from '@/composables/useCountriesStates'
 
+const { t } = useI18n({ useScope: 'global' })
+
 definePage({
   meta: {
     public: false, // Requires authentication
@@ -72,11 +74,11 @@ const roles = ref<Array<{ title: string; value: string }>>([])
 const isLoadingRoles = ref(false)
 
 // Languages
-const languages = [
-  { title: 'English', value: 'en' },
-  { title: 'Spanish', value: 'es' },
-  { title: 'Portuguese', value: 'pt' },
-]
+const languages = computed(() => [
+  { title: t('userForm.languages.english'), value: 'en' },
+  { title: t('userForm.languages.spanish'), value: 'es' },
+  { title: t('userForm.languages.portuguese'), value: 'pt' },
+])
 
 // Fetch communities
 const fetchCommunities = async () => {
@@ -168,7 +170,7 @@ onMounted(() => {
   if (!canCreateUsers.value) {
     snackbar.value = {
       show: true,
-      message: 'You do not have permission to create users',
+      message: t('userForm.messages.noPermission'),
       color: 'error',
     }
     setTimeout(() => {
@@ -226,7 +228,7 @@ const onSubmit = async () => {
     // Success
     snackbar.value = {
       show: true,
-      message: 'User created successfully',
+      message: t('userForm.messages.createSuccess'),
       color: 'success',
     }
 
@@ -238,7 +240,7 @@ const onSubmit = async () => {
     console.error('Error creating user:', err)
     snackbar.value = {
       show: true,
-      message: `Failed to create user: ${err.message}`,
+      message: `${t('userForm.messages.createError')}: ${err.message}`,
       color: 'error',
     }
   } finally {
@@ -251,19 +253,19 @@ const onCancel = () => {
 }
 
 // Validation rules
-const requiredRule = (v: string) => !!v || 'This field is required'
+const requiredRule = (v: string) => !!v || t('userForm.validation.required')
 const emailRule = (v: string) => {
   const pattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
-  return pattern.test(v) || 'Invalid email address'
+  return pattern.test(v) || t('userForm.validation.invalidEmail')
 }
 const passwordRule = (v: string) => {
-  if (!v) return 'Password is required'
-  if (v.length < 8) return 'Password must be at least 8 characters'
+  if (!v) return t('userForm.validation.passwordRequired')
+  if (v.length < 8) return t('userForm.validation.passwordMinLength')
   return true
 }
 const verifyPasswordRule = (v: string) => {
-  if (!v) return 'Please verify your password'
-  if (v !== userForm.value.password) return 'Passwords do not match'
+  if (!v) return t('userForm.validation.verifyPassword')
+  if (v !== userForm.value.password) return t('userForm.validation.passwordMismatch')
   return true
 }
 </script>
@@ -291,10 +293,10 @@ const verifyPasswordRule = (v: string) => {
               </VBtn>
               <div>
                 <h4 class="text-h4">
-                  Add New User
+                  {{ t('userForm.title') }}
                 </h4>
                 <p class="text-body-1 text-medium-emphasis mb-0">
-                  Create a new user account and assign communities, properties, and roles
+                  {{ t('userForm.subtitle') }}
                 </p>
               </div>
             </div>
@@ -313,7 +315,7 @@ const verifyPasswordRule = (v: string) => {
                       color="primary"
                     />
                     <h6 class="text-h6 text-primary">
-                      Basic Information
+                      {{ t('userForm.sections.basicInfo') }}
                     </h6>
                   </div>
                 </VCol>
@@ -325,8 +327,8 @@ const verifyPasswordRule = (v: string) => {
                 >
                   <AppTextField
                     v-model="userForm.email"
-                    label="Email *"
-                    placeholder="Enter email address"
+                    :label="t('userForm.fields.email')"
+                    :placeholder="t('userForm.fields.emailPlaceholder')"
                     type="email"
                     :rules="[requiredRule, emailRule]"
                   >
@@ -343,8 +345,8 @@ const verifyPasswordRule = (v: string) => {
                 >
                   <AppTextField
                     v-model="userForm.display_name"
-                    label="Display Name *"
-                    placeholder="Enter display name"
+                    :label="t('userForm.fields.displayName')"
+                    :placeholder="t('userForm.fields.displayNamePlaceholder')"
                     :rules="[requiredRule]"
                   >
                     <template #prepend-inner>
@@ -360,8 +362,8 @@ const verifyPasswordRule = (v: string) => {
                 >
                   <AppTextField
                     v-model="userForm.password"
-                    label="Password *"
-                    placeholder="Enter password (min. 8 characters)"
+                    :label="t('userForm.fields.password')"
+                    :placeholder="t('userForm.fields.passwordPlaceholder')"
                     type="password"
                     :rules="[passwordRule]"
                   >
@@ -378,8 +380,8 @@ const verifyPasswordRule = (v: string) => {
                 >
                   <AppTextField
                     v-model="userForm.verify_password"
-                    label="Verify Password *"
-                    placeholder="Re-enter password"
+                    :label="t('userForm.fields.verifyPassword')"
+                    :placeholder="t('userForm.fields.verifyPasswordPlaceholder')"
                     type="password"
                     :rules="[verifyPasswordRule]"
                   >
@@ -396,7 +398,7 @@ const verifyPasswordRule = (v: string) => {
                 >
                   <AppSelect
                     v-model="userForm.language"
-                    label="Language"
+                    :label="t('userForm.fields.language')"
                     :items="languages"
                   >
                     <template #prepend-inner>
@@ -417,7 +419,7 @@ const verifyPasswordRule = (v: string) => {
                     />
                     <VSwitch
                       v-model="userForm.enabled"
-                      label="User Enabled"
+                      :label="t('userForm.fields.userEnabled')"
                       color="success"
                     />
                   </div>
@@ -433,7 +435,7 @@ const verifyPasswordRule = (v: string) => {
                       color="warning"
                     />
                     <h6 class="text-h6 text-warning">
-                      Role Assignment
+                      {{ t('userForm.sections.roleAssignment') }}
                     </h6>
                   </div>
                 </VCol>
@@ -444,8 +446,8 @@ const verifyPasswordRule = (v: string) => {
                     v-model="userForm.roles"
                     :items="roles"
                     :loading="isLoadingRoles"
-                    label="Roles"
-                    placeholder="Select roles"
+                    :label="t('userForm.fields.roles')"
+                    :placeholder="t('userForm.fields.rolesPlaceholder')"
                     multiple
                     chips
                     clearable
@@ -462,7 +464,7 @@ const verifyPasswordRule = (v: string) => {
                       size="16"
                       class="me-1"
                     />
-                    Select one or more roles for this user
+                    {{ t('userForm.fields.rolesHint') }}
                   </div>
                 </VCol>
 
@@ -476,7 +478,7 @@ const verifyPasswordRule = (v: string) => {
                       color="success"
                     />
                     <h6 class="text-h6 text-success">
-                      Communities & Properties Assignment
+                      {{ t('userForm.sections.communitiesPropertiesAssignment') }}
                     </h6>
                   </div>
                 </VCol>
@@ -490,8 +492,8 @@ const verifyPasswordRule = (v: string) => {
                     v-model="userForm.def_community_id"
                     :items="communities"
                     :loading="isLoadingCommunities"
-                    label="Default Community"
-                    placeholder="Select default community"
+                    :label="t('userForm.fields.defaultCommunity')"
+                    :placeholder="t('userForm.fields.defaultCommunityPlaceholder')"
                     clearable
                     clear-icon="tabler-x"
                   >
@@ -510,8 +512,8 @@ const verifyPasswordRule = (v: string) => {
                     v-model="userForm.communities"
                     :items="communities"
                     :loading="isLoadingCommunities"
-                    label="Communities"
-                    placeholder="Select communities"
+                    :label="t('userForm.fields.communities')"
+                    :placeholder="t('userForm.fields.communitiesPlaceholder')"
                     multiple
                     chips
                     clearable
@@ -528,7 +530,7 @@ const verifyPasswordRule = (v: string) => {
                       size="16"
                       class="me-1"
                     />
-                    Assign this user to one or more communities
+                    {{ t('userForm.fields.communitiesHint') }}
                   </div>
                 </VCol>
 
@@ -541,8 +543,8 @@ const verifyPasswordRule = (v: string) => {
                     v-model="userForm.def_property_id"
                     :items="properties"
                     :loading="isLoadingProperties"
-                    label="Default Property"
-                    placeholder="Select default property"
+                    :label="t('userForm.fields.defaultProperty')"
+                    :placeholder="t('userForm.fields.defaultPropertyPlaceholder')"
                     clearable
                     clear-icon="tabler-x"
                   >
@@ -561,8 +563,8 @@ const verifyPasswordRule = (v: string) => {
                     v-model="userForm.properties"
                     :items="properties"
                     :loading="isLoadingProperties"
-                    label="Properties"
-                    placeholder="Select properties"
+                    :label="t('userForm.fields.properties')"
+                    :placeholder="t('userForm.fields.propertiesPlaceholder')"
                     multiple
                     chips
                     clearable
@@ -579,7 +581,7 @@ const verifyPasswordRule = (v: string) => {
                       size="16"
                       class="me-1"
                     />
-                    Assign this user to one or more properties
+                    {{ t('userForm.fields.propertiesHint') }}
                   </div>
                 </VCol>
               </VRow>
@@ -601,7 +603,7 @@ const verifyPasswordRule = (v: string) => {
                     block
                     @click="onCancel"
                   >
-                    Cancel
+                    {{ t('userForm.buttons.cancel') }}
                   </VBtn>
                 </VCol>
                 <VCol
@@ -619,7 +621,7 @@ const verifyPasswordRule = (v: string) => {
                     block
                     @click="onSubmit"
                   >
-                    {{ isSaving ? 'Creating User...' : 'Create User' }}
+                    {{ isSaving ? t('userForm.buttons.creating') : t('userForm.buttons.create') }}
                   </VBtn>
                 </VCol>
               </VRow>

@@ -219,44 +219,48 @@
     "noCommunities": "Sin comunidades"
   },
   "propertyList": {
-    "title": "Lista de Propiedades",
-    "subtitle": "Gestionar todas las propiedades",
+    "title": "Propiedades",
     "widgets": {
       "totalProperties": "Total de Propiedades",
-      "activeProperties": "Propiedades Activas",
-      "vacantProperties": "Propiedades Vacantes",
-      "occupiedProperties": "Propiedades Ocupadas"
+      "last30DaysGrowth": "Crecimiento últimos 30 días"
     },
     "filters": {
-      "title": "Filtros",
       "filterByCommunity": "Filtrar por Comunidad",
-      "filterByStatus": "Filtrar por Estado",
-      "filterByType": "Filtrar por Tipo",
-      "clearFilters": "Limpiar Filtros"
+      "filterByStatus": "Filtrar por Estado"
     },
     "table": {
-      "property": "Propiedad",
       "community": "Comunidad",
-      "type": "Tipo",
-      "owner": "Propietario",
+      "propertyId": "ID de Propiedad",
+      "name": "Nombre",
+      "address": "Dirección",
       "status": "Estado",
       "actions": "Acciones"
     },
     "buttons": {
       "addProperty": "Agregar Propiedad",
-      "export": "Exportar",
-      "refresh": "Actualizar"
+      "import": "Importar",
+      "updateStatus": "Actualizar Estado",
+      "delete": "Eliminar"
     },
     "search": {
-      "placeholder": "Buscar propiedad..."
+      "placeholder": "Buscar propiedades..."
     },
-    "types": {
-      "house": "Casa",
-      "apartment": "Apartamento",
-      "condo": "Condominio",
-      "townhouse": "Casa Adosada",
-      "lot": "Lote",
-      "commercial": "Comercial"
+    "actions": {
+      "view": "Ver Propiedad",
+      "edit": "Editar Propiedad",
+      "changeStatus": "Cambiar Estado",
+      "delete": "Eliminar Propiedad"
+    },
+    "status": {
+      "active": "Activo",
+      "vacant": "Vacante",
+      "accessRestricted": "Acceso Restringido",
+      "maintenance": "Mantenimiento",
+      "emergencyLockdown": "Bloqueo de Emergencia",
+      "guestMode": "Modo Invitado",
+      "outOfService": "Fuera de Servicio",
+      "deactivated": "Desactivado",
+      "archived": "Archivado"
     },
     "deleteDialog": {
       "title": "Eliminar Propiedad",
@@ -264,31 +268,32 @@
       "confirm": "Eliminar",
       "cancel": "Cancelar"
     },
+    "bulkDeleteDialog": {
+      "title": "Eliminar Múltiples Propiedades",
+      "message": "¿Está seguro de que desea eliminar {count} {entity}? Esta acción no se puede deshacer.",
+      "warning": "Está a punto de eliminar permanentemente {count} {entity}. Esto eliminará todos los datos asociados.",
+      "confirm": "Eliminar Todo",
+      "cancel": "Cancelar"
+    },
+    "bulkStatusDialog": {
+      "title": "Actualizar Estado de {count} {entity}",
+      "message": "Está a punto de actualizar el estado de {count} {entity}.",
+      "newStatus": "Nuevo Estado *",
+      "selectStatus": "Seleccionar nuevo estado",
+      "reason": "Razón (Opcional)",
+      "reasonPlaceholder": "Ingrese razón del cambio de estado",
+      "confirm": "Actualizar Todo",
+      "cancel": "Cancelar"
+    },
     "messages": {
-      "deleteSuccess": "La propiedad {name} ha sido eliminada exitosamente",
-      "deleteFailed": "Error al eliminar la propiedad. Por favor, intente nuevamente.",
-      "fetchFailed": "Error al cargar las propiedades"
-    },
-    "drawer": {
-      "addTitle": "Agregar Propiedad",
-      "editTitle": "Editar Propiedad",
-      "form": {
-        "name": "Nombre de la Propiedad",
-        "community": "Comunidad",
-        "type": "Tipo",
-        "address": "Dirección",
-        "owner": "Propietario",
-        "status": "Estado",
-        "description": "Descripción"
-      },
-      "buttons": {
-        "submit": "Guardar",
-        "cancel": "Cancelar",
-        "reset": "Restablecer"
-      }
-    },
-    "noData": "No se encontraron propiedades",
-    "noProperties": "Sin propiedades"
+      "saveSuccess": "Propiedad guardada exitosamente",
+      "importSuccess": "Propiedades importadas exitosamente",
+      "statusUpdateSuccess": "Estado de la propiedad actualizado exitosamente",
+      "deleteSuccess": "La propiedad \"{name}\" ha sido eliminada exitosamente",
+      "deleteFailed": "Error al eliminar la propiedad",
+      "deleteRelated": "No se puede eliminar esta propiedad porque tiene registros relacionados",
+      "deletePermissionDenied": "No tiene permiso para eliminar esta propiedad"
+    }
   },
   "visitorList": {
     "title": "Pases de Visitantes",
@@ -321,10 +326,16 @@
     },
     "types": {
       "guest": "Invitado",
+      "family": "Familia",
       "party": "Fiesta",
       "delivery": "Entrega",
       "service": "Servicio",
       "contractor": "Contratista"
+    },
+    "actions": {
+      "viewQR": "Ver Código QR",
+      "viewDetails": "Ver Detalles",
+      "delete": "Eliminar"
     },
     "buttons": {
       "createPass": "Crear Pase",
@@ -332,6 +343,36 @@
     },
     "search": {
       "placeholder": "Buscar visitante o código..."
+    },
+    "dialog": {
+      "title": "Detalles del Pase de Visitante",
+      "visitorName": "Nombre del Visitante",
+      "passCode": "Código del Pase",
+      "host": "Anfitrión",
+      "community": "Comunidad",
+      "property": "Propiedad",
+      "type": "Tipo",
+      "validUntil": "Válido Hasta",
+      "entries": "Entradas",
+      "notes": "Notas",
+      "close": "Cerrar"
+    },
+    "deleteDialog": {
+      "title": "Eliminar Pase de Visitante",
+      "message": "¿Está seguro de que desea eliminar el pase de visitante de {name}? Esta acción no se puede deshacer.",
+      "confirm": "Eliminar",
+      "cancel": "Cancelar"
+    },
+    "bulkDeleteDialog": {
+      "title": "Eliminar Múltiples Pases de Visitantes",
+      "message": "¿Está seguro de que desea eliminar {count} {entity} de visitante? Esta acción no se puede deshacer.",
+      "warning": "Está a punto de eliminar permanentemente {count} {entity} de visitante.",
+      "confirm": "Eliminar Todos",
+      "cancel": "Cancelar"
+    },
+    "messages": {
+      "deleteSuccess": "Pase de visitante eliminado exitosamente",
+      "deleteFailed": "Error al eliminar el pase de visitante"
     }
   },
   "visitorAdd": {
@@ -342,12 +383,15 @@
     },
     "form": {
       "visitorName": "Nombre del Visitante",
+      "visitorNamePlaceholder": "Ingrese el nombre completo del visitante",
       "visitorType": "Tipo de Visitante",
       "community": "Comunidad",
       "property": "Propiedad",
       "passValidity": "Validez del Pase",
       "validUntil": "Válido Hasta",
-      "entriesAllowed": "Entradas Permitidas"
+      "entriesAllowed": "Entradas Permitidas",
+      "documentNumber": "Número de Documento (Opcional)",
+      "notes": "Notas (Opcional)"
     },
     "validity": {
       "single": "Una Entrada",
@@ -361,6 +405,16 @@
       "createAnother": "Crear Otro",
       "viewAllPasses": "Ver Todos los Pases",
       "cancel": "Cancelar"
+    },
+    "validation": {
+      "visitorNameRequired": "Por favor ingrese el nombre del visitante",
+      "communityRequired": "Por favor seleccione una comunidad",
+      "propertyRequired": "Por favor seleccione una propiedad",
+      "validityEndRequired": "Por favor seleccione una fecha de fin de validez"
+    },
+    "messages": {
+      "createSuccess": "¡Pase de visitante creado exitosamente!",
+      "createFailed": "Error al crear el pase de visitante"
     }
   },
   "visitorLogs": {
@@ -389,11 +443,35 @@
       "exitTime": "Hora de Salida",
       "photo": "Foto",
       "lastEntry": "Última Entrada",
-      "exit": "Salida"
+      "exit": "Salida",
+      "entries": "Entradas",
+      "evidence": "Evidencia",
+      "actions": "Acciones"
     },
     "buttons": {
       "export": "Exportar",
-      "refresh": "Actualizar"
+      "refresh": "Actualizar",
+      "viewDetails": "Ver Detalles"
+    },
+    "dialog": {
+      "title": "Detalles del Registro de Acceso",
+      "completed": "Completado",
+      "stillInside": "Aún Adentro",
+      "evidencePhotos": "Fotos de Evidencia",
+      "passCode": "Código del Pase",
+      "entryTime": "Hora de Entrada",
+      "exitTime": "Hora de Salida",
+      "duration": "Duración",
+      "previousEntries": "Entradas Anteriores",
+      "noPhotos": "Sin fotos",
+      "captured": "Capturada",
+      "download": "Descargar"
+    },
+    "labels": {
+      "photo": "foto",
+      "photos": "fotos",
+      "entry": "entrada",
+      "entries": "entradas"
     },
     "search": {
       "placeholder": "Buscar en registros..."
@@ -452,28 +530,54 @@
     "subtitle": "Gestionar dispositivos de control de acceso",
     "widgets": {
       "totalDevices": "Total de Dispositivos",
+      "activeDevices": "Dispositivos Activos",
       "onlineDevices": "Dispositivos En Línea",
       "offlineDevices": "Dispositivos Fuera de Línea",
-      "lastSync": "Última Sincronización"
+      "lastSync": "Última Sincronización",
+      "last30DaysGrowth": "Crecimiento últimos 30 días",
+      "ofTotalDevices": "Del total de dispositivos"
     },
     "filters": {
       "title": "Filtros",
       "filterByCommunity": "Filtrar por Comunidad",
+      "filterByBrand": "Filtrar por Marca",
+      "filterByDirection": "Filtrar por Dirección",
       "filterByStatus": "Filtrar por Estado",
       "filterByType": "Filtrar por Tipo"
     },
     "table": {
       "device": "Dispositivo",
+      "deviceName": "Nombre del Dispositivo",
       "community": "Comunidad",
+      "brandModel": "Marca/Modelo",
+      "direction": "Dirección",
       "type": "Tipo",
       "status": "Estado",
+      "guestAccess": "Acceso de Invitados",
       "lastSeen": "Última Vez Visto",
       "actions": "Acciones"
+    },
+    "direction": {
+      "enter": "Entrada",
+      "exit": "Salida",
+      "both": "Ambos"
     },
     "status": {
       "online": "En Línea",
       "offline": "Fuera de Línea",
+      "enabled": "Habilitado",
+      "disabled": "Deshabilitado",
       "error": "Error"
+    },
+    "guestAccess": {
+      "allowed": "Permitido",
+      "denied": "Denegado"
+    },
+    "actions": {
+      "view": "Ver Dispositivo",
+      "edit": "Editar Dispositivo",
+      "duplicate": "Duplicar Dispositivo",
+      "delete": "Eliminar Dispositivo"
     },
     "types": {
       "gate": "Portón",
@@ -522,8 +626,17 @@
     "noData": "No se encontraron dispositivos"
   },
   "rolesList": {
-    "title": "Roles",
+    "title": "Lista de Roles",
+    "description": "Un rol proporciona acceso a menús y funciones predefinidas dependiendo del rol asignado al usuario.",
     "subtitle": "Gestionar roles del sistema",
+    "tabs": {
+      "roleCards": "Tarjetas de Roles",
+      "permissionMatrix": "Matriz de Permisos",
+      "userAssignments": "Asignaciones de Usuarios"
+    },
+    "totalUsers": "Total de usuarios con este rol",
+    "usersTitle": "Usuarios con este Rol",
+    "usersDescription": "Lista de todos los usuarios asignados a este rol",
     "widgets": {
       "totalRoles": "Total de Roles",
       "totalUsers": "Total de Usuarios",
@@ -1459,6 +1572,11 @@
     "view": "Ver",
     "details": "Detalles",
     "more": "Más",
+    "property": "propiedad",
+    "properties": "propiedades",
+    "community": "comunidad",
+    "communities": "comunidades",
+    "notAvailable": "N/D",
     "less": "Menos",
     "showAll": "Mostrar Todo",
     "hideAll": "Ocultar Todo",
@@ -1479,5 +1597,267 @@
     "thursday": "Jueves",
     "friday": "Viernes",
     "saturday": "Sábado"
+  },
+
+  "communityDialog": {
+    "addTitle": "Agregar Nueva Comunidad",
+    "editTitle": "Editar Comunidad",
+    "addSubtitle": "Crear una nueva comunidad",
+    "editSubtitle": "Actualizar información de la comunidad",
+    "sections": {
+      "basicInfo": "Información Básica",
+      "location": "Detalles de Ubicación",
+      "mapsCoordinates": "Mapas y Coordenadas"
+    },
+    "fields": {
+      "communityId": "ID de Comunidad",
+      "communityIdPlaceholder": "Dejar vacío para ID autogenerado",
+      "communityIdHint": "Opcional: Ingrese un ID personalizado o deje vacío para autogeneración",
+      "communityName": "Nombre de Comunidad",
+      "communityNamePlaceholder": "Ingrese nombre de comunidad",
+      "streetAddress": "Dirección",
+      "streetAddressPlaceholder": "Ingrese dirección",
+      "city": "Ciudad",
+      "cityPlaceholder": "Ingrese ciudad",
+      "postalCode": "Código Postal",
+      "postalCodePlaceholder": "Ingrese código postal",
+      "stateProvince": "Estado/Provincia",
+      "stateProvincePlaceholder": "Seleccione o busque estado",
+      "stateProvinceRegion": "Estado/Provincia/Región",
+      "stateProvinceRegionPlaceholder": "Ingrese estado, provincia o región",
+      "country": "País",
+      "countryPlaceholder": "Seleccione o busque país",
+      "geolocation": "Geolocalización",
+      "geolocationPlaceholder": "Ingrese coordenadas (ej., 40.7128, -74.0060)",
+      "geolocationHint": "Formato: latitud, longitud",
+      "googleMapsUrl": "URL de Google Maps",
+      "googleMapsUrlPlaceholder": "https://maps.google.com/..."
+    },
+    "buttons": {
+      "cancel": "Cancelar",
+      "create": "Crear Comunidad",
+      "update": "Actualizar Comunidad",
+      "saving": "Guardando..."
+    },
+    "validation": {
+      "required": "Este campo es requerido"
+    }
+  },
+
+  "propertyDialog": {
+    "addTitle": "Agregar Nueva Propiedad",
+    "editTitle": "Editar Propiedad",
+    "addSubtitle": "Crear una nueva propiedad",
+    "editSubtitle": "Actualizar información de la propiedad",
+    "sections": {
+      "basicInfo": "Información Básica",
+      "communityAssignment": "Asignación de Comunidad"
+    },
+    "fields": {
+      "propertyId": "ID de Propiedad",
+      "propertyIdPlaceholder": "Dejar vacío para ID autogenerado",
+      "propertyIdHint": "Opcional: Ingrese un ID personalizado o deje vacío para autogeneración",
+      "propertyName": "Nombre de Propiedad",
+      "propertyNamePlaceholder": "Ingrese nombre de propiedad (ej., Apt 101, Casa 5)",
+      "address": "Dirección",
+      "addressPlaceholder": "Ingrese dirección de propiedad",
+      "community": "Comunidad",
+      "communityPlaceholder": "Seleccione comunidad",
+      "communityHint": "Toda propiedad debe pertenecer a una comunidad"
+    },
+    "buttons": {
+      "cancel": "Cancelar",
+      "create": "Crear Propiedad",
+      "update": "Actualizar Propiedad",
+      "saving": "Guardando..."
+    },
+    "validation": {
+      "required": "Este campo es requerido"
+    }
+  },
+
+  "userForm": {
+    "title": "Agregar Nuevo Usuario",
+    "subtitle": "Crear una nueva cuenta de usuario y asignar comunidades, propiedades y roles",
+    "addTitle": "Agregar Nuevo Usuario",
+    "editTitle": "Editar Usuario",
+    "addSubtitle": "Crear una nueva cuenta de usuario y asignar comunidades, propiedades y roles",
+    "editSubtitle": "Actualizar información de cuenta de usuario",
+    "sections": {
+      "basicInfo": "Información Básica",
+      "roleAssignment": "Asignación de Roles",
+      "communityPropertyAssignment": "Asignación de Comunidades y Propiedades",
+      "communitiesPropertiesAssignment": "Asignación de Comunidades y Propiedades"
+    },
+    "fields": {
+      "email": "Correo Electrónico *",
+      "emailPlaceholder": "Ingrese dirección de correo",
+      "displayName": "Nombre para Mostrar *",
+      "displayNamePlaceholder": "Ingrese nombre para mostrar",
+      "password": "Contraseña *",
+      "passwordPlaceholder": "Ingrese contraseña (mín. 8 caracteres)",
+      "verifyPassword": "Verificar Contraseña *",
+      "verifyPasswordPlaceholder": "Re-ingrese contraseña",
+      "language": "Idioma",
+      "userEnabled": "Usuario Habilitado",
+      "roles": "Roles",
+      "rolesPlaceholder": "Seleccione roles",
+      "rolesHint": "Seleccione uno o más roles para este usuario",
+      "defaultCommunity": "Comunidad Predeterminada",
+      "defaultCommunityPlaceholder": "Seleccione comunidad predeterminada",
+      "communities": "Comunidades",
+      "communitiesPlaceholder": "Seleccione comunidades",
+      "communitiesHint": "Asignar este usuario a una o más comunidades",
+      "defaultProperty": "Propiedad Predeterminada",
+      "defaultPropertyPlaceholder": "Seleccione propiedad predeterminada",
+      "properties": "Propiedades",
+      "propertiesPlaceholder": "Seleccione propiedades",
+      "propertiesHint": "Asignar este usuario a una o más propiedades"
+    },
+    "languages": {
+      "english": "Inglés",
+      "spanish": "Español",
+      "portuguese": "Portugués"
+    },
+    "buttons": {
+      "cancel": "Cancelar",
+      "create": "Crear Usuario",
+      "creating": "Creando Usuario...",
+      "update": "Actualizar Usuario",
+      "saving": "Guardando..."
+    },
+    "validation": {
+      "required": "Este campo es requerido",
+      "invalidEmail": "Dirección de correo inválida",
+      "emailInvalid": "Por favor ingrese un correo electrónico válido",
+      "passwordRequired": "La contraseña es requerida",
+      "passwordMinLength": "La contraseña debe tener al menos 8 caracteres",
+      "passwordMin": "La contraseña debe tener al menos 8 caracteres",
+      "verifyPassword": "Por favor verifique su contraseña",
+      "passwordMismatch": "Las contraseñas no coinciden",
+      "passwordsMatch": "Las contraseñas deben coincidir"
+    },
+    "messages": {
+      "noPermission": "No tiene permiso para crear usuarios",
+      "createSuccess": "Usuario creado exitosamente",
+      "createError": "Error al crear usuario"
+    }
+  },
+
+  "importPropertyDialog": {
+    "title": "Importar Propiedades",
+    "subtitle": "Sube un archivo CSV para importar propiedades en masa",
+    "previewTitle": "Vista Previa de Datos",
+    "previewSubtitle": "Revisa los datos antes de importar",
+    "instructions": {
+      "title": "Instrucciones",
+      "step1": "Descarga la plantilla CSV para ver el formato requerido",
+      "step2": "Completa los detalles de la propiedad (ID es opcional)",
+      "step3": "Columnas requeridas: name, address, community_id",
+      "step4": "Guarda el archivo y súbelo abajo",
+      "step5": "Las propiedades existentes (por ID) se actualizarán, las nuevas se crearán"
+    },
+    "upload": {
+      "dropOrClick": "Arrastra el archivo CSV aquí o haz clic para buscar",
+      "supportedFormat": "Formato soportado: .csv"
+    },
+    "preview": {
+      "willBeImported": "se importarán",
+      "reviewData": "Revisa los datos abajo y haz clic en \"Confirmar Importación\" para continuar."
+    },
+    "table": {
+      "propertyId": "ID de Propiedad",
+      "name": "Nombre",
+      "address": "Dirección",
+      "communityId": "ID de Comunidad",
+      "autoGenerated": "Auto-generado"
+    },
+    "results": {
+      "success": "Importación Completada Exitosamente",
+      "withErrors": "Importación Completada con Errores",
+      "totalRows": "Filas totales",
+      "successfullyImported": "Importadas exitosamente",
+      "failed": "Fallidas",
+      "viewErrorDetails": "Ver Detalles de Errores",
+      "row": "Fila",
+      "data": "Datos"
+    },
+    "errors": {
+      "parseError": "Error al Analizar CSV"
+    },
+    "buttons": {
+      "downloadTemplate": "Descargar Plantilla CSV",
+      "removeFile": "Eliminar Archivo",
+      "cancel": "Cancelar",
+      "back": "Volver",
+      "close": "Cerrar",
+      "previewData": "Vista Previa",
+      "confirmImport": "Confirmar Importación",
+      "importing": "Importando...",
+      "done": "Listo"
+    }
+  },
+
+  "deviceDialog": {
+    "addTitle": "Agregar Nuevo Dispositivo",
+    "editTitle": "Editar Dispositivo",
+    "addSubtitle": "Configurar un nuevo dispositivo de automatización",
+    "editSubtitle": "Actualizar configuración del dispositivo de automatización",
+    "sections": {
+      "basicInfo": "Información Básica",
+      "deviceIdentifiers": "Identificadores del Dispositivo",
+      "apiConfiguration": "Configuración de API",
+      "relayConfiguration": "Configuración de Relé",
+      "location": "Ubicación",
+      "statusAccess": "Estado y Acceso"
+    },
+    "fields": {
+      "deviceName": "Nombre del Dispositivo *",
+      "deviceNamePlaceholder": "Ingrese nombre del dispositivo",
+      "brand": "Marca",
+      "brandPlaceholder": "Seleccione marca",
+      "model": "Modelo",
+      "modelPlaceholder": "Seleccione modelo",
+      "deviceIdIn": "ID de Dispositivo de Entrada",
+      "deviceIdInPlaceholder": "Ingrese ID de dispositivo de entrada",
+      "deviceIdOut": "ID de Dispositivo de Salida",
+      "deviceIdOutPlaceholder": "Ingrese ID de dispositivo de salida",
+      "apiUrl": "URL de API",
+      "apiUrlPlaceholder": "https://",
+      "apiEndpoint": "Endpoint de API",
+      "apiEndpointPlaceholder": "/rpc/Switch.Set",
+      "authKey": "Clave de Autenticación",
+      "authKeyPlaceholder": "Ingrese clave de autenticación",
+      "authKeyHint": "La clave de autenticación está protegida. Haga clic en el ojo para revelar.",
+      "direction": "Dirección",
+      "directionPlaceholder": "Seleccione dirección",
+      "turn": "Acción de Interruptor",
+      "turnPlaceholder": "Seleccione acción",
+      "channelIn": "Canal de Entrada",
+      "channelOut": "Canal de Salida",
+      "community": "Comunidad *",
+      "communityPlaceholder": "Seleccione comunidad",
+      "enabled": "Habilitado",
+      "guestAccess": "Acceso de Invitados"
+    },
+    "options": {
+      "other": "Otro",
+      "enter": "Entrada",
+      "exit": "Salida",
+      "both": "Ambos",
+      "on": "Encender",
+      "off": "Apagar",
+      "toggle": "Alternar",
+      "channel": "Canal {n}"
+    },
+    "buttons": {
+      "cancel": "Cancelar",
+      "create": "Crear Dispositivo",
+      "update": "Actualizar Dispositivo",
+      "saving": "Guardando..."
+    },
+    "validation": {
+      "required": "Este campo es requerido"
+    }
   }
 }

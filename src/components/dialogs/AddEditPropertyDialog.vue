@@ -2,6 +2,8 @@
 import { VForm } from 'vuetify/components/VForm'
 import { supabase } from '@/lib/supabase'
 
+const { t } = useI18n({ useScope: 'global' })
+
 interface PropertyData {
   id?: string
   name: string
@@ -160,7 +162,7 @@ const onReset = () => {
 }
 
 // Validation rules
-const requiredRule = (v: string) => !!v || 'This field is required'
+const requiredRule = (v: string) => !!v || t('propertyDialog.validation.required')
 </script>
 
 <template>
@@ -188,10 +190,10 @@ const requiredRule = (v: string) => !!v || 'This field is required'
             />
           </VAvatar>
           <h4 class="text-h4 mb-2">
-            {{ isEditMode ? 'Edit' : 'Add New' }} Property
+            {{ isEditMode ? t('propertyDialog.editTitle') : t('propertyDialog.addTitle') }}
           </h4>
           <p class="text-body-1 text-medium-emphasis">
-            {{ isEditMode ? 'Update property information' : 'Create a new property' }}
+            {{ isEditMode ? t('propertyDialog.editSubtitle') : t('propertyDialog.addSubtitle') }}
           </p>
         </div>
 
@@ -207,7 +209,7 @@ const requiredRule = (v: string) => !!v || 'This field is required'
                   color="primary"
                 />
                 <h6 class="text-h6 text-primary">
-                  Basic Information
+                  {{ t('propertyDialog.sections.basicInfo') }}
                 </h6>
               </div>
             </VCol>
@@ -219,9 +221,9 @@ const requiredRule = (v: string) => !!v || 'This field is required'
             >
               <AppTextField
                 v-model="propertyForm.id"
-                label="Property ID"
-                placeholder="Leave empty for auto-generated ID"
-                hint="Optional: Enter a custom ID or leave empty for auto-generation"
+                :label="t('propertyDialog.fields.propertyId')"
+                :placeholder="t('propertyDialog.fields.propertyIdPlaceholder')"
+                :hint="t('propertyDialog.fields.propertyIdHint')"
                 persistent-hint
               >
                 <template #prepend-inner>
@@ -234,8 +236,8 @@ const requiredRule = (v: string) => !!v || 'This field is required'
             <VCol cols="12">
               <AppTextField
                 v-model="propertyForm.name"
-                label="Property Name"
-                placeholder="Enter property name (e.g., Apt 101, House 5)"
+                :label="t('propertyDialog.fields.propertyName')"
+                :placeholder="t('propertyDialog.fields.propertyNamePlaceholder')"
                 :rules="[requiredRule]"
               >
                 <template #prepend-inner>
@@ -248,8 +250,8 @@ const requiredRule = (v: string) => !!v || 'This field is required'
             <VCol cols="12">
               <AppTextField
                 v-model="propertyForm.address"
-                label="Address"
-                placeholder="Enter property address"
+                :label="t('propertyDialog.fields.address')"
+                :placeholder="t('propertyDialog.fields.addressPlaceholder')"
                 :rules="[requiredRule]"
               >
                 <template #prepend-inner>
@@ -268,7 +270,7 @@ const requiredRule = (v: string) => !!v || 'This field is required'
                   color="success"
                 />
                 <h6 class="text-h6 text-success">
-                  Community Assignment
+                  {{ t('propertyDialog.sections.communityAssignment') }}
                 </h6>
               </div>
             </VCol>
@@ -279,8 +281,8 @@ const requiredRule = (v: string) => !!v || 'This field is required'
                 v-model="propertyForm.community_id"
                 :items="communities"
                 :loading="isLoadingCommunities"
-                label="Community *"
-                placeholder="Select a community"
+                :label="t('propertyDialog.fields.community')"
+                :placeholder="t('propertyDialog.fields.communityPlaceholder')"
                 :rules="[requiredRule]"
                 clearable
                 clear-icon="tabler-x"
@@ -296,7 +298,7 @@ const requiredRule = (v: string) => !!v || 'This field is required'
                   size="16"
                   class="me-1"
                 />
-                Every property must belong to a community
+                {{ t('propertyDialog.fields.communityHint') }}
               </div>
             </VCol>
           </VRow>
@@ -318,7 +320,7 @@ const requiredRule = (v: string) => !!v || 'This field is required'
                 block
                 @click="onReset"
               >
-                Cancel
+                {{ t('propertyDialog.buttons.cancel') }}
               </VBtn>
             </VCol>
             <VCol
@@ -336,7 +338,7 @@ const requiredRule = (v: string) => !!v || 'This field is required'
                 block
                 @click="onSubmit"
               >
-                {{ isSaving ? 'Saving...' : (isEditMode ? 'Update Property' : 'Create Property') }}
+                {{ isSaving ? t('propertyDialog.buttons.saving') : (isEditMode ? t('propertyDialog.buttons.update') : t('propertyDialog.buttons.create')) }}
               </VBtn>
             </VCol>
           </VRow>

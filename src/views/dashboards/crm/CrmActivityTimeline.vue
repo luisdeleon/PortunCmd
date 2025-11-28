@@ -4,12 +4,12 @@ import avatar2 from '@images/avatars/avatar-2.png'
 import avatar3 from '@images/avatars/avatar-3.png'
 import pdf from '@images/icons/project-icons/pdf.png'
 
-const { t } = useI18n({ useScope: 'global' })
-
-const moreList = computed(() => [
-  { title: t('View More'), value: 'View More' },
-  { title: t('Delete'), value: 'Delete' },
-])
+// Demo/placeholder component - using plain strings (no i18n)
+// TODO: Replace with PortunCmd-specific activity timeline
+const moreList = [
+  { title: 'View More', value: 'View More' },
+  { title: 'Delete', value: 'Delete' },
+]
 </script>
 
 <template>
@@ -32,7 +32,7 @@ const moreList = computed(() => [
         </div>
       </template>
 
-      <VCardTitle>{{ t('Activity Timeline') }}</VCardTitle>
+      <VCardTitle>Activity Timeline</VCardTitle>
     </VCardItem>
 
     <VCardText>
@@ -51,14 +51,14 @@ const moreList = computed(() => [
           <!-- 👉 Header -->
           <div class="d-flex justify-space-between align-center gap-2 flex-wrap mb-2">
             <span class="app-timeline-title">
-              {{ t('12 Invoices have been paid') }}
+              12 Invoices have been paid
             </span>
-            <span class="app-timeline-meta">{{ t('12 min ago') }}</span>
+            <span class="app-timeline-meta">12 min ago</span>
           </div>
 
           <!-- 👉 Content -->
           <div class="app-timeline-text mt-1">
-            {{ t('Invoices have been paid to the company') }}
+            Invoices have been paid to the company
           </div>
 
           <div class="d-inline-flex align-center timeline-chip mt-2">
@@ -83,13 +83,13 @@ const moreList = computed(() => [
           <!-- 👉 Header -->
           <div class="d-flex justify-space-between align-center flex-wrap mb-2">
             <div class="app-timeline-title">
-              {{ t('Client Meeting') }}
+              Client Meeting
             </div>
-            <span class="app-timeline-meta">{{ t('45 min ago') }}</span>
+            <span class="app-timeline-meta">45 min ago</span>
           </div>
 
           <div class="app-timeline-text mt-1">
-            {{ t('Project meeting with john @10:15am') }}
+            Project meeting with john @10:15am
           </div>
 
           <!-- 👉 Person -->
@@ -120,14 +120,14 @@ const moreList = computed(() => [
           <!-- 👉 Header -->
           <div class="d-flex justify-space-between align-center flex-wrap mb-2">
             <span class="app-timeline-title">
-              {{ t('Create a new project for client') }}
+              Create a new project for client
             </span>
-            <span class="app-timeline-meta">{{ t('2 Day Ago') }}</span>
+            <span class="app-timeline-meta">2 Day Ago</span>
           </div>
 
           <!-- 👉 Content -->
           <p class="app-timeline-text mt-1 mb-2">
-            {{ t('6 team members in a project') }}
+            6 team members in a project
           </p>
 
           <div class="v-avatar-group demo-avatar-group">

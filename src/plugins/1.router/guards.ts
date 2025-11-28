@@ -31,7 +31,6 @@ export const setupGuards = (router: _RouterTyped<RouteNamedMap & { [key: string]
 
         if (error || !session) {
           // Session invalid - clear cookies immediately
-          console.warn('Session expired or invalid, clearing cookies')
           useCookie('userData').value = null
           useCookie('accessToken').value = null
           useCookie('userAbilityRules').value = null
@@ -40,9 +39,8 @@ export const setupGuards = (router: _RouterTyped<RouteNamedMap & { [key: string]
           // Session is valid
           isLoggedIn = true
         }
-      } catch (error) {
-        console.error('Session verification error:', error)
-        // On error, clear cookies and treat as logged out
+      } catch {
+        // On session verification error, clear cookies and treat as logged out
         useCookie('userData').value = null
         useCookie('accessToken').value = null
         useCookie('userAbilityRules').value = null
@@ -81,9 +79,8 @@ export const setupGuards = (router: _RouterTyped<RouteNamedMap & { [key: string]
         if (!canNavigate(to)) {
           return { name: 'not-authorized' }
         }
-      } catch (error) {
+      } catch {
         // If ability check fails (e.g., ability not initialized), redirect to login for security
-        console.error('Ability check failed, redirecting to login:', error)
         // Clear potentially corrupted cookies
         useCookie('userData').value = null
         useCookie('accessToken').value = null

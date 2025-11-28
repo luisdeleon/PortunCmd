@@ -101,12 +101,12 @@ const toggleRowExpansion = (id: string) => {
 
 // Headers (reduced - additional info in expanded row)
 const headers = computed(() => [
-  { title: 'Visitor', key: 'visitor' },
-  { title: 'Host', key: 'host' },
-  { title: 'Type', key: 'visitor_type' },
-  { title: 'Status', key: 'status', sortable: false },
-  { title: 'Valid Until', key: 'validity_end' },
-  { title: 'Actions', key: 'actions', sortable: false },
+  { title: t('visitorList.table.visitor'), key: 'visitor' },
+  { title: t('visitorList.table.host'), key: 'host' },
+  { title: t('visitorList.table.type'), key: 'visitor_type' },
+  { title: t('visitorList.table.status'), key: 'status', sortable: false },
+  { title: t('visitorList.table.validUntil'), key: 'validity_end' },
+  { title: t('visitorList.table.actions'), key: 'actions', sortable: false },
 ])
 
 // Update options from data table
@@ -534,25 +534,25 @@ watch([searchQuery, selectedCommunity, selectedStatus, selectedType, page, items
 // Widget data
 const widgetData = computed(() => [
   {
-    title: 'Active Passes',
+    title: t('visitorList.widgets.activePasses'),
     value: totalActive.value.toLocaleString(),
     icon: 'tabler-ticket',
     iconColor: 'success',
   },
   {
-    title: 'Expired',
+    title: t('visitorList.widgets.expired'),
     value: totalExpired.value.toLocaleString(),
     icon: 'tabler-clock-off',
     iconColor: 'error',
   },
   {
-    title: 'Used',
+    title: t('visitorList.widgets.used'),
     value: totalUsed.value.toLocaleString(),
     icon: 'tabler-check',
     iconColor: 'secondary',
   },
   {
-    title: 'Created Today',
+    title: t('visitorList.widgets.createdToday'),
     value: totalToday.value.toLocaleString(),
     icon: 'tabler-calendar-plus',
     iconColor: 'primary',
@@ -607,7 +607,7 @@ const widgetData = computed(() => [
     <!-- Filters Card -->
     <VCard class="mb-6">
       <VCardItem class="pb-4">
-        <VCardTitle>Filters</VCardTitle>
+        <VCardTitle>{{ t('visitorList.filters.title') }}</VCardTitle>
       </VCardItem>
 
       <VCardText>
@@ -619,7 +619,7 @@ const widgetData = computed(() => [
           >
             <AppAutocomplete
               v-model="selectedCommunity"
-              placeholder="Filter by Community"
+              :placeholder="t('visitorList.filters.filterByCommunity')"
               :items="communities"
               clearable
               clear-icon="tabler-x"
@@ -632,7 +632,7 @@ const widgetData = computed(() => [
           >
             <AppSelect
               v-model="selectedType"
-              placeholder="Filter by Type"
+              :placeholder="t('visitorList.filters.filterByType')"
               :items="visitorTypes"
               clearable
               clear-icon="tabler-x"
@@ -645,7 +645,7 @@ const widgetData = computed(() => [
           >
             <AppSelect
               v-model="selectedStatus"
-              placeholder="Filter by Status"
+              :placeholder="t('visitorList.filters.filterByStatus')"
               :items="statusOptions"
               clearable
               clear-icon="tabler-x"
@@ -678,7 +678,7 @@ const widgetData = computed(() => [
           <div style="inline-size: 15.625rem;">
             <AppTextField
               v-model="searchQuery"
-              placeholder="Search visitor or code..."
+              :placeholder="t('visitorList.search.placeholder')"
               clearable
               clear-icon="tabler-x"
             />
@@ -692,7 +692,7 @@ const widgetData = computed(() => [
             prepend-icon="tabler-trash"
             @click="openBulkDeleteDialog"
           >
-            Delete ({{ selectedRows.length }})
+            {{ t('Delete') }} ({{ selectedRows.length }})
           </VBtn>
 
           <!-- Refresh button -->
@@ -708,7 +708,7 @@ const widgetData = computed(() => [
             prepend-icon="tabler-plus"
             :to="{ name: 'apps-visitor-add' }"
           >
-            Create Pass
+            {{ t('visitorList.buttons.createPass') }}
           </VBtn>
         </div>
       </VCardText>
@@ -812,7 +812,7 @@ const widgetData = computed(() => [
                 activator="parent"
                 location="top"
               >
-                View QR Code
+                {{ t('visitorList.actions.viewQR') }}
               </VTooltip>
             </IconBtn>
 
@@ -828,7 +828,7 @@ const widgetData = computed(() => [
                 activator="parent"
                 location="top"
               >
-                View Details
+                {{ t('visitorList.actions.viewDetails') }}
               </VTooltip>
             </IconBtn>
 
@@ -845,7 +845,7 @@ const widgetData = computed(() => [
                 activator="parent"
                 location="top"
               >
-                Delete
+                {{ t('visitorList.actions.delete') }}
               </VTooltip>
             </IconBtn>
           </div>
@@ -863,7 +863,7 @@ const widgetData = computed(() => [
                     size="18"
                     class="text-disabled"
                   />
-                  <span class="text-body-2 text-disabled">Community:</span>
+                  <span class="text-body-2 text-disabled">{{ t('visitorList.table.community') }}:</span>
                   <VChip
                     v-if="item.community?.name"
                     size="small"
@@ -876,7 +876,7 @@ const widgetData = computed(() => [
                   <span
                     v-else
                     class="text-disabled"
-                  >N/A</span>
+                  >{{ t('N/A') }}</span>
                 </div>
 
                 <!-- Property -->
@@ -886,7 +886,7 @@ const widgetData = computed(() => [
                     size="18"
                     class="text-disabled"
                   />
-                  <span class="text-body-2 text-disabled">Property:</span>
+                  <span class="text-body-2 text-disabled">{{ t('visitorList.table.property') }}:</span>
                   <VChip
                     v-if="item.property?.name"
                     size="small"
@@ -899,7 +899,7 @@ const widgetData = computed(() => [
                   <span
                     v-else
                     class="text-disabled"
-                  >N/A</span>
+                  >{{ t('N/A') }}</span>
                 </div>
 
                 <!-- Entries -->
@@ -909,7 +909,7 @@ const widgetData = computed(() => [
                     size="18"
                     class="text-disabled"
                   />
-                  <span class="text-body-2 text-disabled">Entries:</span>
+                  <span class="text-body-2 text-disabled">{{ t('visitorList.dialog.entries') }}:</span>
                   <span class="text-body-2">{{ formatEntries(item) }}</span>
                 </div>
               </div>
@@ -935,13 +935,13 @@ const widgetData = computed(() => [
     >
       <VCard v-if="selectedVisitor">
         <VCardTitle class="d-flex justify-space-between align-center pa-6">
-          <span>Visitor Pass Details</span>
+          <span>{{ t('visitorList.dialog.title') }}</span>
           <VChip
             :color="selectedVisitor.statusInfo?.color"
             size="small"
             label
           >
-            {{ selectedVisitor.statusInfo?.status }}
+            {{ t(`visitorList.status.${selectedVisitor.statusInfo?.status}`) }}
           </VChip>
         </VCardTitle>
 
@@ -989,8 +989,8 @@ const widgetData = computed(() => [
                       class="me-2"
                     />
                   </template>
-                  <VListItemTitle>Host</VListItemTitle>
-                  <VListItemSubtitle>{{ selectedVisitor.host?.display_name || 'N/A' }}</VListItemSubtitle>
+                  <VListItemTitle>{{ t('visitorList.dialog.host') }}</VListItemTitle>
+                  <VListItemSubtitle>{{ selectedVisitor.host?.display_name || t('N/A') }}</VListItemSubtitle>
                 </VListItem>
 
                 <VListItem>
@@ -1001,7 +1001,7 @@ const widgetData = computed(() => [
                       class="me-2"
                     />
                   </template>
-                  <VListItemTitle>Community</VListItemTitle>
+                  <VListItemTitle>{{ t('visitorList.dialog.community') }}</VListItemTitle>
                   <VListItemSubtitle>{{ selectedVisitor.community?.name || selectedVisitor.community_id }}</VListItemSubtitle>
                 </VListItem>
 
@@ -1013,7 +1013,7 @@ const widgetData = computed(() => [
                       class="me-2"
                     />
                   </template>
-                  <VListItemTitle>Property</VListItemTitle>
+                  <VListItemTitle>{{ t('visitorList.dialog.property') }}</VListItemTitle>
                   <VListItemSubtitle>{{ selectedVisitor.property?.name || selectedVisitor.property_id }}</VListItemSubtitle>
                 </VListItem>
 
@@ -1025,7 +1025,7 @@ const widgetData = computed(() => [
                       class="me-2"
                     />
                   </template>
-                  <VListItemTitle>Type</VListItemTitle>
+                  <VListItemTitle>{{ t('visitorList.dialog.type') }}</VListItemTitle>
                   <VListItemSubtitle>{{ translateVisitorType(selectedVisitor.visitor_type) }}</VListItemSubtitle>
                 </VListItem>
 
@@ -1037,7 +1037,7 @@ const widgetData = computed(() => [
                       class="me-2"
                     />
                   </template>
-                  <VListItemTitle>Valid Until</VListItemTitle>
+                  <VListItemTitle>{{ t('visitorList.dialog.validUntil') }}</VListItemTitle>
                   <VListItemSubtitle>{{ formatDate(selectedVisitor.validity_end) }}</VListItemSubtitle>
                 </VListItem>
 
@@ -1049,7 +1049,7 @@ const widgetData = computed(() => [
                       class="me-2"
                     />
                   </template>
-                  <VListItemTitle>Entries</VListItemTitle>
+                  <VListItemTitle>{{ t('visitorList.dialog.entries') }}</VListItemTitle>
                   <VListItemSubtitle>{{ formatEntries(selectedVisitor) }}</VListItemSubtitle>
                 </VListItem>
 
@@ -1061,7 +1061,7 @@ const widgetData = computed(() => [
                       class="me-2"
                     />
                   </template>
-                  <VListItemTitle>Notes</VListItemTitle>
+                  <VListItemTitle>{{ t('visitorList.dialog.notes') }}</VListItemTitle>
                   <VListItemSubtitle>{{ selectedVisitor.notes }}</VListItemSubtitle>
                 </VListItem>
               </VList>
@@ -1078,7 +1078,7 @@ const widgetData = computed(() => [
             variant="tonal"
             @click="isViewDialogVisible = false"
           >
-            Close
+            {{ t('visitorList.dialog.close') }}
           </VBtn>
         </VCardActions>
       </VCard>
@@ -1099,13 +1099,11 @@ const widgetData = computed(() => [
           />
 
           <h6 class="text-h6 mb-4">
-            Delete Visitor Pass
+            {{ t('visitorList.deleteDialog.title') }}
           </h6>
 
           <p class="text-body-1 mb-6">
-            Are you sure you want to delete the visitor pass for
-            <strong>{{ selectedVisitor?.visitor_name }}</strong>?
-            This action cannot be undone.
+            {{ t('visitorList.deleteDialog.message', { name: selectedVisitor?.visitor_name }) }}
           </p>
 
           <div class="d-flex gap-4 justify-center">
@@ -1114,7 +1112,7 @@ const widgetData = computed(() => [
               variant="tonal"
               @click="isDeleteDialogVisible = false"
             >
-              Cancel
+              {{ t('visitorList.deleteDialog.cancel') }}
             </VBtn>
 
             <VBtn
@@ -1123,7 +1121,7 @@ const widgetData = computed(() => [
               :loading="isDeleting"
               @click="deleteVisitor"
             >
-              Delete
+              {{ t('visitorList.deleteDialog.confirm') }}
             </VBtn>
           </div>
         </VCardText>
@@ -1145,12 +1143,11 @@ const widgetData = computed(() => [
           />
 
           <h6 class="text-h6 mb-4">
-            Delete Multiple Visitor Passes
+            {{ t('visitorList.bulkDeleteDialog.title') }}
           </h6>
 
           <p class="text-body-1 mb-4">
-            Are you sure you want to delete <strong>{{ selectedRows.length }}</strong> visitor pass(es)?
-            This action cannot be undone.
+            {{ t('visitorList.bulkDeleteDialog.message', { count: selectedRows.length, entity: selectedRows.length === 1 ? t('entry') : t('entries') }) }}
           </p>
 
           <VAlert
@@ -1159,7 +1156,7 @@ const widgetData = computed(() => [
             class="mb-6 text-start"
           >
             <div class="text-body-2">
-              All associated entry/exit logs will also be deleted.
+              {{ t('visitorList.bulkDeleteDialog.warning', { count: selectedRows.length, entity: selectedRows.length === 1 ? t('entry') : t('entries') }) }}
             </div>
           </VAlert>
 
@@ -1169,7 +1166,7 @@ const widgetData = computed(() => [
               variant="tonal"
               @click="isBulkDeleteDialogVisible = false"
             >
-              Cancel
+              {{ t('visitorList.bulkDeleteDialog.cancel') }}
             </VBtn>
 
             <VBtn
@@ -1178,7 +1175,7 @@ const widgetData = computed(() => [
               :loading="isDeleting"
               @click="bulkDeleteVisitors"
             >
-              Delete All
+              {{ t('visitorList.bulkDeleteDialog.confirm') }}
             </VBtn>
           </div>
         </VCardText>

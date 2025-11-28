@@ -2,6 +2,8 @@
 import { VForm } from 'vuetify/components/VForm'
 import { supabase } from '@/lib/supabase'
 
+const { t } = useI18n({ useScope: 'global' })
+
 interface DeviceData {
   id?: string
   device_name: string
@@ -86,7 +88,7 @@ const deviceForm = ref<DeviceData>({
 // Options
 const brandOptions = [
   { title: 'Shelly', value: 'Shelly' },
-  { title: 'Other', value: 'Other' },
+  { title: t('deviceDialog.options.other'), value: 'Other' },
 ]
 
 const modelOptions = [
@@ -94,27 +96,27 @@ const modelOptions = [
   { title: 'Pro 4', value: 'Pro 4' },
   { title: 'Plus 1', value: 'Plus 1' },
   { title: 'Plus 2PM', value: 'Plus 2PM' },
-  { title: 'Other', value: 'Other' },
+  { title: t('deviceDialog.options.other'), value: 'Other' },
 ]
 
-const directionOptions = [
-  { title: 'Enter', value: 'Enter' },
-  { title: 'Exit', value: 'Exit' },
-  { title: 'Both', value: 'Both' },
-]
+const directionOptions = computed(() => [
+  { title: t('deviceDialog.options.enter'), value: 'Enter' },
+  { title: t('deviceDialog.options.exit'), value: 'Exit' },
+  { title: t('deviceDialog.options.both'), value: 'Both' },
+])
 
-const turnOptions = [
-  { title: 'On', value: 'on' },
-  { title: 'Off', value: 'off' },
-  { title: 'Toggle', value: 'toggle' },
-]
+const turnOptions = computed(() => [
+  { title: t('deviceDialog.options.on'), value: 'on' },
+  { title: t('deviceDialog.options.off'), value: 'off' },
+  { title: t('deviceDialog.options.toggle'), value: 'toggle' },
+])
 
-const channelOptions = [
-  { title: 'Channel 0', value: 0 },
-  { title: 'Channel 1', value: 1 },
-  { title: 'Channel 2', value: 2 },
-  { title: 'Channel 3', value: 3 },
-]
+const channelOptions = computed(() => [
+  { title: t('deviceDialog.options.channel', { n: 0 }), value: 0 },
+  { title: t('deviceDialog.options.channel', { n: 1 }), value: 1 },
+  { title: t('deviceDialog.options.channel', { n: 2 }), value: 2 },
+  { title: t('deviceDialog.options.channel', { n: 3 }), value: 3 },
+])
 
 // Watch for dialog visibility to populate form
 watch(() => props.isDialogVisible, (newVal) => {
@@ -242,7 +244,7 @@ const onReset = () => {
 }
 
 // Validation rules
-const requiredRule = (v: string) => !!v || 'This field is required'
+const requiredRule = (v: string) => !!v || t('deviceDialog.validation.required')
 </script>
 
 <template>
@@ -270,10 +272,10 @@ const requiredRule = (v: string) => !!v || 'This field is required'
             />
           </VAvatar>
           <h4 class="text-h4 mb-2">
-            {{ isEditMode ? 'Edit' : 'Add New' }} Device
+            {{ isEditMode ? t('deviceDialog.editTitle') : t('deviceDialog.addTitle') }}
           </h4>
           <p class="text-body-1 text-medium-emphasis">
-            {{ isEditMode ? 'Update automation device configuration' : 'Configure a new automation device' }}
+            {{ isEditMode ? t('deviceDialog.editSubtitle') : t('deviceDialog.addSubtitle') }}
           </p>
         </div>
 
@@ -289,7 +291,7 @@ const requiredRule = (v: string) => !!v || 'This field is required'
                   color="primary"
                 />
                 <h6 class="text-h6 text-primary">
-                  Basic Information
+                  {{ t('deviceDialog.sections.basicInfo') }}
                 </h6>
               </div>
             </VCol>
@@ -301,8 +303,8 @@ const requiredRule = (v: string) => !!v || 'This field is required'
             >
               <AppTextField
                 v-model="deviceForm.device_name"
-                label="Device Name *"
-                placeholder="Enter device name"
+                :label="t('deviceDialog.fields.deviceName')"
+                :placeholder="t('deviceDialog.fields.deviceNamePlaceholder')"
                 :rules="[requiredRule]"
               >
                 <template #prepend-inner>
@@ -318,8 +320,8 @@ const requiredRule = (v: string) => !!v || 'This field is required'
             >
               <AppSelect
                 v-model="deviceForm.community_id"
-                label="Community *"
-                placeholder="Select community"
+                :label="t('deviceDialog.fields.community')"
+                :placeholder="t('deviceDialog.fields.communityPlaceholder')"
                 :items="props.communities"
                 :rules="[requiredRule]"
               >
@@ -336,8 +338,8 @@ const requiredRule = (v: string) => !!v || 'This field is required'
             >
               <AppSelect
                 v-model="deviceForm.device_brand"
-                label="Brand"
-                placeholder="Select brand"
+                :label="t('deviceDialog.fields.brand')"
+                :placeholder="t('deviceDialog.fields.brandPlaceholder')"
                 :items="brandOptions"
               >
                 <template #prepend-inner>
@@ -353,8 +355,8 @@ const requiredRule = (v: string) => !!v || 'This field is required'
             >
               <AppSelect
                 v-model="deviceForm.device_model"
-                label="Model"
-                placeholder="Select model"
+                :label="t('deviceDialog.fields.model')"
+                :placeholder="t('deviceDialog.fields.modelPlaceholder')"
                 :items="modelOptions"
               >
                 <template #prepend-inner>
@@ -373,7 +375,7 @@ const requiredRule = (v: string) => !!v || 'This field is required'
                   color="info"
                 />
                 <h6 class="text-h6 text-info">
-                  Device Identifiers
+                  {{ t('deviceDialog.sections.deviceIdentifiers') }}
                 </h6>
               </div>
             </VCol>
@@ -385,9 +387,9 @@ const requiredRule = (v: string) => !!v || 'This field is required'
             >
               <AppTextField
                 v-model="deviceForm.device_id_in"
-                label="Device ID (In)"
+                :label="t('deviceDialog.fields.deviceIdIn')"
                 placeholder="e.g., c8f09e881dd0"
-                hint="Hardware ID for entry relay"
+                :hint="t('deviceDialog.fields.deviceIdInHint')"
                 persistent-hint
               >
                 <template #prepend-inner>
@@ -403,9 +405,9 @@ const requiredRule = (v: string) => !!v || 'This field is required'
             >
               <AppTextField
                 v-model="deviceForm.device_id_out"
-                label="Device ID (Out)"
+                :label="t('deviceDialog.fields.deviceIdOut')"
                 placeholder="e.g., c8f09e881dd0"
-                hint="Hardware ID for exit relay"
+                :hint="t('deviceDialog.fields.deviceIdOutHint')"
                 persistent-hint
               >
                 <template #prepend-inner>
@@ -424,7 +426,7 @@ const requiredRule = (v: string) => !!v || 'This field is required'
                   color="warning"
                 />
                 <h6 class="text-h6 text-warning">
-                  API Configuration
+                  {{ t('deviceDialog.sections.apiConfiguration') }}
                 </h6>
               </div>
             </VCol>
@@ -433,7 +435,7 @@ const requiredRule = (v: string) => !!v || 'This field is required'
             <VCol cols="12">
               <AppTextField
                 v-model="deviceForm.api_url"
-                label="API URL"
+                :label="t('deviceDialog.fields.apiUrl')"
                 placeholder="https://shelly-144-eu.shelly.cloud"
               >
                 <template #prepend-inner>
@@ -449,7 +451,7 @@ const requiredRule = (v: string) => !!v || 'This field is required'
             >
               <AppTextField
                 v-model="deviceForm.api_endpoint"
-                label="API Endpoint"
+                :label="t('deviceDialog.fields.apiEndpoint')"
                 placeholder="device/relay/control"
               >
                 <template #prepend-inner>
@@ -467,9 +469,9 @@ const requiredRule = (v: string) => !!v || 'This field is required'
               <AppTextField
                 v-if="isAuthKeyProtected"
                 :model-value="showAuthKey ? maskedAuthKey : '••••••••••••••••'"
-                label="Auth Key"
+                :label="t('deviceDialog.fields.authKey')"
                 readonly
-                hint="Auth key is protected. Click eye to reveal partial key."
+                :hint="t('deviceDialog.fields.authKeyProtectedHint')"
                 persistent-hint
               >
                 <template #prepend-inner>
@@ -487,8 +489,8 @@ const requiredRule = (v: string) => !!v || 'This field is required'
               <AppTextField
                 v-else
                 v-model="deviceForm.auth_key"
-                label="Auth Key"
-                placeholder="Enter authentication key"
+                :label="t('deviceDialog.fields.authKey')"
+                :placeholder="t('deviceDialog.fields.authKeyPlaceholder')"
                 :type="showAuthKey ? 'text' : 'password'"
               >
                 <template #prepend-inner>
@@ -514,7 +516,7 @@ const requiredRule = (v: string) => !!v || 'This field is required'
                   color="success"
                 />
                 <h6 class="text-h6 text-success">
-                  Relay Configuration
+                  {{ t('deviceDialog.sections.relayConfiguration') }}
                 </h6>
               </div>
             </VCol>
@@ -526,8 +528,8 @@ const requiredRule = (v: string) => !!v || 'This field is required'
             >
               <AppSelect
                 v-model="deviceForm.direction_type"
-                label="Direction Type"
-                placeholder="Select direction"
+                :label="t('deviceDialog.fields.directionType')"
+                :placeholder="t('deviceDialog.fields.directionTypePlaceholder')"
                 :items="directionOptions"
               >
                 <template #prepend-inner>
@@ -543,8 +545,8 @@ const requiredRule = (v: string) => !!v || 'This field is required'
             >
               <AppSelect
                 v-model="deviceForm.divice_turn"
-                label="Turn Action"
-                placeholder="Select action"
+                :label="t('deviceDialog.fields.turnAction')"
+                :placeholder="t('deviceDialog.fields.turnActionPlaceholder')"
                 :items="turnOptions"
               >
                 <template #prepend-inner>
@@ -560,8 +562,8 @@ const requiredRule = (v: string) => !!v || 'This field is required'
             >
               <AppSelect
                 v-model="deviceForm.device_channel_in"
-                label="Entry Channel"
-                placeholder="Select channel"
+                :label="t('deviceDialog.fields.entryChannel')"
+                :placeholder="t('deviceDialog.fields.channelPlaceholder')"
                 :items="channelOptions"
               >
                 <template #prepend-inner>
@@ -577,8 +579,8 @@ const requiredRule = (v: string) => !!v || 'This field is required'
             >
               <AppSelect
                 v-model="deviceForm.device_channel_out"
-                label="Exit Channel"
-                placeholder="Select channel"
+                :label="t('deviceDialog.fields.exitChannel')"
+                :placeholder="t('deviceDialog.fields.channelPlaceholder')"
                 :items="channelOptions"
               >
                 <template #prepend-inner>
@@ -597,7 +599,7 @@ const requiredRule = (v: string) => !!v || 'This field is required'
                   color="error"
                 />
                 <h6 class="text-h6 text-error">
-                  Location
+                  {{ t('deviceDialog.sections.location') }}
                 </h6>
               </div>
             </VCol>
@@ -606,9 +608,9 @@ const requiredRule = (v: string) => !!v || 'This field is required'
             <VCol cols="12">
               <AppTextField
                 v-model="deviceForm.geolocation"
-                label="Geolocation"
+                :label="t('deviceDialog.fields.geolocation')"
                 placeholder="e.g., 20.09788563257816, -98.78004411194858"
-                hint="Format: latitude, longitude"
+                :hint="t('deviceDialog.fields.geolocationHint')"
                 persistent-hint
               >
                 <template #prepend-inner>
@@ -627,7 +629,7 @@ const requiredRule = (v: string) => !!v || 'This field is required'
                   color="secondary"
                 />
                 <h6 class="text-h6 text-secondary">
-                  Status & Access
+                  {{ t('deviceDialog.sections.statusAccess') }}
                 </h6>
               </div>
             </VCol>
@@ -639,7 +641,7 @@ const requiredRule = (v: string) => !!v || 'This field is required'
             >
               <VSwitch
                 v-model="deviceForm.enabled"
-                label="Device Enabled"
+                :label="t('deviceDialog.fields.deviceEnabled')"
                 color="success"
                 hide-details
               />
@@ -652,7 +654,7 @@ const requiredRule = (v: string) => !!v || 'This field is required'
             >
               <VSwitch
                 v-model="deviceForm.guest_access"
-                label="Guest Access Allowed"
+                :label="t('deviceDialog.fields.guestAccessAllowed')"
                 color="info"
                 hide-details
               />
@@ -676,7 +678,7 @@ const requiredRule = (v: string) => !!v || 'This field is required'
                 block
                 @click="onReset"
               >
-                Cancel
+                {{ t('deviceDialog.buttons.cancel') }}
               </VBtn>
             </VCol>
             <VCol
@@ -694,7 +696,7 @@ const requiredRule = (v: string) => !!v || 'This field is required'
                 block
                 @click="onSubmit"
               >
-                {{ isSaving ? 'Saving...' : (isEditMode ? 'Update Device' : 'Create Device') }}
+                {{ isSaving ? t('deviceDialog.buttons.saving') : (isEditMode ? t('deviceDialog.buttons.update') : t('deviceDialog.buttons.create')) }}
               </VBtn>
             </VCol>
           </VRow>

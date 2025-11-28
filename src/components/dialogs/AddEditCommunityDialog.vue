@@ -3,6 +3,8 @@ import { VForm } from 'vuetify/components/VForm'
 import { supabase } from '@/lib/supabase'
 import { useCountriesStates } from '@/composables/useCountriesStates'
 
+const { t } = useI18n({ useScope: 'global' })
+
 interface CommunityData {
   id?: string
   name: string
@@ -205,7 +207,7 @@ const onReset = () => {
 }
 
 // Validation rules
-const requiredRule = (v: string) => !!v || 'This field is required'
+const requiredRule = (v: string) => !!v || t('communityDialog.validation.required')
 </script>
 
 <template>
@@ -233,10 +235,10 @@ const requiredRule = (v: string) => !!v || 'This field is required'
             />
           </VAvatar>
           <h4 class="text-h4 mb-2">
-            {{ isEditMode ? 'Edit' : 'Add New' }} Community
+            {{ isEditMode ? t('communityDialog.editTitle') : t('communityDialog.addTitle') }}
           </h4>
           <p class="text-body-1 text-medium-emphasis">
-            {{ isEditMode ? 'Update community information' : 'Create a new community' }}
+            {{ isEditMode ? t('communityDialog.editSubtitle') : t('communityDialog.addSubtitle') }}
           </p>
         </div>
 
@@ -252,7 +254,7 @@ const requiredRule = (v: string) => !!v || 'This field is required'
                   color="primary"
                 />
                 <h6 class="text-h6 text-primary">
-                  Basic Information
+                  {{ t('communityDialog.sections.basicInfo') }}
                 </h6>
               </div>
             </VCol>
@@ -264,9 +266,9 @@ const requiredRule = (v: string) => !!v || 'This field is required'
             >
               <AppTextField
                 v-model="communityForm.id"
-                label="Community ID"
-                placeholder="Leave empty for auto-generated ID"
-                hint="Optional: Enter a custom ID or leave empty for auto-generation"
+                :label="t('communityDialog.fields.communityId')"
+                :placeholder="t('communityDialog.fields.communityIdPlaceholder')"
+                :hint="t('communityDialog.fields.communityIdHint')"
                 persistent-hint
               >
                 <template #prepend-inner>
@@ -279,8 +281,8 @@ const requiredRule = (v: string) => !!v || 'This field is required'
             <VCol cols="12">
               <AppTextField
                 v-model="communityForm.name"
-                label="Community Name"
-                placeholder="Enter community name"
+                :label="t('communityDialog.fields.communityName')"
+                :placeholder="t('communityDialog.fields.communityNamePlaceholder')"
                 :rules="[requiredRule]"
               >
                 <template #prepend-inner>
@@ -299,7 +301,7 @@ const requiredRule = (v: string) => !!v || 'This field is required'
                   color="success"
                 />
                 <h6 class="text-h6 text-success">
-                  Location Details
+                  {{ t('communityDialog.sections.location') }}
                 </h6>
               </div>
             </VCol>
@@ -308,8 +310,8 @@ const requiredRule = (v: string) => !!v || 'This field is required'
             <VCol cols="12">
               <AppTextField
                 v-model="communityForm.address"
-                label="Street Address"
-                placeholder="Enter street address"
+                :label="t('communityDialog.fields.streetAddress')"
+                :placeholder="t('communityDialog.fields.streetAddressPlaceholder')"
               >
                 <template #prepend-inner>
                   <VIcon icon="tabler-map-2" />
@@ -321,8 +323,8 @@ const requiredRule = (v: string) => !!v || 'This field is required'
             <VCol cols="12">
               <AppTextField
                 v-model="communityForm.city"
-                label="City"
-                placeholder="Enter city"
+                :label="t('communityDialog.fields.city')"
+                :placeholder="t('communityDialog.fields.cityPlaceholder')"
               >
                 <template #prepend-inner>
                   <VIcon icon="tabler-building" />
@@ -334,8 +336,8 @@ const requiredRule = (v: string) => !!v || 'This field is required'
             <VCol cols="12">
               <AppTextField
                 v-model="communityForm.postal_code"
-                label="Postal Code"
-                placeholder="Enter postal code"
+                :label="t('communityDialog.fields.postalCode')"
+                :placeholder="t('communityDialog.fields.postalCodePlaceholder')"
               >
                 <template #prepend-inner>
                   <VIcon icon="tabler-mailbox" />
@@ -350,8 +352,8 @@ const requiredRule = (v: string) => !!v || 'This field is required'
                 v-if="showStateDropdown"
                 v-model="communityForm.state"
                 :items="availableStates"
-                label="State/Province"
-                placeholder="Select or search state"
+                :label="t('communityDialog.fields.stateProvince')"
+                :placeholder="t('communityDialog.fields.stateProvincePlaceholder')"
                 clearable
                 clear-icon="tabler-x"
                 auto-select-first
@@ -365,8 +367,8 @@ const requiredRule = (v: string) => !!v || 'This field is required'
               <AppTextField
                 v-else
                 v-model="communityForm.state"
-                label="State/Province/Region"
-                placeholder="Enter state, province, or region"
+                :label="t('communityDialog.fields.stateProvinceRegion')"
+                :placeholder="t('communityDialog.fields.stateProvinceRegionPlaceholder')"
               >
                 <template #prepend-inner>
                   <VIcon icon="tabler-map-pin" />
@@ -379,8 +381,8 @@ const requiredRule = (v: string) => !!v || 'This field is required'
               <VAutocomplete
                 v-model="communityForm.country"
                 :items="countries"
-                label="Country"
-                placeholder="Select or search country"
+                :label="t('communityDialog.fields.country')"
+                :placeholder="t('communityDialog.fields.countryPlaceholder')"
                 clearable
                 clear-icon="tabler-x"
                 auto-select-first
@@ -401,7 +403,7 @@ const requiredRule = (v: string) => !!v || 'This field is required'
                   color="warning"
                 />
                 <h6 class="text-h6 text-warning">
-                  Maps & Coordinates
+                  {{ t('communityDialog.sections.mapsCoordinates') }}
                 </h6>
               </div>
             </VCol>
@@ -410,9 +412,9 @@ const requiredRule = (v: string) => !!v || 'This field is required'
             <VCol cols="12">
               <AppTextField
                 v-model="communityForm.geolocation"
-                label="Geolocation"
-                placeholder="Enter coordinates (e.g., 40.7128, -74.0060)"
-                hint="Format: latitude, longitude"
+                :label="t('communityDialog.fields.geolocation')"
+                :placeholder="t('communityDialog.fields.geolocationPlaceholder')"
+                :hint="t('communityDialog.fields.geolocationHint')"
                 persistent-hint
               >
                 <template #prepend-inner>
@@ -425,8 +427,8 @@ const requiredRule = (v: string) => !!v || 'This field is required'
             <VCol cols="12">
               <AppTextField
                 v-model="communityForm.googlemaps"
-                label="Google Maps URL"
-                placeholder="https://maps.google.com/..."
+                :label="t('communityDialog.fields.googleMapsUrl')"
+                :placeholder="t('communityDialog.fields.googleMapsUrlPlaceholder')"
                 type="url"
               >
                 <template #prepend-inner>
@@ -453,7 +455,7 @@ const requiredRule = (v: string) => !!v || 'This field is required'
                 block
                 @click="onReset"
               >
-                Cancel
+                {{ t('communityDialog.buttons.cancel') }}
               </VBtn>
             </VCol>
             <VCol
@@ -471,7 +473,7 @@ const requiredRule = (v: string) => !!v || 'This field is required'
                 block
                 @click="onSubmit"
               >
-                {{ isSaving ? 'Saving...' : (isEditMode ? 'Update Community' : 'Create Community') }}
+                {{ isSaving ? t('communityDialog.buttons.saving') : (isEditMode ? t('communityDialog.buttons.update') : t('communityDialog.buttons.create')) }}
               </VBtn>
             </VCol>
           </VRow>
