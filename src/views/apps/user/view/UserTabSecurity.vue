@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { supabase } from '@/lib/supabase'
 
+const { t } = useI18n({ useScope: 'global' })
 const route = useRoute()
 
 // 👉 User data for permission checks
@@ -13,13 +14,13 @@ const canManage = computed(() => {
 })
 
 // Property Table Header
-const propertyTableHeaders = [
-  { title: 'Property', key: 'id' },
-  { title: 'Name', key: 'name' },
-  { title: 'Community', key: 'community_name' },
-  { title: 'Status', key: 'status' },
-  { title: 'Action', key: 'action', sortable: false },
-]
+const propertyTableHeaders = computed(() => [
+  { title: t('userView.propertyTab.tableHeaders.property'), key: 'id' },
+  { title: t('userView.propertyTab.tableHeaders.name'), key: 'name' },
+  { title: t('userView.propertyTab.tableHeaders.community'), key: 'community_name' },
+  { title: t('userView.propertyTab.tableHeaders.status'), key: 'status' },
+  { title: t('userView.propertyTab.tableHeaders.action'), key: 'action', sortable: false },
+])
 
 const search = ref('')
 const options = ref({ itemsPerPage: 5, page: 1 })
@@ -439,14 +440,14 @@ onMounted(() => {
       <VCard>
         <VCardText class="d-flex justify-space-between align-center flex-wrap gap-4">
           <h5 class="text-h5">
-            User's Properties
+            {{ t('userView.propertyTab.title') }}
           </h5>
 
           <div class="d-flex align-center gap-4">
             <div style="inline-size: 250px;">
               <AppTextField
                 v-model="search"
-                placeholder="Search Property"
+                :placeholder="t('userView.propertyTab.searchPlaceholder')"
               />
             </div>
 
@@ -459,7 +460,7 @@ onMounted(() => {
                 activator="parent"
                 location="top"
               >
-                Refresh
+                {{ t('userView.tooltips.refresh') }}
               </VTooltip>
             </IconBtn>
 
@@ -469,7 +470,7 @@ onMounted(() => {
               prepend-icon="tabler-plus"
               @click="openAssignPropertyDialog"
             >
-              Assign Property
+              {{ t('userView.propertyTab.assignProperty') }}
             </VBtn>
           </div>
         </VCardText>
@@ -534,7 +535,7 @@ onMounted(() => {
                 activator="parent"
                 location="top"
               >
-                Remove Property
+                {{ t('userView.propertyTab.removeProperty') }}
               </VTooltip>
             </IconBtn>
           </template>
@@ -568,17 +569,17 @@ onMounted(() => {
         />
 
         <h6 class="text-h6 mb-4">
-          Assign Properties
+          {{ t('userView.propertyTab.assignDialog.title') }}
         </h6>
 
         <p class="text-body-1 mb-4">
-          Select one or more properties to assign to this user.
+          {{ t('userView.propertyTab.assignDialog.description') }}
         </p>
 
         <AppSelect
           v-model="selectedProperties"
-          label="Properties"
-          placeholder="Select properties to assign"
+          :label="t('userView.propertyTab.assignDialog.label')"
+          :placeholder="t('userView.propertyTab.assignDialog.placeholder')"
           :items="availableProperties"
           multiple
           chips
@@ -596,7 +597,7 @@ onMounted(() => {
             variant="tonal"
             @click="isAssignPropertyDialogVisible = false"
           >
-            Cancel
+            {{ t('common.cancel') }}
           </VBtn>
 
           <VBtn
@@ -606,7 +607,7 @@ onMounted(() => {
             :disabled="selectedProperties.length === 0"
             @click="assignProperties"
           >
-            Assign
+            {{ t('userView.propertyTab.assignDialog.assign') }}
           </VBtn>
         </div>
       </VCardText>
@@ -628,11 +629,11 @@ onMounted(() => {
         />
 
         <h6 class="text-h6 mb-4">
-          Remove Property
+          {{ t('userView.propertyTab.removeDialog.title') }}
         </h6>
 
         <p class="text-body-1 mb-6">
-          Are you sure you want to remove <strong>{{ propertyToRemove?.name }}</strong> from this user?
+          {{ t('userView.propertyTab.removeDialog.message', { name: propertyToRemove?.name }) }}
         </p>
 
         <VAlert
@@ -641,7 +642,7 @@ onMounted(() => {
           class="mb-6 text-start"
         >
           <div class="text-body-2">
-            The user will no longer have access to this property.
+            {{ t('userView.propertyTab.removeDialog.warning') }}
           </div>
         </VAlert>
 
@@ -651,7 +652,7 @@ onMounted(() => {
             variant="tonal"
             @click="cancelRemove"
           >
-            Cancel
+            {{ t('common.cancel') }}
           </VBtn>
 
           <VBtn
@@ -659,7 +660,7 @@ onMounted(() => {
             variant="elevated"
             @click="confirmRemoveProperty"
           >
-            Remove
+            {{ t('userView.propertyTab.removeDialog.remove') }}
           </VBtn>
         </div>
       </VCardText>

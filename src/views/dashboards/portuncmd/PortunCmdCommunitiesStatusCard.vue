@@ -19,12 +19,12 @@ const statusColors: Record<string, string> = {
   'pre-launch': 'rgb(var(--v-theme-warning))',
 }
 
-const statusLabels: Record<string, string> = {
-  'active': 'Active',
-  'inactive': 'Inactive',
-  'archived': 'Archived',
-  'pre-launch': 'Pre-launch',
-}
+const statusLabels = computed(() => ({
+  'active': t('status.active'),
+  'inactive': t('status.inactive'),
+  'archived': t('status.archived'),
+  'pre-launch': t('status.preLaunch'),
+}))
 
 const fetchStatusData = async () => {
   try {
@@ -94,7 +94,7 @@ const chartOptions = computed(() => {
       parentHeightOffset: 0,
       toolbar: { show: false },
     },
-    labels: statusData.value.map(s => statusLabels[s.status] || s.status),
+    labels: statusData.value.map(s => statusLabels.value[s.status as keyof typeof statusLabels.value] || s.status),
     colors: [
       currentTheme.success,
       currentTheme.error,
@@ -133,7 +133,7 @@ const chartOptions = computed(() => {
             total: {
               show: true,
               showAlways: true,
-              label: topStatus ? (statusLabels[topStatus.status] || topStatus.status) : '',
+              label: topStatus ? (statusLabels.value[topStatus.status as keyof typeof statusLabels.value] || topStatus.status) : '',
               fontSize: '0.875rem',
               fontWeight: 400,
               color: currentTheme.success,
@@ -216,7 +216,7 @@ const chartOptions = computed(() => {
               size="10"
             />
             <span class="text-body-2">
-              {{ statusLabels[item.status] || item.status }}
+              {{ statusLabels[item.status as keyof typeof statusLabels] || item.status }}
             </span>
           </div>
         </div>

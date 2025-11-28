@@ -2,6 +2,7 @@
 import { useTheme } from 'vuetify'
 import { supabase } from '@/lib/supabase'
 
+const { t } = useI18n({ useScope: 'global' })
 const vuetifyTheme = useTheme()
 const currentTheme = vuetifyTheme.current.value.colors
 
@@ -174,8 +175,8 @@ const chartOptions = computed(() => ({
         </VAvatar>
       </template>
 
-      <VCardTitle>Total Properties</VCardTitle>
-      <VCardSubtitle>Last Week</VCardSubtitle>
+      <VCardTitle>{{ t('dashboard.properties') }}</VCardTitle>
+      <VCardSubtitle>{{ t('dashboard.lastWeek') }}</VCardSubtitle>
 
       <template #append>
         <IconBtn
@@ -191,7 +192,7 @@ const chartOptions = computed(() => ({
             activator="parent"
             location="top"
           >
-            View Properties
+            {{ t('dashboard.viewProperties') }}
           </VTooltip>
         </IconBtn>
       </template>

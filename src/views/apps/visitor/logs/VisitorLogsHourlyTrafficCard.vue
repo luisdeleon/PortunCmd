@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { supabase } from '@/lib/supabase'
 
+const { t } = useI18n({ useScope: 'global' })
+
 // Props
 interface Props {
   communityFilter?: string
@@ -14,21 +16,21 @@ const emit = defineEmits<{
 }>()
 
 // Time range options
-const timeRangeOptions = [
-  { title: 'Last 7 days', value: 7 },
-  { title: 'Last 30 days', value: 30 },
-  { title: 'Last 90 days', value: 90 },
-  { title: 'Last 6 months', value: 180 },
-  { title: 'Last year', value: 365 },
-  { title: 'All time', value: 0 },
-]
+const timeRangeOptions = computed(() => [
+  { title: t('visitorLogs.last7Days'), value: 7 },
+  { title: t('visitorLogs.last30Days'), value: 30 },
+  { title: t('visitorLogs.last90Days'), value: 90 },
+  { title: t('visitorLogs.last6Months'), value: 180 },
+  { title: t('visitorLogs.lastYear'), value: 365 },
+  { title: t('visitorLogs.allTime'), value: 0 },
+])
 
 const selectedTimeRange = ref(90) // Default to 90 days
 
 // Computed label for selected time range
 const selectedTimeRangeLabel = computed(() => {
-  const option = timeRangeOptions.find(o => o.value === selectedTimeRange.value)
-  return option?.title || 'Last 30 days'
+  const option = timeRangeOptions.value.find(o => o.value === selectedTimeRange.value)
+  return option?.title || t('visitorLogs.last30Days')
 })
 
 // User data for permission checks
@@ -59,12 +61,12 @@ const totalExits = ref(0)
 // Computed chart series
 const series = computed(() => [
   {
-    name: 'Entries',
+    name: t('visitorLogs.entries'),
     type: 'column',
     data: entriesByHour.value,
   },
   {
-    name: 'Exits',
+    name: t('visitorLogs.exits'),
     type: 'line',
     data: exitsByHour.value,
   },
@@ -401,8 +403,8 @@ defineExpose({
     <VCardItem>
       <template #prepend>
         <div>
-          <VCardTitle>Hourly Traffic</VCardTitle>
-          <VCardSubtitle>Entry/exit patterns by hour</VCardSubtitle>
+          <VCardTitle>{{ t('visitorLogs.hourlyTraffic') }}</VCardTitle>
+          <VCardSubtitle>{{ t('visitorLogs.entryExitPatterns') }}</VCardSubtitle>
         </div>
       </template>
 
@@ -413,7 +415,7 @@ defineExpose({
             color="default"
             variant="tonal"
           >
-            {{ totalEntries.toLocaleString() }} entries
+            {{ totalEntries.toLocaleString() }} {{ t('visitorLogs.entries').toLowerCase() }}
           </VChip>
           <VMenu>
             <template #activator="{ props: menuProps }">
@@ -450,7 +452,7 @@ defineExpose({
               activator="parent"
               location="top"
             >
-              View Access Logs
+              {{ t('visitorLogs.viewAccessLogs') }}
             </VTooltip>
           </IconBtn>
         </div>

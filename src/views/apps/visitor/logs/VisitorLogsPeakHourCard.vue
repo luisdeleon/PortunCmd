@@ -1,4 +1,6 @@
 <script setup lang="ts">
+const { t } = useI18n({ useScope: 'global' })
+
 // Props
 interface Props {
   entriesByHour: number[]
@@ -20,7 +22,7 @@ const peakHour = computed(() => {
 
 // Format hour as time range (e.g., "2:00 PM - 3:00 PM")
 const formatHourRange = (hour: number) => {
-  if (hour < 0) return 'No data'
+  if (hour < 0) return t('visitorLogs.noData')
 
   const formatHour = (h: number) => {
     const period = h >= 12 ? 'PM' : 'AM'
@@ -37,10 +39,10 @@ const formatHourRange = (hour: number) => {
 const periodLabel = computed(() => {
   const hour = peakHour.value.hour
   if (hour < 0) return ''
-  if (hour >= 5 && hour < 12) return 'Morning'
-  if (hour >= 12 && hour < 17) return 'Afternoon'
-  if (hour >= 17 && hour < 21) return 'Evening'
-  return 'Night'
+  if (hour >= 5 && hour < 12) return t('visitorLogs.morning')
+  if (hour >= 12 && hour < 17) return t('visitorLogs.afternoon')
+  if (hour >= 17 && hour < 21) return t('visitorLogs.evening')
+  return t('visitorLogs.night')
 })
 </script>
 
@@ -73,7 +75,7 @@ const periodLabel = computed(() => {
         </VAvatar>
 
         <h6 class="text-h6 mb-1">
-          Peak Hour
+          {{ t('visitorLogs.peakHour') }}
         </h6>
 
         <div class="text-h5 font-weight-bold text-warning mb-1">
@@ -89,7 +91,7 @@ const periodLabel = computed(() => {
             color="warning"
             variant="tonal"
           >
-            {{ peakHour.count }} entries
+            {{ peakHour.count }} {{ t('visitorLogs.entries').toLowerCase() }}
           </VChip>
           <span
             v-if="periodLabel"
@@ -102,7 +104,7 @@ const periodLabel = computed(() => {
           v-else
           class="text-body-2 text-disabled"
         >
-          No entries found
+          {{ t('visitorLogs.noEntriesFound') }}
         </span>
 
       </template>
@@ -124,7 +126,7 @@ const periodLabel = computed(() => {
         activator="parent"
         location="top"
       >
-        View Access Logs
+        {{ t('visitorLogs.viewAccessLogs') }}
       </VTooltip>
     </IconBtn>
   </VCard>

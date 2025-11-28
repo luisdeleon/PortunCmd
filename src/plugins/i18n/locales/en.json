@@ -67,120 +67,6 @@
   "Access Logs": "Access Logs",
   "Devices": "Devices",
   "Gate Control": "Gate Control",
-  "visitorList": {
-    "title": "Visitor Passes",
-    "widgets": {
-      "activePasses": "Active Passes",
-      "expired": "Expired",
-      "used": "Used",
-      "createdToday": "Created Today"
-    },
-    "filters": {
-      "title": "Filters",
-      "filterByCommunity": "Filter by Community",
-      "filterByType": "Filter by Type",
-      "filterByStatus": "Filter by Status"
-    },
-    "table": {
-      "visitor": "Visitor",
-      "host": "Host",
-      "community": "Community",
-      "property": "Property",
-      "type": "Type",
-      "status": "Status",
-      "validUntil": "Valid Until",
-      "actions": "Actions"
-    },
-    "status": {
-      "active": "Active",
-      "expired": "Expired",
-      "used": "Used"
-    },
-    "types": {
-      "guest": "Guest",
-      "party": "Party",
-      "delivery": "Delivery",
-      "service": "Service",
-      "contractor": "Contractor"
-    },
-    "actions": {
-      "viewQR": "View QR Code",
-      "viewDetails": "View Details",
-      "delete": "Delete"
-    },
-    "buttons": {
-      "createPass": "Create Pass",
-      "refresh": "Refresh"
-    },
-    "search": {
-      "placeholder": "Search visitor or code..."
-    },
-    "dialog": {
-      "title": "Visitor Pass Details",
-      "visitorName": "Visitor Name",
-      "passCode": "Pass Code",
-      "host": "Host",
-      "community": "Community",
-      "property": "Property",
-      "type": "Type",
-      "validUntil": "Valid Until",
-      "entries": "Entries",
-      "notes": "Notes",
-      "close": "Close"
-    },
-    "deleteDialog": {
-      "title": "Delete Visitor Pass",
-      "message": "Are you sure you want to delete the visitor pass for {name}? This action cannot be undone.",
-      "confirm": "Delete",
-      "cancel": "Cancel"
-    },
-    "messages": {
-      "deleteSuccess": "Visitor pass deleted successfully",
-      "deleteFailed": "Failed to delete visitor pass"
-    }
-  },
-  "visitorAdd": {
-    "title": "Create Visitor Pass",
-    "success": {
-      "title": "Pass Created!",
-      "message": "Visitor pass for {name} has been created successfully."
-    },
-    "form": {
-      "visitorName": "Visitor Name",
-      "visitorNamePlaceholder": "Enter visitor's full name",
-      "visitorType": "Visitor Type",
-      "community": "Community",
-      "property": "Property",
-      "passValidity": "Pass Validity",
-      "validUntil": "Valid Until",
-      "entriesAllowed": "Entries Allowed",
-      "documentNumber": "Document Number (Optional)",
-      "notes": "Notes (Optional)"
-    },
-    "validity": {
-      "single": "Single Entry",
-      "day": "Today Only",
-      "week": "One Week",
-      "custom": "Custom Date",
-      "unlimited": "Unlimited"
-    },
-    "buttons": {
-      "generatePass": "Generate Pass",
-      "createAnother": "Create Another",
-      "viewAllPasses": "View All Passes",
-      "cancel": "Cancel"
-    },
-    "validation": {
-      "visitorNameRequired": "Please enter visitor name",
-      "communityRequired": "Please select a community",
-      "propertyRequired": "Please select a property",
-      "validityEndRequired": "Please select a validity end date"
-    },
-    "messages": {
-      "createSuccess": "Visitor pass created successfully!",
-      "createFailed": "Failed to create visitor pass"
-    }
-  },
   "Email": "Email",
   "Password": "Password",
   "Chat": "Chat",
@@ -340,7 +226,6 @@
   "Made With": "Made With",
   "License": "License",
   "More Themes": "More Themes",
-  "Documentation": "Documentation",
   "Support": "Support",
   "Congratulation Flora! 🎉": "Congratulation Flora! 🎉",
   "Won the monthly best seller badge": "Won the monthly best seller badge",
@@ -352,22 +237,20 @@
   "Received Payment": "Received Payment",
   "Received Order 📦": "Received Order 📦",
   "New order received from john": "New order received from john",
-  "Appointments": "Appointments",
-  "Invoice App": "Invoice App",
-  "Manage Accounts": "Manage Accounts",
-  "Manage Users": "Manage Users",
-  "Role Management": "Role Management",
   "Download": "Download",
   "Delete": "Delete",
-  "View": "View",
   "View More": "View More",
   "View All": "View All",
   "Refresh": "Refresh",
-  "Edit": "Edit",
   "Duplicate": "Duplicate",
   "Cancel": "Cancel",
   "Confirm": "Confirm",
   "Ok": "Ok",
+  "Close": "Close",
+  "Save": "Save",
+  "Submit": "Submit",
+  "Import": "Import",
+  "Export": "Export",
   "Search Project": "Search Project",
   "PROJECT": "PROJECT",
   "LEADER": "LEADER",
@@ -398,10 +281,15 @@
   "Subscribe": "Subscribe",
   "Complaints": "Complaints",
   "Unsubscribe": "Unsubscribe",
-  "Order": "Order",
   "Visits": "Visits",
   "Support Tracker": "Support Tracker",
   "Last 7 Days": "Last 7 Days",
+  "Last 7 days": "Last 7 days",
+  "Last 30 days": "Last 30 days",
+  "Last 90 days": "Last 90 days",
+  "Last 6 months": "Last 6 months",
+  "Last year": "Last year",
+  "All time": "All time",
   "New Tickets": "New Tickets",
   "Open Tickets": "Open Tickets",
   "Response Time": "Response Time",
@@ -424,7 +312,6 @@
   "Congratulations John! 🎉": "Congratulations John! 🎉",
   "Best seller of the month": "Best seller of the month",
   "View Sales": "View Sales",
-  "Statistics": "Statistics",
   "Customers": "Customers",
   "Products": "Products",
   "Revenue": "Revenue",
@@ -448,9 +335,7 @@
   "Sales Overview": "Sales Overview",
   "Weekly Overview": "Weekly Overview",
   "Sales by Countries": "Sales by Countries",
-  "Actions": "Actions",
   "Popular Products": "Popular Products",
-  "Earning Reports": "Earning Reports",
   "Item Code": "Item Code",
   "Price": "Price",
   "Qty": "Qty",
@@ -464,72 +349,517 @@
   "Accordion": "Accordion",
   "Editor": "Editor",
   "Table": "Table",
-  "$vuetify": {
-    "badge": "Badge",
-    "noDataText": "No data available",
-    "close": "Close",
-    "open": "open",
-    "loading": "loading",
-    "carousel": {
-      "ariaLabel": {
-        "delimiter": "delimiter"
-      }
+  "N/A": "N/A",
+  "Unlimited": "Unlimited",
+  "entries": "entries",
+  "entry": "entry",
+  "of": "of",
+  "total": "total",
+  "community": "community",
+  "communities": "communities",
+  "property": "property",
+  "properties": "properties",
+  "user": "user",
+  "users": "users",
+
+  "dashboard": {
+    "title": "Dashboard",
+    "communities": "Communities",
+    "properties": "Properties",
+    "users": "Users",
+    "activeVisitors": "Active Visitors",
+    "lastWeek": "Last Week",
+    "last30DaysGrowth": "Last 30 days growth",
+    "viewCommunities": "View Communities",
+    "viewProperties": "View Properties",
+    "viewUsers": "View Users",
+    "viewVisitors": "View Visitors",
+    "hourlyTraffic": "Hourly Traffic",
+    "entryExitPatterns": "Entry/exit patterns by hour",
+    "peakHour": "Peak Hour",
+    "busiestDay": "Busiest Day",
+    "communitiesByCountry": "Communities by Country",
+    "distributionOverview": "Distribution Overview",
+    "communitiesStatus": "Communities Status",
+    "propertiesStatus": "Properties Status",
+    "noCommunitiesFound": "No communities found",
+    "totalCommunities": "Total Communities",
+    "viewAccessLogs": "View Access Logs"
+  },
+
+  "communityList": {
+    "title": "Communities",
+    "widgets": {
+      "totalCommunities": "Total Communities",
+      "last30DaysGrowth": "Last 30 days growth"
     },
-    "colorPicker": {
-      "ariaLabel": {
-        "hueSlider": "Hue Slider",
-        "eyedropper": "Eye Dropper",
-        "hexInput": "Hex Input"
-      }
+    "filters": {
+      "title": "Filters",
+      "filterById": "Filter by ID",
+      "filterByCity": "Filter by City",
+      "filterByCountry": "Filter by Country",
+      "filterByStatus": "Filter by Status"
     },
-    "dataFooter": {
-      "itemsPerPageText": "Items per page:",
-      "itemsPerPageAll": "All",
-      "pageText": "{0}-{1} of {2}",
-      "firstPage": "First Page",
-      "prevPage": "Previous Page",
-      "nextPage": "Next Page",
-      "lastPage": "Last Page"
+    "table": {
+      "id": "ID",
+      "properties": "Properties",
+      "name": "Name",
+      "city": "City",
+      "country": "Country",
+      "status": "Status",
+      "actions": "Actions"
     },
-    "dataIterator": {
-      "noResultsText": "No matching records found",
-      "loadingText": "Loading items..."
+    "buttons": {
+      "addCommunity": "Add Community",
+      "import": "Import",
+      "updateStatus": "Update Status",
+      "delete": "Delete"
     },
-    "pagination": {
-      "ariaLabel": {
-        "root": "root",
-        "previous": "previous",
-        "first": "first",
-        "last": "last",
-        "next": "next",
-        "currentPage": "currentPage",
-        "page": "page"
-      }
+    "search": {
+      "placeholder": "Search communities..."
     },
-    "input": {
-      "clear": "clear",
-      "appendAction": "appendAction",
-      "prependAction": "prependAction",
-      "counterSize": "counterSize",
-      "otp": "otp"
+    "actions": {
+      "view": "View Community",
+      "edit": "Edit Community",
+      "changeStatus": "Change Status",
+      "delete": "Delete Community"
     },
-    "fileInput": {
-      "counterSize": "counterSize"
+    "status": {
+      "active": "Active",
+      "underConstruction": "Under Construction",
+      "preLaunch": "Pre-Launch",
+      "fullCapacity": "Full Capacity",
+      "maintenance": "Maintenance",
+      "seasonalClosure": "Seasonal Closure",
+      "inactive": "Inactive",
+      "archived": "Archived"
     },
-    "rating": {
-      "ariaLabel": {
-        "item": "item"
-      }
+    "deleteDialog": {
+      "title": "Delete Community",
+      "message": "Are you sure you want to delete {name}? This action cannot be undone.",
+      "confirm": "Delete",
+      "cancel": "Cancel"
     },
-    "video": {
-      "seek": "Seek",
-      "play": "Play",
-      "pause": "Pause",
-      "showVolume": "Show Volume",
-      "enterFullscreen": "Enter Fullscreen",
-      "volume": "Volume"
+    "bulkDeleteDialog": {
+      "title": "Delete Multiple Communities",
+      "message": "Are you sure you want to delete {count} {entity}? This action cannot be undone.",
+      "warning": "You are about to permanently delete {count} {entity}. This will remove all associated data.",
+      "confirm": "Delete All",
+      "cancel": "Cancel"
+    },
+    "bulkStatusDialog": {
+      "title": "Update Status for {count} {entity}",
+      "message": "You are about to update the status for {count} {entity}.",
+      "newStatus": "New Status *",
+      "selectStatus": "Select new status",
+      "reason": "Reason (Optional)",
+      "reasonPlaceholder": "Enter reason for status change",
+      "confirm": "Update All",
+      "cancel": "Cancel"
+    },
+    "messages": {
+      "saveSuccess": "Community saved successfully",
+      "statusUpdateSuccess": "Community status updated successfully",
+      "deleteSuccess": "Community \"{name}\" has been deleted successfully",
+      "deleteFailed": "Failed to delete community",
+      "deleteRelated": "Cannot delete this community because it has related properties or records",
+      "deletePermissionDenied": "You don't have permission to delete this community",
+      "bulkDeleteSuccess": "Successfully deleted {count} {entity}",
+      "bulkDeleteFailed": "Failed to delete {count} {entity}",
+      "bulkDeletePartial": "Deleted {success} {entity}, {failed} failed",
+      "bulkStatusSuccess": "Successfully updated status for {count} {entity}",
+      "bulkStatusFailed": "Failed to update status for {count} {entity}",
+      "bulkStatusPartial": "Updated {success} {entity}, {failed} failed"
     }
   },
+
+  "propertyList": {
+    "title": "Properties",
+    "widgets": {
+      "totalProperties": "Total Properties",
+      "last30DaysGrowth": "Last 30 days growth"
+    },
+    "filters": {
+      "filterByCommunity": "Filter by Community",
+      "filterByStatus": "Filter by Status"
+    },
+    "table": {
+      "community": "Community",
+      "propertyId": "Property ID",
+      "name": "Name",
+      "address": "Address",
+      "status": "Status",
+      "actions": "Actions"
+    },
+    "buttons": {
+      "addProperty": "Add Property",
+      "import": "Import",
+      "updateStatus": "Update Status",
+      "delete": "Delete"
+    },
+    "search": {
+      "placeholder": "Search properties..."
+    },
+    "actions": {
+      "view": "View Property",
+      "edit": "Edit Property",
+      "changeStatus": "Change Status",
+      "delete": "Delete Property"
+    },
+    "status": {
+      "active": "Active",
+      "vacant": "Vacant",
+      "accessRestricted": "Access Restricted",
+      "maintenance": "Maintenance",
+      "emergencyLockdown": "Emergency Lockdown",
+      "guestMode": "Guest Mode",
+      "outOfService": "Out of Service",
+      "deactivated": "Deactivated",
+      "archived": "Archived"
+    },
+    "deleteDialog": {
+      "title": "Delete Property",
+      "message": "Are you sure you want to delete {name}? This action cannot be undone.",
+      "confirm": "Delete",
+      "cancel": "Cancel"
+    },
+    "bulkDeleteDialog": {
+      "title": "Delete Multiple Properties",
+      "message": "Are you sure you want to delete {count} {entity}? This action cannot be undone.",
+      "warning": "You are about to permanently delete {count} {entity}. This will remove all associated data.",
+      "confirm": "Delete All",
+      "cancel": "Cancel"
+    },
+    "bulkStatusDialog": {
+      "title": "Update Status for {count} {entity}",
+      "message": "You are about to update the status for {count} {entity}.",
+      "newStatus": "New Status *",
+      "selectStatus": "Select new status",
+      "reason": "Reason (Optional)",
+      "reasonPlaceholder": "Enter reason for status change",
+      "confirm": "Update All",
+      "cancel": "Cancel"
+    },
+    "messages": {
+      "saveSuccess": "Property saved successfully",
+      "importSuccess": "Properties imported successfully",
+      "statusUpdateSuccess": "Property status updated successfully",
+      "deleteSuccess": "Property \"{name}\" has been deleted successfully",
+      "deleteFailed": "Failed to delete property",
+      "deleteRelated": "Cannot delete this property because it has related records",
+      "deletePermissionDenied": "You don't have permission to delete this property"
+    }
+  },
+
+  "visitorList": {
+    "title": "Visitor Passes",
+    "widgets": {
+      "activePasses": "Active Passes",
+      "expired": "Expired",
+      "used": "Used",
+      "createdToday": "Created Today",
+      "validPasses": "Valid passes",
+      "noLongerValid": "No longer valid",
+      "usedAtLeastOnce": "Used at least once",
+      "createdIn24h": "Created in last 24h"
+    },
+    "filters": {
+      "title": "Filters",
+      "filterByCommunity": "Filter by Community",
+      "filterByType": "Filter by Type",
+      "filterByStatus": "Filter by Status"
+    },
+    "table": {
+      "visitor": "Visitor",
+      "host": "Host",
+      "community": "Community",
+      "property": "Property",
+      "type": "Type",
+      "status": "Status",
+      "validUntil": "Valid Until",
+      "actions": "Actions"
+    },
+    "status": {
+      "active": "Active",
+      "expired": "Expired",
+      "used": "Used"
+    },
+    "types": {
+      "guest": "Guest",
+      "family": "Family",
+      "party": "Party",
+      "delivery": "Delivery",
+      "service": "Service",
+      "contractor": "Contractor"
+    },
+    "actions": {
+      "viewQR": "View QR Code",
+      "viewDetails": "View Details",
+      "delete": "Delete"
+    },
+    "buttons": {
+      "createPass": "Create Pass",
+      "refresh": "Refresh"
+    },
+    "search": {
+      "placeholder": "Search visitor or code..."
+    },
+    "dialog": {
+      "title": "Visitor Pass Details",
+      "visitorName": "Visitor Name",
+      "passCode": "Pass Code",
+      "host": "Host",
+      "community": "Community",
+      "property": "Property",
+      "type": "Type",
+      "validUntil": "Valid Until",
+      "entries": "Entries",
+      "notes": "Notes",
+      "close": "Close"
+    },
+    "deleteDialog": {
+      "title": "Delete Visitor Pass",
+      "message": "Are you sure you want to delete the visitor pass for {name}? This action cannot be undone.",
+      "confirm": "Delete",
+      "cancel": "Cancel"
+    },
+    "bulkDeleteDialog": {
+      "title": "Delete Multiple Visitor Passes",
+      "message": "Are you sure you want to delete {count} visitor {entity}? This action cannot be undone.",
+      "warning": "You are about to permanently delete {count} visitor {entity}.",
+      "confirm": "Delete All",
+      "cancel": "Cancel"
+    },
+    "messages": {
+      "deleteSuccess": "Visitor pass deleted successfully",
+      "deleteFailed": "Failed to delete visitor pass"
+    }
+  },
+
+  "visitorAdd": {
+    "title": "Create Visitor Pass",
+    "success": {
+      "title": "Pass Created!",
+      "message": "Visitor pass for {name} has been created successfully."
+    },
+    "form": {
+      "visitorName": "Visitor Name",
+      "visitorNamePlaceholder": "Enter visitor's full name",
+      "visitorType": "Visitor Type",
+      "community": "Community",
+      "property": "Property",
+      "passValidity": "Pass Validity",
+      "validUntil": "Valid Until",
+      "entriesAllowed": "Entries Allowed",
+      "documentNumber": "Document Number (Optional)",
+      "notes": "Notes (Optional)"
+    },
+    "validity": {
+      "single": "Single Entry",
+      "day": "Today Only",
+      "week": "One Week",
+      "custom": "Custom Date",
+      "unlimited": "Unlimited"
+    },
+    "buttons": {
+      "generatePass": "Generate Pass",
+      "createAnother": "Create Another",
+      "viewAllPasses": "View All Passes",
+      "cancel": "Cancel"
+    },
+    "validation": {
+      "visitorNameRequired": "Please enter visitor name",
+      "communityRequired": "Please select a community",
+      "propertyRequired": "Please select a property",
+      "validityEndRequired": "Please select a validity end date"
+    },
+    "messages": {
+      "createSuccess": "Visitor pass created successfully!",
+      "createFailed": "Failed to create visitor pass"
+    }
+  },
+
+  "visitorLogs": {
+    "title": "Access Logs",
+    "widgets": {
+      "today": "Today",
+      "thisWeek": "This Week",
+      "totalEntries": "Total Entries",
+      "withPhotos": "With Photos",
+      "entriesRecorded": "Entries recorded today",
+      "entriesThisWeek": "Entries this week",
+      "totalEntriesRecorded": "Total entries recorded",
+      "entriesWithEvidence": "Entries with photos"
+    },
+    "filters": {
+      "filterByCommunity": "Filter by Community"
+    },
+    "table": {
+      "visitor": "Visitor",
+      "lastEntry": "Last Entry",
+      "exit": "Exit",
+      "host": "Host",
+      "community": "Community",
+      "entries": "Entries",
+      "evidence": "Evidence",
+      "actions": "Actions"
+    },
+    "search": {
+      "placeholder": "Search visitor name or code..."
+    },
+    "dialog": {
+      "title": "Access Log Details",
+      "completed": "Completed",
+      "stillInside": "Still Inside",
+      "evidencePhotos": "Evidence Photos",
+      "passCode": "Pass Code",
+      "entryTime": "Entry Time",
+      "exitTime": "Exit Time",
+      "duration": "Duration",
+      "previousEntries": "Previous Entries",
+      "noPhotos": "No photos",
+      "captured": "Captured",
+      "download": "Download"
+    },
+    "buttons": {
+      "viewDetails": "View Details"
+    },
+    "labels": {
+      "photo": "photo",
+      "photos": "photos",
+      "entry": "entry",
+      "entries": "entries"
+    },
+    "hourlyTraffic": "Hourly Traffic",
+    "entryExitPatterns": "Entry/exit patterns by hour",
+    "entries": "Entries",
+    "exits": "Exits",
+    "viewAccessLogs": "View Access Logs",
+    "last7Days": "Last 7 days",
+    "last30Days": "Last 30 days",
+    "last90Days": "Last 90 days",
+    "last6Months": "Last 6 months",
+    "lastYear": "Last year",
+    "allTime": "All time",
+    "peakHour": "Peak Hour",
+    "busiestDay": "Busiest Day",
+    "noData": "No data",
+    "noEntriesFound": "No entries found",
+    "total": "total",
+    "morning": "Morning",
+    "afternoon": "Afternoon",
+    "evening": "Evening",
+    "night": "Night",
+    "weeklyEntries": {
+      "title": "Weekly Entries",
+      "subtitle": "Entries per day this week"
+    }
+  },
+
+  "deviceList": {
+    "title": "Automation Devices",
+    "widgets": {
+      "totalDevices": "Total Devices",
+      "activeDevices": "Active Devices",
+      "last30DaysGrowth": "Last 30 days growth",
+      "ofTotalDevices": "Of total devices"
+    },
+    "filters": {
+      "filterByCommunity": "Filter by Community",
+      "filterByBrand": "Filter by Brand",
+      "filterByDirection": "Filter by Direction",
+      "filterByStatus": "Filter by Status"
+    },
+    "table": {
+      "deviceName": "Device Name",
+      "community": "Community",
+      "brandModel": "Brand/Model",
+      "direction": "Direction",
+      "status": "Status",
+      "guestAccess": "Guest Access",
+      "actions": "Actions"
+    },
+    "direction": {
+      "enter": "Enter",
+      "exit": "Exit",
+      "both": "Both"
+    },
+    "status": {
+      "enabled": "Enabled",
+      "disabled": "Disabled"
+    },
+    "guestAccess": {
+      "allowed": "Allowed",
+      "denied": "Denied"
+    },
+    "buttons": {
+      "addDevice": "Add Device"
+    },
+    "search": {
+      "placeholder": "Search devices..."
+    },
+    "actions": {
+      "view": "View Device",
+      "edit": "Edit Device",
+      "duplicate": "Duplicate Device",
+      "delete": "Delete Device"
+    },
+    "deleteDialog": {
+      "title": "Delete Device",
+      "message": "Are you sure you want to delete {name}? This action cannot be undone.",
+      "confirm": "Delete",
+      "cancel": "Cancel"
+    },
+    "bulkDeleteDialog": {
+      "title": "Delete Multiple Devices",
+      "message": "Are you sure you want to delete {count} {entity}? This action cannot be undone.",
+      "warning": "You are about to permanently delete {count} {entity}.",
+      "confirm": "Delete All",
+      "cancel": "Cancel"
+    },
+    "messages": {
+      "saveSuccess": "Device saved successfully",
+      "deleteSuccess": "Device deleted successfully",
+      "deleteFailed": "Failed to delete device"
+    }
+  },
+
+  "rolesList": {
+    "title": "Roles List",
+    "description": "A role provides access to predefined menus and features depending on the assigned role to the user.",
+    "tabs": {
+      "roleCards": "Role Cards",
+      "permissionMatrix": "Permission Matrix",
+      "userAssignments": "User Assignments"
+    },
+    "totalUsers": "Total users with this role",
+    "usersTitle": "Users with this Role",
+    "usersDescription": "List of all users assigned to this role"
+  },
+
+  "permissionsList": {
+    "title": "Permissions",
+    "table": {
+      "name": "Name",
+      "assignedTo": "Assigned To",
+      "createdDate": "Created Date",
+      "actions": "Actions"
+    },
+    "buttons": {
+      "addPermission": "Add Permission"
+    },
+    "search": {
+      "placeholder": "Search Permission"
+    },
+    "roles": {
+      "support": "Support",
+      "users": "Users",
+      "manager": "Manager",
+      "administrator": "Administrator",
+      "restrictedUser": "Restricted User"
+    }
+  },
+
   "userList": {
     "title": "User List",
     "widgets": {
@@ -545,6 +875,7 @@
       "filterByRole": "Filter by Role",
       "filterByCommunity": "Filter by Community",
       "filterByEnabled": "Filter by Enabled",
+      "filterByStatus": "Filter by Status",
       "active": "Active",
       "inactive": "Inactive"
     },
@@ -554,11 +885,15 @@
       "community": "Community",
       "property": "Property",
       "enabled": "Enabled",
+      "status": "Status",
       "actions": "Actions"
     },
     "buttons": {
       "export": "Export",
-      "addNewUser": "Add New User"
+      "import": "Import",
+      "addNewUser": "Add New User",
+      "updateStatus": "Update Status",
+      "delete": "Delete"
     },
     "search": {
       "placeholder": "Search User"
@@ -577,9 +912,18 @@
       "inactive": "Inactive"
     },
     "actions": {
-      "view": "View",
-      "edit": "Edit",
-      "delete": "Delete"
+      "view": "View User",
+      "edit": "Edit User",
+      "assignRole": "Assign Role",
+      "changeStatus": "Change Status",
+      "delete": "Delete User",
+      "cannotModifyOwn": "Cannot modify own",
+      "cannotModifyHigherRank": "Cannot modify higher rank"
+    },
+    "expandedRow": {
+      "communities": "Communities",
+      "properties": "Properties",
+      "scope": "Scope"
     },
     "deleteDialog": {
       "title": "Delete User",
@@ -587,27 +931,43 @@
       "confirm": "Delete",
       "cancel": "Cancel"
     },
+    "bulkDeleteDialog": {
+      "title": "Delete Multiple Users",
+      "message": "Are you sure you want to delete {count} {entity}? This action cannot be undone.",
+      "warning": "You are about to permanently delete {count} {entity}. This will remove all associated data.",
+      "confirm": "Delete All",
+      "cancel": "Cancel"
+    },
+    "bulkStatusDialog": {
+      "title": "Update Status for {count} {entity}",
+      "message": "You are about to update the status for {count} {entity}.",
+      "newStatus": "New Status *",
+      "selectStatus": "Select new status",
+      "reason": "Reason (Optional)",
+      "reasonPlaceholder": "Enter reason for status change",
+      "confirm": "Update All",
+      "cancel": "Cancel"
+    },
     "messages": {
       "deleteSuccess": "User {name} has been deleted successfully",
       "deleteFailed": "Failed to delete user. Please try again.",
       "cannotDeleteManager": "Cannot delete this user because they are assigned as a community manager",
       "cannotDeleteRelated": "Cannot delete this user because they have related records (visitors, properties, etc.)",
-      "deletePermissionDenied": "You don't have permission to delete this user"
+      "deletePermissionDenied": "You don't have permission to delete this user",
+      "statusUpdateSuccess": "User status updated successfully",
+      "bulkDeleteSuccess": "Successfully deleted {count} {entity}",
+      "bulkDeleteFailed": "Failed to delete {count} {entity}",
+      "bulkStatusSuccess": "Successfully updated status for {count} {entity}",
+      "bulkStatusSkipped": "Skipped {count} {entity} (own account or higher rank)"
     }
   },
-  "footer": {
-    "copyright": "Copyright © {year} Webzy LLC. All rights reserved.",
-    "termsAndConditions": "Terms and Conditions",
-    "termsOfService": "Terms of Service",
-    "privacyPolicy": "Privacy Policy",
-    "cookiePolicy": "Cookie Policy"
-  },
+
   "userView": {
     "loading": "Loading user data...",
     "notFound": "User with ID {id} not found!",
     "tabs": {
-      "account": "Account",
-      "security": "Security",
+      "community": "Community",
+      "property": "Property",
       "billingPlan": "Billing & Plan",
       "notifications": "Notifications",
       "connections": "Connections"
@@ -625,7 +985,14 @@
       "language": "Language",
       "country": "Country",
       "edit": "Edit",
-      "suspend": "Suspend"
+      "suspend": "Suspend",
+      "delete": "Delete",
+      "disable": "Disable",
+      "enable": "Enable",
+      "community": "Community",
+      "communities": "Communities",
+      "property": "Property",
+      "properties": "Properties"
     },
     "plan": {
       "popular": "Popular",
@@ -639,8 +1006,223 @@
         "storage": "Up to 10GB storage",
         "support": "Basic Support"
       }
+    },
+    "communityTab": {
+      "title": "User's Communities",
+      "searchPlaceholder": "Search Community",
+      "refresh": "Refresh",
+      "assignCommunity": "Assign Community",
+      "removeCommunity": "Remove Community",
+      "tableHeaders": {
+        "community": "COMMUNITY",
+        "properties": "PROPERTIES",
+        "name": "NAME",
+        "city": "CITY",
+        "action": "ACTION"
+      },
+      "assignDialog": {
+        "title": "Assign Communities",
+        "description": "Select one or more communities to assign to this user.",
+        "label": "Communities",
+        "placeholder": "Select communities to assign",
+        "cancel": "Cancel",
+        "assign": "Assign"
+      },
+      "removeDialog": {
+        "title": "Remove Community",
+        "message": "Are you sure you want to remove {name} from this user?",
+        "warning": "The user will no longer have access to this community and its properties.",
+        "cancel": "Cancel",
+        "remove": "Remove"
+      },
+      "messages": {
+        "assignSuccess": "Successfully assigned {count} community(ies)",
+        "assignFailed": "Failed to assign communities",
+        "removeSuccess": "Community removed successfully",
+        "removeFailed": "Failed to remove community",
+        "fetchRoleFailed": "Failed to fetch user role"
+      }
+    },
+    "propertyTab": {
+      "title": "User's Properties",
+      "searchPlaceholder": "Search Property",
+      "refresh": "Refresh",
+      "assignProperty": "Assign Property",
+      "removeProperty": "Remove Property",
+      "tableHeaders": {
+        "property": "PROPERTY",
+        "name": "NAME",
+        "community": "COMMUNITY",
+        "status": "STATUS",
+        "action": "ACTION"
+      },
+      "assignDialog": {
+        "title": "Assign Properties",
+        "description": "Select one or more properties to assign to this user.",
+        "label": "Properties",
+        "placeholder": "Select properties to assign",
+        "cancel": "Cancel",
+        "assign": "Assign"
+      },
+      "removeDialog": {
+        "title": "Remove Property",
+        "message": "Are you sure you want to remove {name} from this user?",
+        "warning": "The user will no longer have access to this property.",
+        "cancel": "Cancel",
+        "remove": "Remove"
+      },
+      "messages": {
+        "assignSuccess": "Successfully assigned {count} property(ies)",
+        "assignFailed": "Failed to assign properties",
+        "removeSuccess": "Property removed successfully",
+        "removeFailed": "Failed to remove property",
+        "fetchRoleFailed": "Failed to fetch user role"
+      }
+    },
+    "devicesTab": {
+      "title": "Automation Devices",
+      "searchPlaceholder": "Search Device",
+      "refresh": "Refresh",
+      "addDevice": "Add Device",
+      "tableHeaders": {
+        "deviceName": "DEVICE NAME",
+        "community": "COMMUNITY",
+        "status": "STATUS",
+        "actions": "ACTIONS"
+      },
+      "status": {
+        "enabled": "Enabled",
+        "disabled": "Disabled"
+      },
+      "direction": {
+        "entry": "Entry",
+        "exit": "Exit",
+        "both": "Both"
+      },
+      "actions": {
+        "view": "View",
+        "edit": "Edit",
+        "duplicate": "Duplicate",
+        "delete": "Delete"
+      },
+      "viewDialog": {
+        "title": "Device Details",
+        "name": "Name",
+        "brand": "Brand",
+        "model": "Model",
+        "community": "Community",
+        "direction": "Direction",
+        "apiUrl": "API URL",
+        "apiEndpoint": "API Endpoint",
+        "channelIn": "Channel In",
+        "channelOut": "Channel Out",
+        "status": "Status",
+        "guestAccess": "Guest Access",
+        "close": "Close"
+      },
+      "addEditDialog": {
+        "addTitle": "Add New Device",
+        "editTitle": "Edit Device",
+        "deviceName": "Device Name *",
+        "deviceNamePlaceholder": "Enter device name",
+        "community": "Community *",
+        "communityPlaceholder": "Select community",
+        "brand": "Brand",
+        "brandPlaceholder": "e.g., Shelly",
+        "model": "Model",
+        "modelPlaceholder": "e.g., Shelly Pro 4PM",
+        "directionType": "Direction Type",
+        "directionPlaceholder": "Select direction",
+        "apiUrl": "API URL",
+        "apiEndpoint": "API Endpoint",
+        "authKey": "Auth Key",
+        "authKeyPlaceholder": "Enter auth key",
+        "authKeyHint": "Auth key is protected. Click eye to reveal partial key.",
+        "channelIn": "Channel In",
+        "channelOut": "Channel Out",
+        "deviceIdIn": "Device ID In",
+        "deviceIdInPlaceholder": "Enter device ID in",
+        "deviceIdOut": "Device ID Out",
+        "deviceIdOutPlaceholder": "Enter device ID out",
+        "enabled": "Enabled",
+        "guestAccess": "Guest Access",
+        "cancel": "Cancel",
+        "create": "Create",
+        "update": "Update"
+      },
+      "deleteDialog": {
+        "title": "Delete Device",
+        "message": "Are you sure you want to delete {name}?",
+        "warning": "This action cannot be undone. The device will be permanently removed.",
+        "cancel": "Cancel",
+        "delete": "Delete"
+      },
+      "messages": {
+        "createSuccess": "Device created successfully",
+        "createFailed": "Failed to create device",
+        "updateSuccess": "Device updated successfully",
+        "updateFailed": "Failed to update device",
+        "deleteSuccess": "Device deleted successfully",
+        "deleteFailed": "Failed to delete device",
+        "validationError": "Device name and community are required"
+      }
+    },
+    "deleteDialog": {
+      "title": "Delete User",
+      "description": "Are you sure you want to delete {name}? This action cannot be undone and will permanently remove the user account.",
+      "warning": "Deleting this user will remove all associated data and cannot be reversed.",
+      "cancel": "Cancel",
+      "delete": "Delete User"
+    },
+    "toggleStatusDialog": {
+      "disableTitle": "Disable User",
+      "enableTitle": "Enable User",
+      "disableDescription": "Are you sure you want to disable {name}?",
+      "enableDescription": "Are you sure you want to enable {name}?",
+      "disableWarning": "Disabling this user will prevent them from logging in and accessing the system.",
+      "enableWarning": "Enabling this user will allow them to log in and access the system again.",
+      "cancel": "Cancel",
+      "disable": "Disable User",
+      "enable": "Enable User"
+    },
+    "tooltips": {
+      "refresh": "Refresh",
+      "cannotDeleteOwnAccount": "You cannot delete your own account",
+      "cannotDeleteHigherRank": "You cannot delete a user with higher rank",
+      "cannotDisableOwnAccount": "You cannot disable your own account",
+      "cannotDisableHigherRank": "You cannot disable a user with higher rank",
+      "cannotEnableOwnAccount": "You cannot enable your own account",
+      "cannotEnableHigherRank": "You cannot enable a user with higher rank"
     }
   },
+
+  "footer": {
+    "copyright": "Copyright © {year} Webzy LLC. All rights reserved.",
+    "termsAndConditions": "Terms and Conditions",
+    "termsOfService": "Terms of Service",
+    "privacyPolicy": "Privacy Policy",
+    "cookiePolicy": "Cookie Policy"
+  },
+
+  "common": {
+    "sunday": "Sunday",
+    "monday": "Monday",
+    "tuesday": "Tuesday",
+    "wednesday": "Wednesday",
+    "thursday": "Thursday",
+    "friday": "Friday",
+    "saturday": "Saturday",
+    "yes": "Yes",
+    "no": "No",
+    "cancel": "Cancel",
+    "close": "Close",
+    "loading": "Loading...",
+    "error": "Error",
+    "success": "Success",
+    "warning": "Warning",
+    "info": "Info"
+  },
+
   "status": {
     "label": "Status",
     "filterByStatus": "Filter by Status",
@@ -652,6 +1234,13 @@
     "statusReasonRequired": "Reason is required for this status",
     "statusChanged": "Status changed successfully",
     "statusChangeFailed": "Failed to change status",
+    "active": "Active",
+    "inactive": "Inactive",
+    "occupied": "Occupied",
+    "vacant": "Vacant",
+    "maintenance": "Maintenance",
+    "archived": "Archived",
+    "preLaunch": "Pre-launch",
     "user": {
       "active": "Active",
       "pending": "Pending",
@@ -729,6 +1318,73 @@
       },
       "confirm": "Change Status",
       "cancel": "Cancel"
+    }
+  },
+
+  "$vuetify": {
+    "badge": "Badge",
+    "noDataText": "No data available",
+    "close": "Close",
+    "open": "open",
+    "loading": "loading",
+    "carousel": {
+      "ariaLabel": {
+        "delimiter": "delimiter"
+      }
+    },
+    "colorPicker": {
+      "ariaLabel": {
+        "hueSlider": "Hue Slider",
+        "eyedropper": "Eye Dropper",
+        "hexInput": "Hex Input"
+      }
+    },
+    "dataFooter": {
+      "itemsPerPageText": "Items per page:",
+      "itemsPerPageAll": "All",
+      "pageText": "{0}-{1} of {2}",
+      "firstPage": "First Page",
+      "prevPage": "Previous Page",
+      "nextPage": "Next Page",
+      "lastPage": "Last Page"
+    },
+    "dataIterator": {
+      "noResultsText": "No matching records found",
+      "loadingText": "Loading items..."
+    },
+    "pagination": {
+      "ariaLabel": {
+        "root": "root",
+        "previous": "previous",
+        "first": "first",
+        "last": "last",
+        "next": "next",
+        "currentPage": "currentPage",
+        "page": "page"
+      }
+    },
+    "input": {
+      "clear": "clear",
+      "appendAction": "appendAction",
+      "prependAction": "prependAction",
+      "counterSize": "counterSize",
+      "otp": "otp"
+    },
+    "fileInput": {
+      "counterSize": "counterSize"
+    },
+    "rating": {
+      "ariaLabel": {
+        "item": "item"
+      }
+    },
+    "video": {
+      "seek": "Seek",
+      "play": "Play",
+      "pause": "Pause",
+      "showVolume": "Show Volume",
+      "enterFullscreen": "Enter Fullscreen",
+      "volume": "Volume"
     }
   }
 }

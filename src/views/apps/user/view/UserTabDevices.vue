@@ -1,6 +1,7 @@
 <script lang="ts" setup>
 import { supabase } from '@/lib/supabase'
 
+const { t } = useI18n({ useScope: 'global' })
 const route = useRoute()
 
 // 👉 User data for permission checks
@@ -13,12 +14,12 @@ const canManageDevices = computed(() => {
 })
 
 // Device Table Headers
-const deviceTableHeaders = [
-  { title: 'Device Name', key: 'device_name' },
-  { title: 'Community', key: 'community_name' },
-  { title: 'Status', key: 'enabled' },
-  { title: 'Actions', key: 'actions', sortable: false },
-]
+const deviceTableHeaders = computed(() => [
+  { title: t('userView.devicesTab.tableHeaders.deviceName'), key: 'device_name' },
+  { title: t('userView.devicesTab.tableHeaders.community'), key: 'community_name' },
+  { title: t('userView.devicesTab.tableHeaders.status'), key: 'enabled' },
+  { title: t('userView.devicesTab.tableHeaders.actions'), key: 'actions', sortable: false },
+])
 
 const search = ref('')
 const options = ref({ itemsPerPage: 5, page: 1 })
@@ -77,11 +78,11 @@ const deviceToDelete = ref<{ id: string; name: string } | null>(null)
 const availableCommunities = ref<any[]>([])
 
 // Direction type options
-const directionTypes = [
-  { title: 'Entry', value: 'entry' },
-  { title: 'Exit', value: 'exit' },
-  { title: 'Both', value: 'both' },
-]
+const directionTypes = computed(() => [
+  { title: t('userView.devicesTab.direction.entry'), value: 'entry' },
+  { title: t('userView.devicesTab.direction.exit'), value: 'exit' },
+  { title: t('userView.devicesTab.direction.both'), value: 'both' },
+])
 
 // Fetch user's communities for the dropdown
 const fetchUserCommunities = async () => {
@@ -467,14 +468,14 @@ onMounted(() => {
       <VCard>
         <VCardText class="d-flex justify-space-between align-center flex-wrap gap-4">
           <h5 class="text-h5">
-            Automation Devices
+            {{ t('userView.devicesTab.title') }}
           </h5>
 
           <div class="d-flex align-center gap-4">
             <div style="inline-size: 250px;">
               <AppTextField
                 v-model="search"
-                placeholder="Search Device"
+                :placeholder="t('userView.devicesTab.searchPlaceholder')"
               />
             </div>
 
@@ -485,7 +486,7 @@ onMounted(() => {
                 activator="parent"
                 location="top"
               >
-                Refresh
+                {{ t('userView.tooltips.refresh') }}
               </VTooltip>
             </IconBtn>
 
@@ -494,7 +495,7 @@ onMounted(() => {
               prepend-icon="tabler-plus"
               @click="openAddDeviceDialog"
             >
-              Add Device
+              {{ t('userView.devicesTab.addDevice') }}
             </VBtn>
           </div>
         </VCardText>
@@ -561,7 +562,7 @@ onMounted(() => {
               size="small"
               label
             >
-              {{ item.enabled ? 'Enabled' : 'Disabled' }}
+              {{ item.enabled ? t('userView.devicesTab.status.enabled') : t('userView.devicesTab.status.disabled') }}
             </VChip>
           </template>
 
@@ -578,7 +579,7 @@ onMounted(() => {
                   activator="parent"
                   location="top"
                 >
-                  View
+                  {{ t('userView.devicesTab.actions.view') }}
                 </VTooltip>
               </IconBtn>
 
@@ -592,7 +593,7 @@ onMounted(() => {
                   activator="parent"
                   location="top"
                 >
-                  Edit
+                  {{ t('userView.devicesTab.actions.edit') }}
                 </VTooltip>
               </IconBtn>
 
@@ -606,7 +607,7 @@ onMounted(() => {
                   activator="parent"
                   location="top"
                 >
-                  Duplicate
+                  {{ t('userView.devicesTab.actions.duplicate') }}
                 </VTooltip>
               </IconBtn>
 
@@ -620,7 +621,7 @@ onMounted(() => {
                   activator="parent"
                   location="top"
                 >
-                  Delete
+                  {{ t('userView.devicesTab.actions.delete') }}
                 </VTooltip>
               </IconBtn>
             </div>
@@ -654,7 +655,7 @@ onMounted(() => {
         />
 
         <h6 class="text-h6 mb-4">
-          Device Details
+          {{ t('userView.devicesTab.viewDialog.title') }}
         </h6>
 
         <VList
@@ -662,52 +663,52 @@ onMounted(() => {
           class="text-start"
         >
           <VListItem>
-            <strong>Name:</strong> {{ deviceToView.device_name || 'N/A' }}
+            <strong>{{ t('userView.devicesTab.viewDialog.name') }}:</strong> {{ deviceToView.device_name || 'N/A' }}
           </VListItem>
           <VListItem>
-            <strong>Brand:</strong> {{ deviceToView.device_brand || 'N/A' }}
+            <strong>{{ t('userView.devicesTab.viewDialog.brand') }}:</strong> {{ deviceToView.device_brand || 'N/A' }}
           </VListItem>
           <VListItem>
-            <strong>Model:</strong> {{ deviceToView.device_model || 'N/A' }}
+            <strong>{{ t('userView.devicesTab.viewDialog.model') }}:</strong> {{ deviceToView.device_model || 'N/A' }}
           </VListItem>
           <VListItem>
-            <strong>Community:</strong> {{ deviceToView.community_name || 'N/A' }}
+            <strong>{{ t('userView.devicesTab.viewDialog.community') }}:</strong> {{ deviceToView.community_name || 'N/A' }}
           </VListItem>
           <VListItem>
-            <strong>Direction:</strong> {{ deviceToView.direction_type || 'N/A' }}
+            <strong>{{ t('userView.devicesTab.viewDialog.direction') }}:</strong> {{ deviceToView.direction_type || 'N/A' }}
           </VListItem>
           <VListItem>
-            <strong>API URL:</strong> {{ deviceToView.api_url || 'N/A' }}
+            <strong>{{ t('userView.devicesTab.viewDialog.apiUrl') }}:</strong> {{ deviceToView.api_url || 'N/A' }}
           </VListItem>
           <VListItem>
-            <strong>API Endpoint:</strong> {{ deviceToView.api_endpoint || 'N/A' }}
+            <strong>{{ t('userView.devicesTab.viewDialog.apiEndpoint') }}:</strong> {{ deviceToView.api_endpoint || 'N/A' }}
           </VListItem>
           <VListItem>
-            <strong>Channel In:</strong> {{ deviceToView.device_channel_in ?? 'N/A' }}
+            <strong>{{ t('userView.devicesTab.viewDialog.channelIn') }}:</strong> {{ deviceToView.device_channel_in ?? 'N/A' }}
           </VListItem>
           <VListItem>
-            <strong>Channel Out:</strong> {{ deviceToView.device_channel_out ?? 'N/A' }}
+            <strong>{{ t('userView.devicesTab.viewDialog.channelOut') }}:</strong> {{ deviceToView.device_channel_out ?? 'N/A' }}
           </VListItem>
           <VListItem>
-            <strong>Status:</strong>
+            <strong>{{ t('userView.devicesTab.viewDialog.status') }}:</strong>
             <VChip
               :color="deviceToView.enabled ? 'success' : 'error'"
               size="small"
               label
               class="ms-2"
             >
-              {{ deviceToView.enabled ? 'Enabled' : 'Disabled' }}
+              {{ deviceToView.enabled ? t('userView.devicesTab.status.enabled') : t('userView.devicesTab.status.disabled') }}
             </VChip>
           </VListItem>
           <VListItem>
-            <strong>Guest Access:</strong>
+            <strong>{{ t('userView.devicesTab.viewDialog.guestAccess') }}:</strong>
             <VChip
               :color="deviceToView.guest_access ? 'success' : 'secondary'"
               size="small"
               label
               class="ms-2"
             >
-              {{ deviceToView.guest_access ? 'Yes' : 'No' }}
+              {{ deviceToView.guest_access ? t('common.yes') : t('common.no') }}
             </VChip>
           </VListItem>
         </VList>
@@ -718,7 +719,7 @@ onMounted(() => {
             variant="tonal"
             @click="isViewDeviceDialogVisible = false"
           >
-            Close
+            {{ t('common.close') }}
           </VBtn>
         </div>
       </VCardText>
@@ -740,7 +741,7 @@ onMounted(() => {
         />
 
         <h6 class="text-h6 mb-4">
-          {{ isEditMode ? 'Edit Device' : 'Add New Device' }}
+          {{ isEditMode ? t('userView.devicesTab.addEditDialog.editTitle') : t('userView.devicesTab.addEditDialog.addTitle') }}
         </h6>
 
         <VForm @submit.prevent="saveDevice">
@@ -751,8 +752,8 @@ onMounted(() => {
             >
               <AppTextField
                 v-model="deviceForm.device_name"
-                label="Device Name *"
-                placeholder="Enter device name"
+                :label="t('userView.devicesTab.addEditDialog.deviceName')"
+                :placeholder="t('userView.devicesTab.addEditDialog.deviceNamePlaceholder')"
               />
             </VCol>
 
@@ -762,8 +763,8 @@ onMounted(() => {
             >
               <AppSelect
                 v-model="deviceForm.community_id"
-                label="Community *"
-                placeholder="Select community"
+                :label="t('userView.devicesTab.addEditDialog.community')"
+                :placeholder="t('userView.devicesTab.addEditDialog.communityPlaceholder')"
                 :items="availableCommunities"
               />
             </VCol>
@@ -774,8 +775,8 @@ onMounted(() => {
             >
               <AppTextField
                 v-model="deviceForm.device_brand"
-                label="Brand"
-                placeholder="e.g., Shelly"
+                :label="t('userView.devicesTab.addEditDialog.brand')"
+                :placeholder="t('userView.devicesTab.addEditDialog.brandPlaceholder')"
               />
             </VCol>
 
@@ -785,8 +786,8 @@ onMounted(() => {
             >
               <AppTextField
                 v-model="deviceForm.device_model"
-                label="Model"
-                placeholder="e.g., Shelly Pro 4PM"
+                :label="t('userView.devicesTab.addEditDialog.model')"
+                :placeholder="t('userView.devicesTab.addEditDialog.modelPlaceholder')"
               />
             </VCol>
 
@@ -796,8 +797,8 @@ onMounted(() => {
             >
               <AppSelect
                 v-model="deviceForm.direction_type"
-                label="Direction Type"
-                placeholder="Select direction"
+                :label="t('userView.devicesTab.addEditDialog.directionType')"
+                :placeholder="t('userView.devicesTab.addEditDialog.directionPlaceholder')"
                 :items="directionTypes"
               />
             </VCol>
@@ -808,7 +809,7 @@ onMounted(() => {
             >
               <AppTextField
                 v-model="deviceForm.api_url"
-                label="API URL"
+                :label="t('userView.devicesTab.addEditDialog.apiUrl')"
                 placeholder="https://..."
               />
             </VCol>
@@ -819,7 +820,7 @@ onMounted(() => {
             >
               <AppTextField
                 v-model="deviceForm.api_endpoint"
-                label="API Endpoint"
+                :label="t('userView.devicesTab.addEditDialog.apiEndpoint')"
                 placeholder="/relay/0"
               />
             </VCol>
@@ -832,9 +833,9 @@ onMounted(() => {
               <AppTextField
                 v-if="isAuthKeyProtected"
                 :model-value="showAuthKey ? maskedAuthKey : '••••••••••••••••'"
-                label="Auth Key"
+                :label="t('userView.devicesTab.addEditDialog.authKey')"
                 readonly
-                hint="Auth key is protected. Click eye to reveal partial key."
+                :hint="t('userView.devicesTab.addEditDialog.authKeyHint')"
                 persistent-hint
               >
                 <template #prepend-inner>
@@ -852,8 +853,8 @@ onMounted(() => {
               <AppTextField
                 v-else
                 v-model="deviceForm.auth_key"
-                label="Auth Key"
-                placeholder="Enter auth key"
+                :label="t('userView.devicesTab.addEditDialog.authKey')"
+                :placeholder="t('userView.devicesTab.addEditDialog.authKeyPlaceholder')"
                 :type="showAuthKey ? 'text' : 'password'"
               >
                 <template #prepend-inner>
@@ -875,7 +876,7 @@ onMounted(() => {
             >
               <AppTextField
                 v-model.number="deviceForm.device_channel_in"
-                label="Channel In"
+                :label="t('userView.devicesTab.addEditDialog.channelIn')"
                 placeholder="0"
                 type="number"
               />
@@ -887,7 +888,7 @@ onMounted(() => {
             >
               <AppTextField
                 v-model.number="deviceForm.device_channel_out"
-                label="Channel Out"
+                :label="t('userView.devicesTab.addEditDialog.channelOut')"
                 placeholder="1"
                 type="number"
               />
@@ -899,8 +900,8 @@ onMounted(() => {
             >
               <AppTextField
                 v-model="deviceForm.device_id_in"
-                label="Device ID In"
-                placeholder="Enter device ID in"
+                :label="t('userView.devicesTab.addEditDialog.deviceIdIn')"
+                :placeholder="t('userView.devicesTab.addEditDialog.deviceIdInPlaceholder')"
               />
             </VCol>
 
@@ -910,8 +911,8 @@ onMounted(() => {
             >
               <AppTextField
                 v-model="deviceForm.device_id_out"
-                label="Device ID Out"
-                placeholder="Enter device ID out"
+                :label="t('userView.devicesTab.addEditDialog.deviceIdOut')"
+                :placeholder="t('userView.devicesTab.addEditDialog.deviceIdOutPlaceholder')"
               />
             </VCol>
 
@@ -921,7 +922,7 @@ onMounted(() => {
             >
               <VSwitch
                 v-model="deviceForm.enabled"
-                label="Enabled"
+                :label="t('userView.devicesTab.addEditDialog.enabled')"
                 color="success"
               />
             </VCol>
@@ -932,7 +933,7 @@ onMounted(() => {
             >
               <VSwitch
                 v-model="deviceForm.guest_access"
-                label="Guest Access"
+                :label="t('userView.devicesTab.addEditDialog.guestAccess')"
                 color="primary"
               />
             </VCol>
@@ -944,7 +945,7 @@ onMounted(() => {
               variant="tonal"
               @click="isAddEditDeviceDialogVisible = false"
             >
-              Cancel
+              {{ t('common.cancel') }}
             </VBtn>
 
             <VBtn
@@ -953,7 +954,7 @@ onMounted(() => {
               type="submit"
               :loading="isSaving"
             >
-              {{ isEditMode ? 'Update' : 'Create' }}
+              {{ isEditMode ? t('userView.devicesTab.addEditDialog.update') : t('userView.devicesTab.addEditDialog.create') }}
             </VBtn>
           </div>
         </VForm>
@@ -976,11 +977,11 @@ onMounted(() => {
         />
 
         <h6 class="text-h6 mb-4">
-          Delete Device
+          {{ t('userView.devicesTab.deleteDialog.title') }}
         </h6>
 
         <p class="text-body-1 mb-6">
-          Are you sure you want to delete <strong>{{ deviceToDelete?.name }}</strong>?
+          {{ t('userView.devicesTab.deleteDialog.message', { name: deviceToDelete?.name }) }}
         </p>
 
         <VAlert
@@ -989,7 +990,7 @@ onMounted(() => {
           class="mb-6 text-start"
         >
           <div class="text-body-2">
-            This action cannot be undone. The device will be permanently removed.
+            {{ t('userView.devicesTab.deleteDialog.warning') }}
           </div>
         </VAlert>
 
@@ -999,7 +1000,7 @@ onMounted(() => {
             variant="tonal"
             @click="cancelDelete"
           >
-            Cancel
+            {{ t('common.cancel') }}
           </VBtn>
 
           <VBtn
@@ -1008,7 +1009,7 @@ onMounted(() => {
             :loading="isDeleting"
             @click="confirmDeleteDevice"
           >
-            Delete
+            {{ t('userView.devicesTab.deleteDialog.delete') }}
           </VBtn>
         </div>
       </VCardText>

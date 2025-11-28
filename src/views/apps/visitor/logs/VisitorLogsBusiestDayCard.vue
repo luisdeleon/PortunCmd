@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { supabase } from '@/lib/supabase'
 
+const { t } = useI18n({ useScope: 'global' })
+
 // Props
 interface Props {
   communityFilter?: string
@@ -23,9 +25,16 @@ const isResident = computed(() => userData.value?.role === 'Resident')
 const isLoading = ref(true)
 const entriesByDay = ref<number[]>(Array(7).fill(0))
 
-// Day names
-const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']
-const shortDayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+// Day names (computed for translation)
+const dayNames = computed(() => [
+  t('common.sunday'),
+  t('common.monday'),
+  t('common.tuesday'),
+  t('common.wednesday'),
+  t('common.thursday'),
+  t('common.friday'),
+  t('common.saturday'),
+])
 
 // Find busiest day
 const busiestDay = computed(() => {
@@ -38,14 +47,8 @@ const busiestDay = computed(() => {
 
 // Get day name
 const dayName = computed(() => {
-  if (busiestDay.value.day < 0) return 'No data'
-  return dayNames[busiestDay.value.day]
-})
-
-// Get short day name
-const shortDayName = computed(() => {
-  if (busiestDay.value.day < 0) return ''
-  return shortDayNames[busiestDay.value.day]
+  if (busiestDay.value.day < 0) return t('visitorLogs.noData')
+  return dayNames.value[busiestDay.value.day]
 })
 
 // Fetch data
@@ -194,7 +197,7 @@ defineExpose({
         </VAvatar>
 
         <h6 class="text-h6 mb-1">
-          Busiest Day
+          {{ t('visitorLogs.busiestDay') }}
         </h6>
 
         <div class="text-h5 font-weight-bold text-primary mb-1">
@@ -210,17 +213,17 @@ defineExpose({
             color="primary"
             variant="tonal"
           >
-            {{ busiestDay.count }} entries
+            {{ busiestDay.count }} {{ t('visitorLogs.entries').toLowerCase() }}
           </VChip>
           <span class="text-body-2 text-disabled">
-            total
+            {{ t('visitorLogs.total') }}
           </span>
         </div>
         <span
           v-else
           class="text-body-2 text-disabled"
         >
-          No entries found
+          {{ t('visitorLogs.noEntriesFound') }}
         </span>
 
       </template>
@@ -242,7 +245,7 @@ defineExpose({
         activator="parent"
         location="top"
       >
-        View Access Logs
+        {{ t('visitorLogs.viewAccessLogs') }}
       </VTooltip>
     </IconBtn>
   </VCard>

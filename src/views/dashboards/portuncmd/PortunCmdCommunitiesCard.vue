@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { supabase } from '@/lib/supabase'
 
+const { t } = useI18n({ useScope: 'global' })
+
 const totalCommunities = ref(0)
 const growthPercentage = ref(0)
 const weeklyData = ref<number[]>([0, 0, 0, 0, 0, 0, 0])
@@ -208,8 +210,8 @@ const chartOptions = computed(() => {
         </VAvatar>
       </template>
 
-      <VCardTitle>Total Communities</VCardTitle>
-      <VCardSubtitle>Last Week</VCardSubtitle>
+      <VCardTitle>{{ t('dashboard.communities') }}</VCardTitle>
+      <VCardSubtitle>{{ t('dashboard.lastWeek') }}</VCardSubtitle>
 
       <template #append>
         <IconBtn
@@ -225,7 +227,7 @@ const chartOptions = computed(() => {
             activator="parent"
             location="top"
           >
-            View Communities
+            {{ t('dashboard.viewCommunities') }}
           </VTooltip>
         </IconBtn>
       </template>

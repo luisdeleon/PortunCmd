@@ -2,6 +2,7 @@
 import { supabase } from '@/lib/supabase'
 import UserTabDevices from './UserTabDevices.vue'
 
+const { t } = useI18n({ useScope: 'global' })
 const route = useRoute()
 
 // 👉 User data for permission checks
@@ -14,13 +15,13 @@ const canManage = computed(() => {
 })
 
 // Community Table Header
-const communityTableHeaders = [
-  { title: 'Community', key: 'id' },
-  { title: 'Properties', key: 'property_count', sortable: false },
-  { title: 'Name', key: 'name' },
-  { title: 'City', key: 'city' },
-  { title: 'Action', key: 'action', sortable: false },
-]
+const communityTableHeaders = computed(() => [
+  { title: t('userView.communityTab.tableHeaders.community'), key: 'id' },
+  { title: t('userView.communityTab.tableHeaders.properties'), key: 'property_count', sortable: false },
+  { title: t('userView.communityTab.tableHeaders.name'), key: 'name' },
+  { title: t('userView.communityTab.tableHeaders.city'), key: 'city' },
+  { title: t('userView.communityTab.tableHeaders.action'), key: 'action', sortable: false },
+])
 
 const search = ref('')
 const options = ref({ itemsPerPage: 5, page: 1 })
@@ -324,14 +325,14 @@ onMounted(() => {
       <VCard>
         <VCardText class="d-flex justify-space-between align-center flex-wrap gap-4">
           <h5 class="text-h5">
-            User's Communities
+            {{ t('userView.communityTab.title') }}
           </h5>
 
           <div class="d-flex align-center gap-4">
             <div style="inline-size: 250px;">
               <AppTextField
                 v-model="search"
-                placeholder="Search Community"
+                :placeholder="t('userView.communityTab.searchPlaceholder')"
               />
             </div>
 
@@ -344,7 +345,7 @@ onMounted(() => {
                 activator="parent"
                 location="top"
               >
-                Refresh
+                {{ t('userView.tooltips.refresh') }}
               </VTooltip>
             </IconBtn>
 
@@ -354,7 +355,7 @@ onMounted(() => {
               prepend-icon="tabler-plus"
               @click="openAssignCommunityDialog"
             >
-              Assign Community
+              {{ t('userView.communityTab.assignCommunity') }}
             </VBtn>
           </div>
         </VCardText>
@@ -420,7 +421,7 @@ onMounted(() => {
                 activator="parent"
                 location="top"
               >
-                Remove Community
+                {{ t('userView.communityTab.removeCommunity') }}
               </VTooltip>
             </IconBtn>
           </template>
@@ -457,17 +458,17 @@ onMounted(() => {
         />
 
         <h6 class="text-h6 mb-4">
-          Assign Communities
+          {{ t('userView.communityTab.assignDialog.title') }}
         </h6>
 
         <p class="text-body-1 mb-4">
-          Select one or more communities to assign to this user.
+          {{ t('userView.communityTab.assignDialog.description') }}
         </p>
 
         <AppSelect
           v-model="selectedCommunities"
-          label="Communities"
-          placeholder="Select communities to assign"
+          :label="t('userView.communityTab.assignDialog.label')"
+          :placeholder="t('userView.communityTab.assignDialog.placeholder')"
           :items="availableCommunities"
           multiple
           chips
@@ -485,7 +486,7 @@ onMounted(() => {
             variant="tonal"
             @click="isAssignCommunityDialogVisible = false"
           >
-            Cancel
+            {{ t('common.cancel') }}
           </VBtn>
 
           <VBtn
@@ -495,7 +496,7 @@ onMounted(() => {
             :disabled="selectedCommunities.length === 0"
             @click="assignCommunities"
           >
-            Assign
+            {{ t('userView.communityTab.assignDialog.assign') }}
           </VBtn>
         </div>
       </VCardText>
@@ -517,11 +518,11 @@ onMounted(() => {
         />
 
         <h6 class="text-h6 mb-4">
-          Remove Community
+          {{ t('userView.communityTab.removeDialog.title') }}
         </h6>
 
         <p class="text-body-1 mb-6">
-          Are you sure you want to remove <strong>{{ communityToRemove?.name }}</strong> from this user?
+          {{ t('userView.communityTab.removeDialog.message', { name: communityToRemove?.name }) }}
         </p>
 
         <VAlert
@@ -530,7 +531,7 @@ onMounted(() => {
           class="mb-6 text-start"
         >
           <div class="text-body-2">
-            The user will no longer have access to this community and its properties.
+            {{ t('userView.communityTab.removeDialog.warning') }}
           </div>
         </VAlert>
 
@@ -540,7 +541,7 @@ onMounted(() => {
             variant="tonal"
             @click="cancelRemove"
           >
-            Cancel
+            {{ t('common.cancel') }}
           </VBtn>
 
           <VBtn
@@ -549,7 +550,7 @@ onMounted(() => {
             :loading="isRemoving"
             @click="confirmRemoveCommunity"
           >
-            Remove
+            {{ t('userView.communityTab.removeDialog.remove') }}
           </VBtn>
         </div>
       </VCardText>

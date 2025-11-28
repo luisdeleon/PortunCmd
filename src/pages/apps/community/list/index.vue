@@ -50,15 +50,15 @@ const updateOptions = (options: any) => {
 }
 
 // Headers
-const headers = [
-  { title: 'ID', key: 'id' },
-  { title: 'Properties', key: 'property_count', sortable: false },
-  { title: 'Name', key: 'name' },
-  { title: 'City', key: 'city' },
-  { title: 'Country', key: 'country' },
-  { title: 'Status', key: 'status' },
-  { title: 'Actions', key: 'actions', sortable: false },
-]
+const headers = computed(() => [
+  { title: t('communityList.table.id'), key: 'id' },
+  { title: t('communityList.table.properties'), key: 'property_count', sortable: false },
+  { title: t('communityList.table.name'), key: 'name' },
+  { title: t('communityList.table.city'), key: 'city' },
+  { title: t('communityList.table.country'), key: 'country' },
+  { title: t('communityList.table.status'), key: 'status' },
+  { title: t('communityList.table.actions'), key: 'actions', sortable: false },
+])
 
 // 👉 Fetching communities from Supabase
 const communities = ref([])
@@ -284,16 +284,16 @@ const bulkStatusForm = ref({
 })
 
 // Status filter options
-const statusOptions = [
-  { title: 'Active', value: 'active' },
-  { title: 'Under Construction', value: 'under-construction' },
-  { title: 'Pre-Launch', value: 'pre-launch' },
-  { title: 'Full Capacity', value: 'full-capacity' },
-  { title: 'Maintenance', value: 'maintenance' },
-  { title: 'Seasonal Closure', value: 'seasonal-closure' },
-  { title: 'Inactive', value: 'inactive' },
-  { title: 'Archived', value: 'archived' },
-]
+const statusOptions = computed(() => [
+  { title: t('communityList.status.active'), value: 'active' },
+  { title: t('communityList.status.underConstruction'), value: 'under-construction' },
+  { title: t('communityList.status.preLaunch'), value: 'pre-launch' },
+  { title: t('communityList.status.fullCapacity'), value: 'full-capacity' },
+  { title: t('communityList.status.maintenance'), value: 'maintenance' },
+  { title: t('communityList.status.seasonalClosure'), value: 'seasonal-closure' },
+  { title: t('communityList.status.inactive'), value: 'inactive' },
+  { title: t('communityList.status.archived'), value: 'archived' },
+])
 
 // Computed property for bulk delete button visibility
 const hasSelectedRows = computed(() => selectedRows.value.length > 0)
@@ -607,10 +607,10 @@ const widgetData = computed(() => {
 
   return [
     {
-      title: 'Total Communities',
+      title: t('communityList.widgets.totalCommunities'),
       value: totalCommunities.value.toLocaleString(),
       change: growthPercentage,
-      desc: 'Last 30 days growth',
+      desc: t('communityList.widgets.last30DaysGrowth'),
       icon: 'tabler-building-community',
       iconColor: 'primary'
     },
@@ -675,7 +675,7 @@ const widgetData = computed(() => {
 
     <VCard class="mb-6">
       <VCardItem class="pb-4">
-        <VCardTitle>Communities</VCardTitle>
+        <VCardTitle>{{ t('communityList.title') }}</VCardTitle>
       </VCardItem>
 
       <VCardText>
@@ -687,7 +687,7 @@ const widgetData = computed(() => {
           >
             <AppSelect
               v-model="selectedId"
-              placeholder="Filter by ID"
+              :placeholder="t('communityList.filters.filterById')"
               :items="communityIds"
               clearable
               clear-icon="tabler-x"
@@ -700,7 +700,7 @@ const widgetData = computed(() => {
           >
             <AppSelect
               v-model="selectedCity"
-              placeholder="Filter by City"
+              :placeholder="t('communityList.filters.filterByCity')"
               :items="cities"
               clearable
               clear-icon="tabler-x"
@@ -713,7 +713,7 @@ const widgetData = computed(() => {
           >
             <AppSelect
               v-model="selectedCountry"
-              placeholder="Filter by Country"
+              :placeholder="t('communityList.filters.filterByCountry')"
               :items="countries"
               clearable
               clear-icon="tabler-x"
@@ -726,7 +726,7 @@ const widgetData = computed(() => {
           >
             <AppSelect
               v-model="selectedStatus"
-              placeholder="Filter by Status"
+              :placeholder="t('communityList.filters.filterByStatus')"
               :items="statusOptions"
               clearable
               clear-icon="tabler-x"
@@ -760,7 +760,7 @@ const widgetData = computed(() => {
             prepend-icon="tabler-replace"
             @click="openBulkStatusUpdateDialog"
           >
-            Update Status ({{ selectedRows.length }})
+            {{ t('communityList.buttons.updateStatus') }} ({{ selectedRows.length }})
           </VBtn>
 
           <!-- 👉 Bulk Delete button (shown when items are selected) -->
@@ -771,7 +771,7 @@ const widgetData = computed(() => {
             prepend-icon="tabler-trash"
             @click="openBulkDeleteDialog"
           >
-            Delete ({{ selectedRows.length }})
+            {{ t('communityList.buttons.delete') }} ({{ selectedRows.length }})
           </VBtn>
         </div>
         <VSpacer />
@@ -781,7 +781,7 @@ const widgetData = computed(() => {
           <div style="inline-size: 15.625rem;">
             <AppTextField
               v-model="searchQuery"
-              placeholder="Search communities..."
+              :placeholder="t('communityList.search.placeholder')"
               clearable
               clear-icon="tabler-x"
             />
@@ -802,7 +802,7 @@ const widgetData = computed(() => {
             color="secondary"
             prepend-icon="tabler-download"
           >
-            Import
+            {{ t('communityList.buttons.import') }}
           </VBtn>
 
           <!-- 👉 Add community button (Super Admin only) -->
@@ -811,7 +811,7 @@ const widgetData = computed(() => {
             prepend-icon="tabler-plus"
             @click="openAddCommunityDialog"
           >
-            Add Community
+            {{ t('communityList.buttons.addCommunity') }}
           </VBtn>
         </div>
       </VCardText>
@@ -898,7 +898,7 @@ const widgetData = computed(() => {
                 activator="parent"
                 location="top"
               >
-                View Community
+                {{ t('communityList.actions.view') }}
               </VTooltip>
             </IconBtn>
 
@@ -915,7 +915,7 @@ const widgetData = computed(() => {
                 activator="parent"
                 location="top"
               >
-                Edit Community
+                {{ t('communityList.actions.edit') }}
               </VTooltip>
             </IconBtn>
 
@@ -932,7 +932,7 @@ const widgetData = computed(() => {
                 activator="parent"
                 location="top"
               >
-                Change Status
+                {{ t('communityList.actions.changeStatus') }}
               </VTooltip>
             </IconBtn>
 
@@ -949,7 +949,7 @@ const widgetData = computed(() => {
                 activator="parent"
                 location="top"
               >
-                Delete Community
+                {{ t('communityList.actions.delete') }}
               </VTooltip>
             </IconBtn>
           </div>
@@ -1017,11 +1017,11 @@ const widgetData = computed(() => {
           </VBtn>
 
           <h6 class="text-h6 mb-4">
-            Delete Community
+            {{ t('communityList.deleteDialog.title') }}
           </h6>
 
           <p class="text-body-1 mb-6">
-            Are you sure you want to delete <strong>{{ communityToDelete?.name }}</strong>? This action cannot be undone.
+            {{ t('communityList.deleteDialog.message', { name: communityToDelete?.name }) }}
           </p>
 
           <div class="d-flex gap-4 justify-center">
@@ -1030,7 +1030,7 @@ const widgetData = computed(() => {
               variant="tonal"
               @click="cancelDelete"
             >
-              Cancel
+              {{ t('communityList.deleteDialog.cancel') }}
             </VBtn>
 
             <VBtn
@@ -1038,7 +1038,7 @@ const widgetData = computed(() => {
               variant="elevated"
               @click="deleteCommunity"
             >
-              Delete
+              {{ t('communityList.deleteDialog.confirm') }}
             </VBtn>
           </div>
         </VCardText>
@@ -1060,13 +1060,11 @@ const widgetData = computed(() => {
           />
 
           <h6 class="text-h6 mb-4">
-            Delete Multiple Communities
+            {{ t('communityList.bulkDeleteDialog.title') }}
           </h6>
 
           <p class="text-body-1 mb-6">
-            Are you sure you want to delete <strong>{{ selectedRows.length }}</strong>
-            {{ selectedRows.length === 1 ? 'community' : 'communities' }}?
-            This action cannot be undone.
+            {{ t('communityList.bulkDeleteDialog.message', { count: selectedRows.length, entity: selectedRows.length === 1 ? t('community') : t('communities') }) }}
           </p>
 
           <VAlert
@@ -1075,9 +1073,7 @@ const widgetData = computed(() => {
             class="mb-6 text-start"
           >
             <div class="text-body-2">
-              You are about to permanently delete <strong>{{ selectedRows.length }}</strong>
-              {{ selectedRows.length === 1 ? 'community' : 'communities' }}.
-              This will remove all associated data.
+              {{ t('communityList.bulkDeleteDialog.warning', { count: selectedRows.length, entity: selectedRows.length === 1 ? t('community') : t('communities') }) }}
             </div>
           </VAlert>
 
@@ -1087,7 +1083,7 @@ const widgetData = computed(() => {
               variant="tonal"
               @click="cancelBulkDelete"
             >
-              Cancel
+              {{ t('communityList.bulkDeleteDialog.cancel') }}
             </VBtn>
 
             <VBtn
@@ -1095,7 +1091,7 @@ const widgetData = computed(() => {
               variant="elevated"
               @click="bulkDeleteCommunities"
             >
-              Delete All
+              {{ t('communityList.bulkDeleteDialog.confirm') }}
             </VBtn>
           </div>
         </VCardText>
@@ -1115,7 +1111,7 @@ const widgetData = computed(() => {
               size="24"
               color="warning"
             />
-            Update Status for {{ selectedRows.length }} {{ selectedRows.length === 1 ? 'Community' : 'Communities' }}
+            {{ t('communityList.bulkStatusDialog.title', { count: selectedRows.length, entity: selectedRows.length === 1 ? t('community') : t('communities') }) }}
           </div>
         </VCardTitle>
 
@@ -1130,8 +1126,7 @@ const widgetData = computed(() => {
                 class="mb-4"
               >
                 <div class="text-body-2">
-                  You are about to update the status for <strong>{{ selectedRows.length }}</strong>
-                  {{ selectedRows.length === 1 ? 'community' : 'communities' }}.
+                  {{ t('communityList.bulkStatusDialog.message', { count: selectedRows.length, entity: selectedRows.length === 1 ? t('community') : t('communities') }) }}
                 </div>
               </VAlert>
             </VCol>
@@ -1140,8 +1135,8 @@ const widgetData = computed(() => {
             <VCol cols="12">
               <AppSelect
                 v-model="bulkStatusForm.newStatus"
-                label="New Status *"
-                placeholder="Select new status"
+                :label="t('communityList.bulkStatusDialog.newStatus')"
+                :placeholder="t('communityList.bulkStatusDialog.selectStatus')"
                 :items="statusOptions"
               >
                 <template #prepend-inner>
@@ -1154,8 +1149,8 @@ const widgetData = computed(() => {
             <VCol cols="12">
               <AppTextarea
                 v-model="bulkStatusForm.reason"
-                label="Reason (Optional)"
-                placeholder="Enter reason for status change"
+                :label="t('communityList.bulkStatusDialog.reason')"
+                :placeholder="t('communityList.bulkStatusDialog.reasonPlaceholder')"
                 rows="3"
               >
                 <template #prepend-inner>
@@ -1175,7 +1170,7 @@ const widgetData = computed(() => {
             variant="tonal"
             @click="cancelBulkStatusUpdate"
           >
-            Cancel
+            {{ t('communityList.bulkStatusDialog.cancel') }}
           </VBtn>
           <VBtn
             color="warning"
@@ -1183,7 +1178,7 @@ const widgetData = computed(() => {
             :disabled="!bulkStatusForm.newStatus"
             @click="bulkUpdateStatus"
           >
-            Update All
+            {{ t('communityList.bulkStatusDialog.confirm') }}
           </VBtn>
         </VCardActions>
       </VCard>

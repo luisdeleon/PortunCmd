@@ -143,8 +143,8 @@ watch(() => props.userData?.id, () => {
 }, { immediate: true })
 
 // Singular/plural labels
-const communityLabel = computed(() => communitiesCount.value === 1 ? 'Community' : 'Communities')
-const propertyLabel = computed(() => propertiesCount.value === 1 ? 'Property' : 'Properties')
+const communityLabel = computed(() => communitiesCount.value === 1 ? t('userView.bioPanel.community') : t('userView.bioPanel.communities'))
+const propertyLabel = computed(() => propertiesCount.value === 1 ? t('userView.bioPanel.property') : t('userView.bioPanel.properties'))
 
 const standardPlan = computed(() => ({
   plan: 'Standard',
@@ -498,13 +498,13 @@ const toggleUserStatus = async () => {
             :disabled="!canManageUser"
             @click="isDeleteDialogVisible = true"
           >
-            Delete
+            {{ t('userView.bioPanel.delete') }}
             <VTooltip
               v-if="!canManageUser"
               activator="parent"
               location="top"
             >
-              You cannot delete {{ cannotManageReason === 'own account' ? 'your own account' : 'a user with higher rank' }}
+              {{ cannotManageReason === 'own account' ? t('userView.tooltips.cannotDeleteOwnAccount') : t('userView.tooltips.cannotDeleteHigherRank') }}
             </VTooltip>
           </VBtn>
 
@@ -515,13 +515,13 @@ const toggleUserStatus = async () => {
             :disabled="!canManageUser"
             @click="isToggleStatusDialogVisible = true"
           >
-            {{ props.userData.enabled ? 'Disable' : 'Enable' }}
+            {{ props.userData.enabled ? t('userView.bioPanel.disable') : t('userView.bioPanel.enable') }}
             <VTooltip
               v-if="!canManageUser"
               activator="parent"
               location="top"
             >
-              You cannot {{ props.userData.enabled ? 'disable' : 'enable' }} {{ cannotManageReason === 'own account' ? 'your own account' : 'a user with higher rank' }}
+              {{ props.userData.enabled ? (cannotManageReason === 'own account' ? t('userView.tooltips.cannotDisableOwnAccount') : t('userView.tooltips.cannotDisableHigherRank')) : (cannotManageReason === 'own account' ? t('userView.tooltips.cannotEnableOwnAccount') : t('userView.tooltips.cannotEnableHigherRank')) }}
             </VTooltip>
           </VBtn>
         </VCardText>
@@ -638,12 +638,11 @@ const toggleUserStatus = async () => {
         />
 
         <h6 class="text-h6 mb-4">
-          Delete User
+          {{ t('userView.deleteDialog.title') }}
         </h6>
 
         <p class="text-body-1 mb-6">
-          Are you sure you want to delete <strong>{{ props.userData.fullName }}</strong>?
-          This action cannot be undone and will permanently remove the user account.
+          {{ t('userView.deleteDialog.description', { name: props.userData.fullName }) }}
         </p>
 
         <VAlert
@@ -652,7 +651,7 @@ const toggleUserStatus = async () => {
           class="mb-6 text-start"
         >
           <div class="text-body-2">
-            <strong>Warning:</strong> Deleting this user will remove all associated data and cannot be reversed.
+            {{ t('userView.deleteDialog.warning') }}
           </div>
         </VAlert>
 
@@ -662,7 +661,7 @@ const toggleUserStatus = async () => {
             variant="tonal"
             @click="isDeleteDialogVisible = false"
           >
-            Cancel
+            {{ t('common.cancel') }}
           </VBtn>
 
           <VBtn
@@ -670,7 +669,7 @@ const toggleUserStatus = async () => {
             variant="elevated"
             @click="deleteUser(); isDeleteDialogVisible = false"
           >
-            Delete User
+            {{ t('userView.deleteDialog.delete') }}
           </VBtn>
         </div>
       </VCardText>
@@ -692,11 +691,11 @@ const toggleUserStatus = async () => {
         />
 
         <h6 class="text-h6 mb-4">
-          {{ props.userData.enabled ? 'Disable User' : 'Enable User' }}
+          {{ props.userData.enabled ? t('userView.toggleStatusDialog.disableTitle') : t('userView.toggleStatusDialog.enableTitle') }}
         </h6>
 
         <p class="text-body-1 mb-6">
-          Are you sure you want to {{ props.userData.enabled ? 'disable' : 'enable' }} <strong>{{ props.userData.fullName }}</strong>?
+          {{ props.userData.enabled ? t('userView.toggleStatusDialog.disableDescription', { name: props.userData.fullName }) : t('userView.toggleStatusDialog.enableDescription', { name: props.userData.fullName }) }}
         </p>
 
         <VAlert
@@ -705,12 +704,7 @@ const toggleUserStatus = async () => {
           class="mb-6 text-start"
         >
           <div class="text-body-2">
-            <template v-if="props.userData.enabled">
-              <strong>Disabling this user</strong> will prevent them from logging in and accessing the system.
-            </template>
-            <template v-else>
-              <strong>Enabling this user</strong> will allow them to log in and access the system again.
-            </template>
+            {{ props.userData.enabled ? t('userView.toggleStatusDialog.disableWarning') : t('userView.toggleStatusDialog.enableWarning') }}
           </div>
         </VAlert>
 
@@ -720,7 +714,7 @@ const toggleUserStatus = async () => {
             variant="tonal"
             @click="isToggleStatusDialogVisible = false"
           >
-            Cancel
+            {{ t('common.cancel') }}
           </VBtn>
 
           <VBtn
@@ -728,7 +722,7 @@ const toggleUserStatus = async () => {
             variant="elevated"
             @click="toggleUserStatus(); isToggleStatusDialogVisible = false"
           >
-            {{ props.userData.enabled ? 'Disable' : 'Enable' }} User
+            {{ props.userData.enabled ? t('userView.toggleStatusDialog.disable') : t('userView.toggleStatusDialog.enable') }}
           </VBtn>
         </div>
       </VCardText>
