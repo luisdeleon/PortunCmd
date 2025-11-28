@@ -8,6 +8,11 @@ import PortunCmdCommunitiesByCountry from '@/views/dashboards/portuncmd/PortunCm
 import PortunCmdCommunitiesStatusCard from '@/views/dashboards/portuncmd/PortunCmdCommunitiesStatusCard.vue'
 import PortunCmdPropertiesStatusCard from '@/views/dashboards/portuncmd/PortunCmdPropertiesStatusCard.vue'
 
+// Visitor Analytics Cards
+import VisitorLogsHourlyTrafficCard from '@/views/apps/visitor/logs/VisitorLogsHourlyTrafficCard.vue'
+import VisitorLogsPeakHourCard from '@/views/apps/visitor/logs/VisitorLogsPeakHourCard.vue'
+import VisitorLogsBusiestDayCard from '@/views/apps/visitor/logs/VisitorLogsBusiestDayCard.vue'
+
 // TODO: Replace remaining CRM components with PortunCmd-specific components
 import CrmActivityTimeline from '@/views/dashboards/crm/CrmActivityTimeline.vue'
 
@@ -17,6 +22,18 @@ definePage({
     public: false, // Requires authentication
   },
 })
+
+// Hourly data for Peak Hour card (shared from hourly traffic card)
+const entriesByHour = ref<number[]>(Array(24).fill(0))
+const isHourlyLoading = ref(true)
+const selectedTimeRange = ref(90)
+
+// Callback to receive hourly data from the chart component
+const onHourlyDataLoaded = (data: { entries: number[], exits: number[], isLoading: boolean, timeRange: number }) => {
+  entriesByHour.value = data.entries
+  isHourlyLoading.value = data.isLoading
+  selectedTimeRange.value = data.timeRange
+}
 </script>
 
 <template>
@@ -59,6 +76,32 @@ definePage({
       lg="3"
     >
       <PortunCmdActiveVisitorsCard />
+    </VCol>
+
+    <!-- 👉 Visitor Hourly Traffic Analytics -->
+    <VCol
+      cols="12"
+      lg="8"
+    >
+      <VisitorLogsHourlyTrafficCard @data-loaded="onHourlyDataLoaded" />
+    </VCol>
+
+    <!-- 👉 Peak Hour & Busiest Day Cards -->
+    <VCol
+      cols="12"
+      lg="4"
+    >
+      <VRow>
+        <VCol cols="12">
+          <VisitorLogsPeakHourCard
+            :entries-by-hour="entriesByHour"
+            :is-loading="isHourlyLoading"
+          />
+        </VCol>
+        <VCol cols="12">
+          <VisitorLogsBusiestDayCard :time-range="selectedTimeRange" />
+        </VCol>
+      </VRow>
     </VCol>
 
     <!-- 👉 Communities by Country -->

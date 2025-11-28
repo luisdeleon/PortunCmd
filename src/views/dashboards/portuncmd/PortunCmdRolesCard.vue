@@ -176,6 +176,25 @@ const chartOptions = computed(() => ({
 
       <VCardTitle>Role Assignments</VCardTitle>
       <VCardSubtitle>Last Week</VCardSubtitle>
+
+      <template #append>
+        <IconBtn
+          :to="{ name: 'apps-roles' }"
+          color="warning"
+          variant="text"
+        >
+          <VIcon
+            icon="tabler-external-link"
+            size="22"
+          />
+          <VTooltip
+            activator="parent"
+            location="top"
+          >
+            View Roles
+          </VTooltip>
+        </IconBtn>
+      </template>
     </VCardItem>
 
     <VueApexCharts
@@ -198,23 +217,6 @@ const chartOptions = computed(() => ({
         </span>
       </div>
 
-      <VDivider class="my-3" />
-
-      <div class="d-flex align-center justify-center">
-        <VBtn
-          :to="{ name: 'apps-roles' }"
-          variant="text"
-          color="warning"
-          size="small"
-        >
-          View All Roles
-          <VIcon
-            end
-            icon="tabler-chevron-right"
-            size="18"
-          />
-        </VBtn>
-      </div>
     </VCardText>
   </VCard>
 </template>

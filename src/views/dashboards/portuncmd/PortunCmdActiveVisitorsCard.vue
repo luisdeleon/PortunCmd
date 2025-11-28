@@ -249,6 +249,25 @@ const chartOptions = computed(() => ({
 
       <VCardTitle>Active Visitors</VCardTitle>
       <VCardSubtitle>Last Week</VCardSubtitle>
+
+      <template #append>
+        <IconBtn
+          :to="{ name: 'apps-visitor-list' }"
+          color="warning"
+          variant="text"
+        >
+          <VIcon
+            icon="tabler-external-link"
+            size="22"
+          />
+          <VTooltip
+            activator="parent"
+            location="top"
+          >
+            View Visitors
+          </VTooltip>
+        </IconBtn>
+      </template>
     </VCardItem>
 
     <VueApexCharts
@@ -271,23 +290,6 @@ const chartOptions = computed(() => ({
         </span>
       </div>
 
-      <VDivider class="my-3" />
-
-      <div class="d-flex align-center justify-center">
-        <VBtn
-          :to="{ name: 'apps-visitor-list' }"
-          variant="text"
-          color="warning"
-          size="small"
-        >
-          View All Visitors
-          <VIcon
-            end
-            icon="tabler-chevron-right"
-            size="18"
-          />
-        </VBtn>
-      </div>
     </VCardText>
   </VCard>
 </template>

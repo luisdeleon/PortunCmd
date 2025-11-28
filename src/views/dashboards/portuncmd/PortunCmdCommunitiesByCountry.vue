@@ -104,7 +104,23 @@ onMounted(() => {
     :subtitle="t('Distribution Overview')"
   >
     <template #append>
-      <div class="mt-n4 me-n2">
+      <div class="d-flex align-center mt-n4 me-n2">
+        <IconBtn
+          :to="{ name: 'apps-community-list' }"
+          color="primary"
+          variant="text"
+        >
+          <VIcon
+            icon="tabler-external-link"
+            size="22"
+          />
+          <VTooltip
+            activator="parent"
+            location="top"
+          >
+            View Communities
+          </VTooltip>
+        </IconBtn>
         <MoreBtn
           size="small"
           :menu-list="moreList"

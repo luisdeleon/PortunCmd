@@ -176,6 +176,25 @@ const chartOptions = computed(() => ({
 
       <VCardTitle>Total Properties</VCardTitle>
       <VCardSubtitle>Last Week</VCardSubtitle>
+
+      <template #append>
+        <IconBtn
+          :to="{ name: 'apps-property-list' }"
+          color="success"
+          variant="text"
+        >
+          <VIcon
+            icon="tabler-external-link"
+            size="22"
+          />
+          <VTooltip
+            activator="parent"
+            location="top"
+          >
+            View Properties
+          </VTooltip>
+        </IconBtn>
+      </template>
     </VCardItem>
 
     <VueApexCharts
@@ -198,23 +217,6 @@ const chartOptions = computed(() => ({
         </span>
       </div>
 
-      <VDivider class="my-3" />
-
-      <div class="d-flex align-center justify-center">
-        <VBtn
-          :to="{ name: 'apps-property-list' }"
-          variant="text"
-          color="success"
-          size="small"
-        >
-          View All Properties
-          <VIcon
-            end
-            icon="tabler-chevron-right"
-            size="18"
-          />
-        </VBtn>
-      </div>
     </VCardText>
   </VCard>
 </template>

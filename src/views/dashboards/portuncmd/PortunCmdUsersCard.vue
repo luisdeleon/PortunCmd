@@ -210,6 +210,25 @@ const chartOptions = computed(() => {
 
       <VCardTitle>Total Users</VCardTitle>
       <VCardSubtitle>Last Week</VCardSubtitle>
+
+      <template #append>
+        <IconBtn
+          :to="{ name: 'apps-user-list' }"
+          color="info"
+          variant="text"
+        >
+          <VIcon
+            icon="tabler-external-link"
+            size="22"
+          />
+          <VTooltip
+            activator="parent"
+            location="top"
+          >
+            View Users
+          </VTooltip>
+        </IconBtn>
+      </template>
     </VCardItem>
 
     <VCardText>
@@ -232,23 +251,6 @@ const chartOptions = computed(() => {
         </div>
       </div>
 
-      <VDivider class="my-3" />
-
-      <div class="d-flex align-center justify-center">
-        <VBtn
-          :to="{ name: 'apps-user-list' }"
-          variant="text"
-          color="info"
-          size="small"
-        >
-          View All Users
-          <VIcon
-            end
-            icon="tabler-chevron-right"
-            size="18"
-          />
-        </VBtn>
-      </div>
     </VCardText>
   </VCard>
 </template>

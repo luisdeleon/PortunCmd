@@ -1,5 +1,5 @@
 <script setup lang="ts">
-// CRM dashboard is disabled - redirect to main dashboard
+// CRM dashboard is disabled - redirect to main PortunCmd dashboard
 definePage({
   meta: {
     layout: 'default',
@@ -10,7 +10,7 @@ definePage({
 const router = useRouter()
 
 onMounted(() => {
-  router.replace('/dashboards/portuncmd')
+  router.replace('/dashboard')
 })
 </script>
 

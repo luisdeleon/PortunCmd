@@ -26,12 +26,12 @@ export const redirects: RouteRecordRaw[] = [
 
       // Check if role contains 'admin' (case-insensitive)
       if (userRole.includes('admin'))
-        return { name: 'dashboards-crm' }
+        return { name: 'dashboard' }
       if (userRole === 'client')
         return { name: 'access-control' }
 
-      // Default to CRM dashboard for all logged-in users
-      return { name: 'dashboards-crm' }
+      // Default to main dashboard for all logged-in users
+      return { name: 'dashboard' }
     },
   },
   {

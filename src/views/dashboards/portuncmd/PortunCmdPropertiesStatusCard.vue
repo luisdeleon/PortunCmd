@@ -158,7 +158,25 @@ const chartOptions = computed(() => {
       </VCardTitle>
 
       <template #append>
-        <MoreBtn :menu-list="[{ title: t('Refresh'), value: 'refresh' }]" />
+        <div class="d-flex align-center">
+          <IconBtn
+            :to="{ name: 'apps-property-list' }"
+            color="success"
+            variant="text"
+          >
+            <VIcon
+              icon="tabler-external-link"
+              size="22"
+            />
+            <VTooltip
+              activator="parent"
+              location="top"
+            >
+              View Properties
+            </VTooltip>
+          </IconBtn>
+          <MoreBtn :menu-list="[{ title: t('Refresh'), value: 'refresh' }]" />
+        </div>
       </template>
     </VCardItem>
 
