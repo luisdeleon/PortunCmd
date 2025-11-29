@@ -397,7 +397,7 @@ onMounted(() => {
         <!-- QR Code -->
         <div class="d-flex justify-center mb-6">
           <QRCodeDisplay
-            :value="createdVisitor.record_url"
+            :value="createdVisitor.record_uid"
             :size="200"
           />
         </div>

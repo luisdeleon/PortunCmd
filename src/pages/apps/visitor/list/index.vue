@@ -956,7 +956,7 @@ const widgetData = computed(() => [
               class="d-flex flex-column align-center"
             >
               <QRCodeDisplay
-                :value="selectedVisitor.record_url || `https://qr.portun.app/${selectedVisitor.record_uid}`"
+                :value="selectedVisitor.record_uid"
                 :size="180"
               />
               <div class="text-center mt-4">

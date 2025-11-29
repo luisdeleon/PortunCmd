@@ -4,7 +4,7 @@ import { supabase } from '@/lib/supabase'
 import { useRouter } from 'vue-router'
 import { useCountriesStates } from '@/composables/useCountriesStates'
 
-const { t } = useI18n({ useScope: 'global' })
+const { t, locale } = useI18n({ useScope: 'global' })
 
 definePage({
   meta: {
@@ -53,7 +53,7 @@ const userForm = ref({
   password: '',
   verify_password: '',
   enabled: true,
-  language: 'en',
+  language: locale.value,
   def_community_id: '',
   def_property_id: '',
   communities: [] as string[],
