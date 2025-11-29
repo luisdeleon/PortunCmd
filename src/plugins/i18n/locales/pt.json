@@ -99,7 +99,9 @@
       "properties": "Propriedades",
       "communities": "Comunidades"
     },
-    "noDataAvailable": "Nenhum dado disponível"
+    "noDataAvailable": "Nenhum dado disponível",
+    "noCommunitiesFound": "Nenhuma comunidade encontrada",
+    "totalCommunities": "Total de Comunidades"
   },
   "communityList": {
     "title": "Comunidades",

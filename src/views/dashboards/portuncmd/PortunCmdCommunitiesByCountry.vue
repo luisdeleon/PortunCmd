@@ -100,8 +100,8 @@ onMounted(() => {
 
 <template>
   <VCard
-    :title="t('Communities by Country')"
-    :subtitle="t('Distribution Overview')"
+    :title="t('dashboard.communitiesByCountry')"
+    :subtitle="t('dashboard.distributionOverview')"
   >
     <template #append>
       <div class="d-flex align-center mt-n4 me-n2">
@@ -183,7 +183,7 @@ onMounted(() => {
 
         <VListItem v-if="countriesData.length === 0 && !isLoading">
           <VListItemTitle class="text-center text-disabled">
-            {{ t('No communities found') }}
+            {{ t('dashboard.noCommunitiesFound') }}
           </VListItemTitle>
         </VListItem>
       </VList>
@@ -198,7 +198,7 @@ onMounted(() => {
         class="d-flex justify-space-between align-center"
       >
         <span class="text-body-1 text-medium-emphasis">
-          {{ t('Total Communities') }}
+          {{ t('dashboard.totalCommunities') }}
         </span>
         <VChip
           color="primary"

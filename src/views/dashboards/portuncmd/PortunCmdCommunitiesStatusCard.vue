@@ -151,7 +151,7 @@ const chartOptions = computed(() => {
   <VCard>
     <VCardItem>
       <VCardTitle>
-        {{ t('Communities Status') }}
+        {{ t('dashboard.communitiesStatus') }}
       </VCardTitle>
 
       <template #append>
