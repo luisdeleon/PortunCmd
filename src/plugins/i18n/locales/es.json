@@ -355,7 +355,9 @@
       "validUntil": "Válido Hasta",
       "entries": "Entradas",
       "notes": "Notas",
-      "close": "Cerrar"
+      "close": "Cerrar",
+      "copyLink": "Copiar enlace de acceso",
+      "linkCopied": "Enlace de acceso copiado al portapapeles"
     },
     "deleteDialog": {
       "title": "Eliminar Pase de Visitante",

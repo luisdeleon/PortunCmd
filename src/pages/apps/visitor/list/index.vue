@@ -518,6 +518,26 @@ const resolveTypeVariant = (type: string) => {
   return { color: 'primary', icon: 'tabler-user-check' }
 }
 
+// Copy access link to clipboard
+const copyAccessLink = async (recordUid: string) => {
+  const accessLink = `https://access.portun.app/hm/${recordUid}`
+  try {
+    await navigator.clipboard.writeText(accessLink)
+    snackbar.value = {
+      show: true,
+      message: t('visitorList.dialog.linkCopied'),
+      color: 'success',
+    }
+  } catch (err) {
+    console.error('Failed to copy:', err)
+    snackbar.value = {
+      show: true,
+      message: 'Failed to copy link',
+      color: 'error',
+    }
+  }
+}
+
 // Lifecycle
 onMounted(() => {
   loadTranslations()
@@ -963,7 +983,24 @@ const widgetData = computed(() => [
                 <h6 class="text-h6">
                   {{ selectedVisitor.visitor_name }}
                 </h6>
-                <span class="text-body-2 text-disabled">{{ selectedVisitor.record_uid }}</span>
+                <div class="d-flex align-center justify-center gap-1">
+                  <span class="text-body-2 text-disabled">{{ selectedVisitor.record_uid }}</span>
+                  <IconBtn
+                    size="x-small"
+                    @click="copyAccessLink(selectedVisitor.record_uid)"
+                  >
+                    <VIcon
+                      icon="tabler-copy"
+                      size="16"
+                    />
+                    <VTooltip
+                      activator="parent"
+                      location="top"
+                    >
+                      {{ t('visitorList.dialog.copyLink') }}
+                    </VTooltip>
+                  </IconBtn>
+                </div>
               </div>
             </VCol>
 

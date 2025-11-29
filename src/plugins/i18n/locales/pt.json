@@ -377,6 +377,21 @@
       "downloadQR": "Baixar QR",
       "close": "Fechar"
     },
+    "dialog": {
+      "title": "Detalhes do Passe de Visitante",
+      "visitorName": "Nome do Visitante",
+      "passCode": "Código do Passe",
+      "host": "Anfitrião",
+      "community": "Comunidade",
+      "property": "Propriedade",
+      "type": "Tipo",
+      "validUntil": "Válido Até",
+      "entries": "Entradas",
+      "notes": "Notas",
+      "close": "Fechar",
+      "copyLink": "Copiar link de acesso",
+      "linkCopied": "Link de acesso copiado para a área de transferência"
+    },
     "messages": {
       "deleteSuccess": "Passe de visitante excluído com sucesso",
       "deleteFailed": "Falha ao excluir passe de visitante. Por favor, tente novamente.",

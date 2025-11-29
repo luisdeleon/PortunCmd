@@ -615,7 +615,9 @@
       "validUntil": "Valid Until",
       "entries": "Entries",
       "notes": "Notes",
-      "close": "Close"
+      "close": "Close",
+      "copyLink": "Copy access link",
+      "linkCopied": "Access link copied to clipboard"
     },
     "deleteDialog": {
       "title": "Delete Visitor Pass",
