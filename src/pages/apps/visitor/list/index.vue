@@ -519,8 +519,8 @@ const resolveTypeVariant = (type: string) => {
 }
 
 // Copy access link to clipboard
-const copyAccessLink = async (recordUid: string) => {
-  const accessLink = `https://access.portun.app/hm/${recordUid}`
+const copyAccessLink = async (uuid: string) => {
+  const accessLink = `https://access.portun.app/hm/${uuid}`
   try {
     await navigator.clipboard.writeText(accessLink)
     snackbar.value = {
@@ -987,7 +987,7 @@ const widgetData = computed(() => [
                   <span class="text-body-2 text-disabled">{{ selectedVisitor.record_uid }}</span>
                   <IconBtn
                     size="x-small"
-                    @click="copyAccessLink(selectedVisitor.record_uid)"
+                    @click="copyAccessLink(selectedVisitor.id)"
                   >
                     <VIcon
                       icon="tabler-copy"
