@@ -307,6 +307,10 @@ const fetchUserCommunities = async () => {
         property_count: community.property?.[0]?.count || 0,
       }))
     }
+    // If no communities in scope, clear the list
+    else {
+      communities.value = []
+    }
   } catch (err) {
     console.error('Error in fetchUserCommunities:', err)
   } finally {
