@@ -119,6 +119,10 @@ const updateOptions = (options: any) => {
 const getVisitorStatus = (visitor: any) => {
   const now = new Date()
   const validityEnd = new Date(visitor.validity_end)
+
+  // Set validity_end to end of day (23:59:59.999) so passes are valid for the entire day
+  validityEnd.setHours(23, 59, 59, 999)
+
   const entriesUsed = visitor.entries_used || 0
   const entriesAllowed = visitor.entries_allowed || 1
 
