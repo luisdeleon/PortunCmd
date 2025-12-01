@@ -189,6 +189,9 @@ const onSubmit = async () => {
       // Create new community - use provided ID or generate one
       const communityId = communityForm.value.id?.trim() || crypto.randomUUID()
 
+      // Get current user ID
+      const { data: { user } } = await supabase.auth.getUser()
+
       const { error } = await supabase
         .from('community')
         .insert({
@@ -201,6 +204,7 @@ const onSubmit = async () => {
           country: communityForm.value.country || null,
           geolocation: communityForm.value.geolocation || null,
           googlemaps: communityForm.value.googlemaps || null,
+          created_by: user?.id || null,
         })
 
       if (error) throw error
@@ -405,6 +409,20 @@ const generateIdFromName = (name: string | null | undefined): string => {
               </div>
             </VCol>
 
+            <!-- Community Name -->
+            <VCol cols="12">
+              <AppTextField
+                v-model="communityForm.name"
+                :label="t('communityDialog.fields.communityName')"
+                :placeholder="t('communityDialog.fields.communityNamePlaceholder')"
+                :rules="[requiredRule]"
+              >
+                <template #prepend-inner>
+                  <VIcon icon="tabler-building-community" />
+                </template>
+              </AppTextField>
+            </VCol>
+
             <!-- Community ID (only for new communities) -->
             <VCol
               v-if="!isEditMode"
@@ -444,20 +462,6 @@ const generateIdFromName = (name: string | null | undefined): string => {
                     icon="tabler-check"
                     color="success"
                   />
-                </template>
-              </AppTextField>
-            </VCol>
-
-            <!-- Community Name -->
-            <VCol cols="12">
-              <AppTextField
-                v-model="communityForm.name"
-                :label="t('communityDialog.fields.communityName')"
-                :placeholder="t('communityDialog.fields.communityNamePlaceholder')"
-                :rules="[requiredRule]"
-              >
-                <template #prepend-inner>
-                  <VIcon icon="tabler-building-community" />
                 </template>
               </AppTextField>
             </VCol>

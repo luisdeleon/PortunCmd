@@ -1,4 +1,10 @@
 <script setup lang="ts">
+interface CreatorProfile {
+  id: string
+  display_name?: string
+  email?: string
+}
+
 interface CommunityData {
   id: string
   name?: string
@@ -12,6 +18,8 @@ interface CommunityData {
   property_count?: number
   created_at?: string
   updated_at?: string
+  created_by?: string
+  creator?: CreatorProfile
 }
 
 interface Props {
@@ -45,6 +53,32 @@ const formatDate = (dateString?: string) => {
   })
   return `${dateStr}, ${timeStr}`
 }
+
+const creatorName = computed(() => {
+  const creator = props.communityData?.creator
+  if (!creator) return 'N/A'
+
+  return creator.display_name || creator.email || 'N/A'
+})
+
+const creatorInitials = computed(() => {
+  const creator = props.communityData?.creator
+  if (!creator) return '?'
+
+  const displayName = creator.display_name || ''
+
+  if (displayName) {
+    const words = displayName.trim().split(/\s+/)
+    if (words.length >= 2) {
+      return `${words[0][0]}${words[1][0]}`.toUpperCase()
+    }
+    return displayName.substring(0, 2).toUpperCase()
+  } else if (creator.email) {
+    return creator.email.substring(0, 2).toUpperCase()
+  }
+
+  return '?'
+})
 </script>
 
 <template>
@@ -313,15 +347,29 @@ const formatDate = (dateString?: string) => {
           <!-- System Information -->
           <VCol cols="12">
             <VDivider class="my-4" />
-            <div class="d-flex align-center gap-2 mb-4">
-              <VIcon
-                icon="tabler-clock"
-                size="20"
-                color="secondary"
-              />
-              <h6 class="text-h6 text-secondary">
-                System Information
-              </h6>
+            <div class="d-flex align-center justify-space-between mb-4">
+              <div class="d-flex align-center gap-2">
+                <VIcon
+                  icon="tabler-clock"
+                  size="20"
+                  color="secondary"
+                />
+                <h6 class="text-h6 text-secondary">
+                  System Information
+                </h6>
+              </div>
+              <!-- Created By (inline with section header) -->
+              <div class="d-flex align-center gap-2">
+                <span class="text-sm text-disabled">Created By:</span>
+                <VAvatar
+                  size="24"
+                  color="primary"
+                  variant="tonal"
+                >
+                  <span class="text-xs font-weight-medium">{{ creatorInitials }}</span>
+                </VAvatar>
+                <span class="text-body-2">{{ creatorName }}</span>
+              </div>
             </div>
           </VCol>
 

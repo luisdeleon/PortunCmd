@@ -85,13 +85,15 @@ const fetchCommunities = async () => {
         googlemaps,
         created_at,
         updated_at,
+        created_by,
         status,
         status_changed_at,
         status_changed_by,
         status_reason,
         seasonal_reopening_date,
         maintenance_expected_completion,
-        property:property(count)
+        property:property(count),
+        creator:profile!created_by(id, display_name, email)
       `, { count: 'exact' })
 
     // Apply search filter
@@ -141,10 +143,11 @@ const fetchCommunities = async () => {
       return
     }
 
-    // Transform data to include property_count
+    // Transform data to include property_count and creator
     communities.value = (data || []).map(community => ({
       ...community,
-      property_count: community.property?.[0]?.count || 0
+      property_count: community.property?.[0]?.count || 0,
+      creator: community.creator || null
     }))
     totalCommunities.value = count || 0
   } catch (err) {

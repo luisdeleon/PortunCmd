@@ -1408,7 +1408,7 @@
     "fields": {
       "communityId": "Community ID",
       "communityIdPlaceholder": "Leave empty for auto-generated ID",
-      "communityIdHint": "Optional: Enter a custom ID or leave empty for auto-generation",
+      "communityIdHint": "Auto-generated from name, or customize it here",
       "communityName": "Community Name",
       "communityNamePlaceholder": "Enter community name",
       "streetAddress": "Street Address",
@@ -1454,7 +1454,7 @@
     "fields": {
       "propertyId": "Property ID",
       "propertyIdPlaceholder": "Leave empty for auto-generated ID",
-      "propertyIdHint": "Optional: Enter a custom ID or leave empty for auto-generation",
+      "propertyIdHint": "Auto-generated from community and property name, or customize it here",
       "propertyName": "Property Name",
       "propertyNamePlaceholder": "Enter property name (e.g., Apt 101, House 5)",
       "address": "Address",
@@ -1470,7 +1470,9 @@
       "saving": "Saving..."
     },
     "validation": {
-      "required": "This field is required"
+      "required": "This field is required",
+      "idAlreadyExists": "This Property ID already exists",
+      "checkingId": "Checking availability..."
     }
   },
 

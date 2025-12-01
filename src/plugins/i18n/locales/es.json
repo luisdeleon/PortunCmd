@@ -1616,7 +1616,7 @@
     "fields": {
       "communityId": "ID de Comunidad",
       "communityIdPlaceholder": "Dejar vacío para ID autogenerado",
-      "communityIdHint": "Opcional: Ingrese un ID personalizado o deje vacío para autogeneración",
+      "communityIdHint": "Autogenerado desde el nombre, o personalícelo aquí",
       "communityName": "Nombre de Comunidad",
       "communityNamePlaceholder": "Ingrese nombre de comunidad",
       "streetAddress": "Dirección",
@@ -1662,7 +1662,7 @@
     "fields": {
       "propertyId": "ID de Propiedad",
       "propertyIdPlaceholder": "Dejar vacío para ID autogenerado",
-      "propertyIdHint": "Opcional: Ingrese un ID personalizado o deje vacío para autogeneración",
+      "propertyIdHint": "Autogenerado desde la comunidad y nombre de propiedad, o personalícelo aquí",
       "propertyName": "Nombre de Propiedad",
       "propertyNamePlaceholder": "Ingrese nombre de propiedad (ej., Apt 101, Casa 5)",
       "address": "Dirección",
@@ -1678,7 +1678,9 @@
       "saving": "Guardando..."
     },
     "validation": {
-      "required": "Este campo es requerido"
+      "required": "Este campo es requerido",
+      "idAlreadyExists": "Este ID de Propiedad ya existe",
+      "checkingId": "Verificando disponibilidad..."
     }
   },
 
