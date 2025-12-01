@@ -49,6 +49,11 @@ const refCommunityForm = ref<VForm>()
 const isSaving = ref(false)
 const isEditMode = ref(false)
 
+// Community ID validation state
+const isCheckingId = ref(false)
+const idAlreadyExists = ref(false)
+const idCheckDebounceTimer = ref<ReturnType<typeof setTimeout> | null>(null)
+
 // Form data
 const communityForm = ref<CommunityData>({
   id: '',
@@ -124,6 +129,12 @@ watch(() => props.isDialogVisible, (newVal) => {
 })
 
 const resetForm = () => {
+  // Clear debounce timer if active
+  if (idCheckDebounceTimer.value) {
+    clearTimeout(idCheckDebounceTimer.value)
+    idCheckDebounceTimer.value = null
+  }
+
   communityForm.value = {
     id: '',
     name: '',
@@ -139,6 +150,8 @@ const resetForm = () => {
   showStateDropdown.value = false
   selectedCountryCode.value = ''
   isEditMode.value = false
+  isCheckingId.value = false
+  idAlreadyExists.value = false
   refCommunityForm.value?.reset()
 }
 
@@ -146,6 +159,9 @@ const onSubmit = async () => {
   const { valid } = await refCommunityForm.value!.validate()
 
   if (!valid) return
+
+  // Prevent submission if ID already exists or is still being checked
+  if (idAlreadyExists.value || isCheckingId.value) return
 
   try {
     isSaving.value = true
@@ -206,8 +222,60 @@ const onReset = () => {
   resetForm()
 }
 
+// Check if community ID already exists in database
+const checkCommunityIdExists = async (id: string): Promise<boolean> => {
+  if (!id.trim()) return false
+
+  const { data, error } = await supabase
+    .from('community')
+    .select('id')
+    .eq('id', id.trim())
+    .maybeSingle()
+
+  if (error) {
+    console.error('Error checking community ID:', error)
+    return false
+  }
+
+  return !!data
+}
+
+// Watch community ID changes to check for duplicates (debounced)
+watch(() => communityForm.value.id, (newId) => {
+  // Clear previous timer
+  if (idCheckDebounceTimer.value) {
+    clearTimeout(idCheckDebounceTimer.value)
+  }
+
+  // Reset state if empty or in edit mode
+  if (!newId?.trim() || isEditMode.value) {
+    idAlreadyExists.value = false
+    isCheckingId.value = false
+    return
+  }
+
+  // Start checking indicator
+  isCheckingId.value = true
+  idAlreadyExists.value = false
+
+  // Debounce the check (500ms)
+  idCheckDebounceTimer.value = setTimeout(async () => {
+    const exists = await checkCommunityIdExists(newId)
+    idAlreadyExists.value = exists
+    isCheckingId.value = false
+  }, 500)
+})
+
 // Validation rules
 const requiredRule = (v: string) => !!v || t('communityDialog.validation.required')
+
+// Community ID validation rule
+const communityIdRule = () => {
+  if (idAlreadyExists.value) {
+    return t('communityDialog.validation.idAlreadyExists')
+  }
+  return true
+}
 </script>
 
 <template>
@@ -268,11 +336,35 @@ const requiredRule = (v: string) => !!v || t('communityDialog.validation.require
                 v-model="communityForm.id"
                 :label="t('communityDialog.fields.communityId')"
                 :placeholder="t('communityDialog.fields.communityIdPlaceholder')"
-                :hint="t('communityDialog.fields.communityIdHint')"
+                :hint="isCheckingId ? t('communityDialog.validation.checkingId') : t('communityDialog.fields.communityIdHint')"
+                :error="idAlreadyExists"
+                :error-messages="idAlreadyExists ? t('communityDialog.validation.idAlreadyExists') : undefined"
+                :loading="isCheckingId"
+                :rules="[communityIdRule]"
                 persistent-hint
               >
                 <template #prepend-inner>
                   <VIcon icon="tabler-hash" />
+                </template>
+                <template
+                  v-if="isCheckingId"
+                  #append-inner
+                >
+                  <VProgressCircular
+                    size="20"
+                    width="2"
+                    indeterminate
+                    color="primary"
+                  />
+                </template>
+                <template
+                  v-else-if="communityForm.id && !idAlreadyExists"
+                  #append-inner
+                >
+                  <VIcon
+                    icon="tabler-check"
+                    color="success"
+                  />
                 </template>
               </AppTextField>
             </VCol>
@@ -467,7 +559,7 @@ const requiredRule = (v: string) => !!v || t('communityDialog.validation.require
               <VBtn
                 color="primary"
                 :loading="isSaving"
-                :disabled="isSaving"
+                :disabled="isSaving || isCheckingId || idAlreadyExists"
                 prepend-icon="tabler-check"
                 size="large"
                 block

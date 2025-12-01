@@ -1703,7 +1703,9 @@
       "saving": "Salvando..."
     },
     "validation": {
-      "required": "Este campo é obrigatório"
+      "required": "Este campo é obrigatório",
+      "idAlreadyExists": "Este ID de Comunidade já existe",
+      "checkingId": "Verificando disponibilidade..."
     }
   },
 

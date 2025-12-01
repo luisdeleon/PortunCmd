@@ -1436,7 +1436,9 @@
       "saving": "Saving..."
     },
     "validation": {
-      "required": "This field is required"
+      "required": "This field is required",
+      "idAlreadyExists": "This Community ID already exists",
+      "checkingId": "Checking availability..."
     }
   },
 
