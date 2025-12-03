@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import AddNewUserDrawer from '@/views/apps/user/list/AddNewUserDrawer.vue'
 import AssignRoleDialog from '@/components/dialogs/AssignRoleDialog.vue'
+import ImportUserDialog from '@/components/dialogs/ImportUserDialog.vue'
 import type { UserProperties } from '@/plugins/fake-api/handlers/apps/users/types'
 import { supabase } from '@/lib/supabase'
 import { useI18n } from 'vue-i18n'
@@ -526,6 +527,7 @@ const resolveUserStatusVariant = (stat: string) => {
 
 const isAddNewUserDrawerVisible = ref(false)
 const isAssignRoleDialogVisible = ref(false)
+const isImportDialogVisible = ref(false)
 const selectedUserForRole = ref<string | null>(null)
 const isDeleteDialogVisible = ref(false)
 const isBulkDeleteDialogVisible = ref(false)
@@ -564,6 +566,24 @@ const handleRoleAssigned = () => {
   isAssignRoleDialogVisible.value = false
   selectedUserForRole.value = null
   fetchUsers() // Refresh user list
+}
+
+// Open import dialog
+const openImportDialog = () => {
+  isImportDialogVisible.value = true
+}
+
+// Handle import completed
+const handleImportCompleted = () => {
+  fetchUsers()
+  fetchUserGrowth()
+  fetchResidentStats()
+  fetchActiveInactiveStats()
+  snackbar.value = {
+    show: true,
+    message: t('userList.messages.importSuccess'),
+    color: 'success',
+  }
 }
 
 // Open status change dialog
@@ -1120,8 +1140,9 @@ const widgetData = computed(() => {
             variant="tonal"
             color="secondary"
             prepend-icon="tabler-download"
+            @click="openImportDialog"
           >
-            Import
+            {{ $t('userList.buttons.import') }}
           </VBtn>
 
           <!-- 👉 Add user button -->
@@ -1469,6 +1490,12 @@ const widgetData = computed(() => {
       v-model:is-dialog-visible="isAssignRoleDialogVisible"
       :user-id="selectedUserForRole"
       @role-assigned="handleRoleAssigned"
+    />
+
+    <!-- 👉 Import User Dialog -->
+    <ImportUserDialog
+      v-model:is-dialog-visible="isImportDialogVisible"
+      @import-completed="handleImportCompleted"
     />
 
     <!-- 👉 Status Change Dialog -->

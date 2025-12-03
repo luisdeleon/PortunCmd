@@ -46,6 +46,11 @@ const refUserForm = ref<VForm>()
 const isSaving = ref(false)
 const snackbar = ref({ show: false, message: '', color: 'success' })
 
+// Email duplicate checking
+const isCheckingEmail = ref(false)
+const emailExists = ref(false)
+const lastCheckedEmail = ref('')
+
 // Form data
 const userForm = ref({
   email: '',
@@ -132,6 +137,59 @@ const fetchProperties = async () => {
   }
 }
 
+// Check if email already exists in database
+const checkEmailExists = async (email: string): Promise<boolean> => {
+  if (!email || email === lastCheckedEmail.value) {
+    return emailExists.value
+  }
+
+  try {
+    isCheckingEmail.value = true
+    const normalizedEmail = email.toLowerCase().trim()
+
+    const { data, error } = await supabase
+      .from('profile')
+      .select('id')
+      .ilike('email', normalizedEmail)
+      .limit(1)
+
+    if (error) {
+      console.error('Error checking email:', error)
+      return false
+    }
+
+    emailExists.value = (data?.length || 0) > 0
+    lastCheckedEmail.value = email
+    return emailExists.value
+  } catch (err) {
+    console.error('Error in checkEmailExists:', err)
+    return false
+  } finally {
+    isCheckingEmail.value = false
+  }
+}
+
+// Debounced email check
+let emailCheckTimeout: ReturnType<typeof setTimeout> | null = null
+const debouncedEmailCheck = (email: string) => {
+  if (emailCheckTimeout) {
+    clearTimeout(emailCheckTimeout)
+  }
+  emailCheckTimeout = setTimeout(() => {
+    checkEmailExists(email)
+  }, 500)
+}
+
+// Watch email field for changes
+watch(() => userForm.value.email, (newEmail) => {
+  if (newEmail) {
+    debouncedEmailCheck(newEmail)
+  } else {
+    emailExists.value = false
+    lastCheckedEmail.value = ''
+  }
+})
+
 // Fetch roles (filtered by role hierarchy)
 const fetchRoles = async () => {
   try {
@@ -188,6 +246,19 @@ const onSubmit = async () => {
   const { valid } = await refUserForm.value!.validate()
 
   if (!valid) return
+
+  // Double-check email doesn't exist (in case user types fast and hits submit)
+  if (userForm.value.email) {
+    await checkEmailExists(userForm.value.email)
+    if (emailExists.value) {
+      snackbar.value = {
+        show: true,
+        message: t('userForm.validation.emailExists'),
+        color: 'error',
+      }
+      return
+    }
+  }
 
   try {
     isSaving.value = true
@@ -257,6 +328,12 @@ const requiredRule = (v: string) => !!v || t('userForm.validation.required')
 const emailRule = (v: string) => {
   const pattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/
   return pattern.test(v) || t('userForm.validation.invalidEmail')
+}
+const emailDuplicateRule = () => {
+  if (emailExists.value) {
+    return t('userForm.validation.emailExists')
+  }
+  return true
 }
 const passwordRule = (v: string) => {
   if (!v) return t('userForm.validation.passwordRequired')
@@ -330,10 +407,34 @@ const verifyPasswordRule = (v: string) => {
                     :label="t('userForm.fields.email')"
                     :placeholder="t('userForm.fields.emailPlaceholder')"
                     type="email"
-                    :rules="[requiredRule, emailRule]"
+                    :rules="[requiredRule, emailRule, emailDuplicateRule]"
+                    :loading="isCheckingEmail"
+                    :error="emailExists"
+                    :error-messages="emailExists ? [t('userForm.validation.emailExists')] : []"
                   >
                     <template #prepend-inner>
                       <VIcon icon="tabler-mail" />
+                    </template>
+                    <template #append-inner>
+                      <VProgressCircular
+                        v-if="isCheckingEmail"
+                        size="20"
+                        width="2"
+                        indeterminate
+                        color="primary"
+                      />
+                      <VIcon
+                        v-else-if="userForm.email && !emailExists && lastCheckedEmail === userForm.email"
+                        icon="tabler-check"
+                        color="success"
+                        size="20"
+                      />
+                      <VIcon
+                        v-else-if="emailExists"
+                        icon="tabler-alert-circle"
+                        color="error"
+                        size="20"
+                      />
                     </template>
                   </AppTextField>
                 </VCol>

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { usePropertyImport, type ImportResult, type PropertyImportRow } from '@/composables/usePropertyImport'
+import { useUserImport, type UserImportResult, type UserImportRow } from '@/composables/useUserImport'
 
 const { t } = useI18n({ useScope: 'global' })
 
@@ -15,7 +15,11 @@ interface Emit {
 const props = defineProps<Props>()
 const emit = defineEmits<Emit>()
 
-const { isImporting, parseCSV, checkDuplicates, importFromCSV, downloadTemplate } = usePropertyImport()
+const { isImporting, parseCSV, checkDuplicates, importFromCSV, downloadTemplate, canCreateRole, getAllowedRoles, getCurrentUserRole } = useUserImport()
+
+// Get allowed roles for current user
+const allowedRoles = computed(() => getAllowedRoles())
+const currentUserRole = computed(() => getCurrentUserRole())
 
 // Checking duplicates state
 const isCheckingDuplicates = ref(false)
@@ -27,11 +31,11 @@ const isDragging = ref(false)
 
 // Preview state
 const showPreview = ref(false)
-const previewData = ref<PropertyImportRow[]>([])
+const previewData = ref<UserImportRow[]>([])
 const parseError = ref<string | null>(null)
 
 // Import results
-const importResult = ref<ImportResult | null>(null)
+const importResult = ref<UserImportResult | null>(null)
 const showResults = ref(false)
 
 // Reset state when dialog opens/closes
@@ -113,10 +117,10 @@ const previewCSV = async () => {
     // Parse CSV
     const parsed = parseCSV(content)
 
-    // Check for duplicates
-    const parsedWithDuplicates = await checkDuplicates(parsed)
+    // Check for duplicates and role violations
+    const parsedWithStatus = await checkDuplicates(parsed)
 
-    previewData.value = parsedWithDuplicates
+    previewData.value = parsedWithStatus
     showPreview.value = true
   } catch (err: any) {
     parseError.value = err.message
@@ -129,12 +133,12 @@ const previewCSV = async () => {
 
 // Count duplicates in preview data
 const duplicateCount = computed(() => {
-  return previewData.value.filter(p => p._isDuplicate).length
+  return previewData.value.filter(u => u._isDuplicate).length
 })
 
-// Count importable items (non-duplicates)
+// Count importable items (non-duplicates and non-role-violations)
 const importableCount = computed(() => {
-  return previewData.value.filter(p => !p._isDuplicate).length
+  return previewData.value.filter(u => !u._isDuplicate && !u._isRoleViolation).length
 })
 
 // Check if there are any duplicates
@@ -143,14 +147,12 @@ const hasDuplicates = computed(() => duplicateCount.value > 0)
 // Get duplicate reason text
 const getDuplicateReasonText = (reason: string | undefined) => {
   switch (reason) {
-    case 'id_exists':
-      return t('importPropertyDialog.duplicates.idExists')
-    case 'name_community_exists':
-      return t('importPropertyDialog.duplicates.nameCommunityExists')
+    case 'email_exists':
+      return t('importUserDialog.duplicates.emailExists')
     case 'duplicate_in_file':
-      return t('importPropertyDialog.duplicates.duplicateInFile')
+      return t('importUserDialog.duplicates.duplicateInFile')
     default:
-      return t('importPropertyDialog.duplicates.duplicate')
+      return t('importUserDialog.duplicates.duplicate')
   }
 }
 
@@ -169,7 +171,7 @@ const confirmImport = async () => {
     // Read file content
     const content = await selectedFile.value.text()
 
-    // Import properties
+    // Import users
     const result = await importFromCSV(content)
 
     importResult.value = result
@@ -202,13 +204,59 @@ const downloadTemplateFile = () => {
   downloadTemplate()
 }
 
+// Check if a row should be skipped (duplicate or role violation)
+const shouldSkipRow = (user: UserImportRow) => {
+  return user._isDuplicate || user._isRoleViolation
+}
+
+// Get skip reason for a row
+const getSkipReason = (user: UserImportRow) => {
+  if (user._isDuplicate) {
+    return getDuplicateReasonText(user._duplicateReason)
+  }
+  if (user._isRoleViolation) {
+    return t('importUserDialog.errors.cannotCreateRole')
+  }
+  return ''
+}
+
+// Resolve role color - show error color if role is not allowed
+const resolveRoleColor = (role: string) => {
+  // If user can't create this role, show error color
+  if (!canCreateRole(role)) {
+    return 'error'
+  }
+
+  const roleLower = role.toLowerCase()
+  if (roleLower === 'super admin') return 'error'
+  if (roleLower === 'mega dealer') return 'purple'
+  if (roleLower === 'dealer') return 'warning'
+  if (roleLower === 'administrator') return 'primary'
+  if (roleLower === 'guard') return 'info'
+  if (roleLower === 'client') return 'secondary'
+  if (roleLower === 'resident') return 'success'
+  return 'secondary'
+}
+
+// Check if a role is not allowed for the current user
+const isRoleNotAllowed = (role: string) => !canCreateRole(role)
+
+// Count how many rows have role hierarchy violations
+const roleViolationCount = computed(() => {
+  return previewData.value.filter(user => !canCreateRole(user.role)).length
+})
+
+// Check if there are any role violations in the preview data
+const hasRoleViolations = computed(() => roleViolationCount.value > 0)
+
 // Data table headers for preview
 const previewHeaders = computed(() => [
-  { title: t('importPropertyDialog.table.status'), key: 'status', width: '120px' },
-  { title: t('importPropertyDialog.table.propertyId'), key: 'id', width: '150px' },
-  { title: t('importPropertyDialog.table.name'), key: 'name', width: '200px' },
-  { title: t('importPropertyDialog.table.address'), key: 'address', width: '300px' },
-  { title: t('importPropertyDialog.table.communityId'), key: 'community_id', width: '150px' },
+  { title: t('importUserDialog.table.status'), key: 'status', width: '120px' },
+  { title: t('importUserDialog.table.email'), key: 'email', width: '250px' },
+  { title: t('importUserDialog.table.displayName'), key: 'display_name', width: '200px' },
+  { title: t('importUserDialog.table.role'), key: 'role', width: '150px' },
+  { title: t('importUserDialog.table.communityId'), key: 'community_id', width: '150px' },
+  { title: t('importUserDialog.table.propertyId'), key: 'property_id', width: '150px' },
 ])
 </script>
 
@@ -237,10 +285,10 @@ const previewHeaders = computed(() => [
             />
           </VAvatar>
           <h4 class="text-h4 mb-2">
-            {{ showPreview ? t('importPropertyDialog.previewTitle') : t('importPropertyDialog.title') }}
+            {{ showPreview ? t('importUserDialog.previewTitle') : t('importUserDialog.title') }}
           </h4>
           <p class="text-body-1 text-medium-emphasis">
-            {{ showPreview ? t('importPropertyDialog.previewSubtitle') : t('importPropertyDialog.subtitle') }}
+            {{ showPreview ? t('importUserDialog.previewSubtitle') : t('importUserDialog.subtitle') }}
           </p>
         </div>
 
@@ -252,27 +300,27 @@ const previewHeaders = computed(() => [
           class="mb-6"
         >
           <VAlertTitle class="mb-2">
-            {{ importResult.success ? t('importPropertyDialog.results.success') : t('importPropertyDialog.results.withErrors') }}
+            {{ importResult.success ? t('importUserDialog.results.success') : t('importUserDialog.results.withErrors') }}
           </VAlertTitle>
 
           <div class="text-body-2">
             <div class="mb-2">
-              <strong>{{ t('importPropertyDialog.results.totalRows') }}:</strong> {{ importResult.totalRows }}
+              <strong>{{ t('importUserDialog.results.totalRows') }}:</strong> {{ importResult.totalRows }}
             </div>
             <div class="mb-2">
-              <strong>{{ t('importPropertyDialog.results.successfullyImported') }}:</strong> {{ importResult.successCount }}
-            </div>
-            <div
-              v-if="importResult.errorCount > 0"
-              class="mb-2"
-            >
-              <strong>{{ t('importPropertyDialog.results.failed') }}:</strong> {{ importResult.errorCount }}
+              <strong>{{ t('importUserDialog.results.successfullyImported') }}:</strong> {{ importResult.successCount }}
             </div>
             <div
               v-if="importResult.skippedCount > 0"
               class="mb-2"
             >
-              <strong>{{ t('importPropertyDialog.results.skipped') }}:</strong> {{ importResult.skippedCount }}
+              <strong>{{ t('importUserDialog.results.skipped') }}:</strong> {{ importResult.skippedCount }}
+            </div>
+            <div
+              v-if="importResult.errorCount > 0"
+              class="mb-2"
+            >
+              <strong>{{ t('importUserDialog.results.failed') }}:</strong> {{ importResult.errorCount }}
             </div>
           </div>
 
@@ -283,7 +331,7 @@ const previewHeaders = computed(() => [
           >
             <VExpansionPanels>
               <VExpansionPanel
-                :title="t('importPropertyDialog.results.viewErrorDetails')"
+                :title="t('importUserDialog.results.viewErrorDetails')"
                 expand-icon="tabler-chevron-down"
               >
                 <VExpansionPanelText>
@@ -294,13 +342,13 @@ const previewHeaders = computed(() => [
                     style="background-color: rgba(var(--v-theme-error), 0.1); border-radius: 4px;"
                   >
                     <div class="text-caption">
-                      <strong>{{ t('importPropertyDialog.results.row') }} {{ error.row }}:</strong> {{ error.error }}
+                      <strong>{{ t('importUserDialog.results.row') }} {{ error.row }}:</strong> {{ error.error }}
                     </div>
                     <div
                       v-if="error.data"
                       class="text-caption text-medium-emphasis mt-1"
                     >
-                      {{ t('importPropertyDialog.results.data') }}: {{ JSON.stringify(error.data) }}
+                      {{ t('importUserDialog.results.data') }}: {{ JSON.stringify(error.data) }}
                     </div>
                   </div>
                 </VExpansionPanelText>
@@ -317,7 +365,7 @@ const previewHeaders = computed(() => [
           class="mb-6"
         >
           <VAlertTitle class="mb-2">
-            {{ t('importPropertyDialog.errors.parseError') }}
+            {{ t('importUserDialog.errors.parseError') }}
           </VAlertTitle>
           <div class="text-body-2">
             {{ parseError }}
@@ -339,10 +387,30 @@ const previewHeaders = computed(() => [
                 size="20"
                 class="me-2"
               />
-              {{ t('importPropertyDialog.duplicates.warning') }}
+              {{ t('importUserDialog.duplicates.warning') }}
             </VAlertTitle>
             <div class="text-body-2">
-              {{ t('importPropertyDialog.duplicates.message', { count: duplicateCount }) }}
+              {{ t('importUserDialog.duplicates.message', { count: duplicateCount }) }}
+            </div>
+          </VAlert>
+
+          <!-- Role Hierarchy Warning -->
+          <VAlert
+            v-if="hasRoleViolations"
+            color="error"
+            variant="tonal"
+            class="mb-4"
+          >
+            <VAlertTitle class="mb-2">
+              <VIcon
+                icon="tabler-alert-triangle"
+                size="20"
+                class="me-2"
+              />
+              {{ t('importUserDialog.errors.roleHierarchyViolation') }}
+            </VAlertTitle>
+            <div class="text-body-2">
+              {{ t('importUserDialog.errors.roleHierarchyMessage', { count: roleViolationCount, role: currentUserRole }) }}
             </div>
           </VAlert>
 
@@ -358,9 +426,9 @@ const previewHeaders = computed(() => [
                   size="20"
                 />
                 <div class="text-body-2">
-                  <strong>{{ importableCount }}</strong> {{ importableCount === 1 ? t('common.property') : t('common.properties') }} {{ t('importPropertyDialog.preview.willBeImported') }}.
-                  <span v-if="hasDuplicates" class="text-warning">
-                    {{ t('importPropertyDialog.duplicates.skipped', { count: duplicateCount }) }}
+                  <strong>{{ importableCount }}</strong> {{ importableCount === 1 ? t('common.user') : t('common.users') }} {{ t('importUserDialog.preview.willBeImported') }}.
+                  <span v-if="hasDuplicates || hasRoleViolations" class="text-warning">
+                    {{ t('importUserDialog.duplicates.skipped', { count: previewData.length - importableCount }) }}
                   </span>
                 </div>
               </div>
@@ -377,9 +445,9 @@ const previewHeaders = computed(() => [
               <!-- Status -->
               <template #item.status="{ item }">
                 <VChip
-                  v-if="item._isDuplicate"
+                  v-if="shouldSkipRow(item)"
                   size="small"
-                  color="warning"
+                  :color="item._isRoleViolation ? 'error' : 'warning'"
                   variant="tonal"
                 >
                   <VIcon
@@ -387,7 +455,7 @@ const previewHeaders = computed(() => [
                     size="14"
                     class="me-1"
                   />
-                  {{ t('importPropertyDialog.duplicates.skipLabel') }}
+                  {{ t('importUserDialog.duplicates.skipLabel') }}
                 </VChip>
                 <VChip
                   v-else
@@ -400,44 +468,19 @@ const previewHeaders = computed(() => [
                     size="14"
                     class="me-1"
                   />
-                  {{ t('importPropertyDialog.duplicates.importLabel') }}
+                  {{ t('importUserDialog.duplicates.importLabel') }}
                 </VChip>
               </template>
 
-              <!-- Property ID -->
-              <template #item.id="{ item }">
-                <div
-                  class="text-body-2"
-                  :class="{ 'text-disabled': item._isDuplicate }"
-                >
-                  <VChip
-                    v-if="item.id"
-                    size="small"
-                    :color="item._isDuplicate ? 'secondary' : 'primary'"
-                    variant="tonal"
-                  >
-                    {{ item.id }}
-                  </VChip>
-                  <VChip
-                    v-else
-                    size="small"
-                    color="secondary"
-                    variant="tonal"
-                  >
-                    {{ t('importPropertyDialog.table.autoGenerated') }}
-                  </VChip>
-                </div>
-              </template>
-
-              <!-- Name -->
-              <template #item.name="{ item }">
+              <!-- Email -->
+              <template #item.email="{ item }">
                 <div
                   class="text-body-2 font-weight-medium"
-                  :class="{ 'text-disabled': item._isDuplicate }"
+                  :class="{ 'text-disabled': shouldSkipRow(item) }"
                 >
-                  {{ item.name }}
+                  {{ item.email }}
                   <VTooltip
-                    v-if="item._isDuplicate"
+                    v-if="shouldSkipRow(item)"
                     location="top"
                   >
                     <template #activator="{ props: tooltipProps }">
@@ -445,36 +488,74 @@ const previewHeaders = computed(() => [
                         v-bind="tooltipProps"
                         icon="tabler-info-circle"
                         size="16"
-                        color="warning"
+                        :color="item._isRoleViolation ? 'error' : 'warning'"
                         class="ms-1"
                       />
                     </template>
-                    <span>{{ getDuplicateReasonText(item._duplicateReason) }}</span>
+                    <span>{{ getSkipReason(item) }}</span>
                   </VTooltip>
                 </div>
               </template>
 
-              <!-- Address -->
-              <template #item.address="{ item }">
+              <!-- Display Name -->
+              <template #item.display_name="{ item }">
                 <div
                   class="text-body-2"
-                  :class="{ 'text-disabled': item._isDuplicate }"
+                  :class="{ 'text-disabled': shouldSkipRow(item) }"
                 >
-                  {{ item.address }}
+                  {{ item.display_name }}
+                </div>
+              </template>
+
+              <!-- Role -->
+              <template #item.role="{ item }">
+                <div class="d-flex align-center gap-1">
+                  <VChip
+                    size="small"
+                    :color="shouldSkipRow(item) ? (item._isRoleViolation ? 'error' : 'secondary') : resolveRoleColor(item.role)"
+                    variant="tonal"
+                  >
+                    <VIcon
+                      v-if="item._isRoleViolation"
+                      icon="tabler-alert-triangle"
+                      size="14"
+                      class="me-1"
+                    />
+                    {{ item.role }}
+                  </VChip>
                 </div>
               </template>
 
               <!-- Community ID -->
               <template #item.community_id="{ item }">
-                <div class="text-body-2">
-                  <VChip
-                    size="small"
-                    :color="item._isDuplicate ? 'secondary' : 'success'"
-                    variant="tonal"
-                  >
-                    {{ item.community_id }}
-                  </VChip>
-                </div>
+                <VChip
+                  v-if="item.community_id"
+                  size="small"
+                  :color="shouldSkipRow(item) ? 'secondary' : 'primary'"
+                  variant="tonal"
+                >
+                  {{ item.community_id }}
+                </VChip>
+                <span
+                  v-else
+                  class="text-disabled"
+                >-</span>
+              </template>
+
+              <!-- Property ID -->
+              <template #item.property_id="{ item }">
+                <VChip
+                  v-if="item.property_id"
+                  size="small"
+                  :color="shouldSkipRow(item) ? 'secondary' : 'success'"
+                  variant="tonal"
+                >
+                  {{ item.property_id }}
+                </VChip>
+                <span
+                  v-else
+                  class="text-disabled"
+                >-</span>
               </template>
             </VDataTable>
           </VCard>
@@ -495,15 +576,18 @@ const previewHeaders = computed(() => [
                   size="20"
                 />
                 <h6 class="text-h6">
-                  {{ t('importPropertyDialog.instructions.title') }}
+                  {{ t('importUserDialog.instructions.title') }}
                 </h6>
               </div>
               <ul class="text-body-2">
-                <li>{{ t('importPropertyDialog.instructions.step1') }}</li>
-                <li>{{ t('importPropertyDialog.instructions.step2') }}</li>
-                <li>{{ t('importPropertyDialog.instructions.step3') }}</li>
-                <li>{{ t('importPropertyDialog.instructions.step4') }}</li>
-                <li>{{ t('importPropertyDialog.instructions.step5') }}</li>
+                <li>{{ t('importUserDialog.instructions.step1') }}</li>
+                <li>{{ t('importUserDialog.instructions.step2') }}</li>
+                <li>{{ t('importUserDialog.instructions.step3') }}</li>
+                <li>
+                  {{ t('importUserDialog.instructions.step4Prefix') }}
+                  <strong>{{ allowedRoles.join(', ') }}</strong>
+                </li>
+                <li>{{ t('importUserDialog.instructions.step5') }}</li>
               </ul>
             </VCardText>
           </VCard>
@@ -516,7 +600,7 @@ const previewHeaders = computed(() => [
               prepend-icon="tabler-download"
               @click="downloadTemplateFile"
             >
-              {{ t('importPropertyDialog.buttons.downloadTemplate') }}
+              {{ t('importUserDialog.buttons.downloadTemplate') }}
             </VBtn>
           </div>
 
@@ -548,10 +632,10 @@ const previewHeaders = computed(() => [
                 class="mb-4"
               />
               <h6 class="text-h6 mb-2">
-                {{ t('importPropertyDialog.upload.dropOrClick') }}
+                {{ t('importUserDialog.upload.dropOrClick') }}
               </h6>
               <p class="text-body-2 text-medium-emphasis">
-                {{ t('importPropertyDialog.upload.supportedFormat') }}
+                {{ t('importUserDialog.upload.supportedFormat') }}
               </p>
             </div>
 
@@ -578,7 +662,7 @@ const previewHeaders = computed(() => [
                 prepend-icon="tabler-x"
                 @click.stop="removeFile"
               >
-                {{ t('importPropertyDialog.buttons.removeFile') }}
+                {{ t('importUserDialog.buttons.removeFile') }}
               </VBtn>
             </div>
           </div>
@@ -599,7 +683,7 @@ const previewHeaders = computed(() => [
               block
               @click="showPreview ? cancelPreview() : closeDialog()"
             >
-              {{ showPreview ? t('importPropertyDialog.buttons.back') : (showResults ? t('importPropertyDialog.buttons.close') : t('importPropertyDialog.buttons.cancel')) }}
+              {{ showPreview ? t('importUserDialog.buttons.back') : (showResults ? t('importUserDialog.buttons.close') : t('importUserDialog.buttons.cancel')) }}
             </VBtn>
           </VCol>
           <VCol
@@ -616,7 +700,7 @@ const previewHeaders = computed(() => [
               block
               @click="previewCSV"
             >
-              {{ t('importPropertyDialog.buttons.previewData') }}
+              {{ t('importUserDialog.buttons.previewData') }}
             </VBtn>
 
             <!-- Confirm Import Button (when previewing) -->
@@ -630,7 +714,7 @@ const previewHeaders = computed(() => [
               block
               @click="confirmImport"
             >
-              {{ isImporting ? t('importPropertyDialog.buttons.importing') : t('importPropertyDialog.buttons.confirmImport') }}
+              {{ isImporting ? t('importUserDialog.buttons.importing') : t('importUserDialog.buttons.confirmImport') }}
             </VBtn>
 
             <!-- Close Button (when showing results) -->
@@ -642,7 +726,7 @@ const previewHeaders = computed(() => [
               block
               @click="closeDialog"
             >
-              {{ t('importPropertyDialog.buttons.done') }}
+              {{ t('importUserDialog.buttons.done') }}
             </VBtn>
           </VCol>
         </VRow>

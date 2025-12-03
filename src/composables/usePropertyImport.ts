@@ -5,6 +5,9 @@ export interface PropertyImportRow {
   name: string
   address: string
   community_id: string
+  _isDuplicate?: boolean
+  _duplicateReason?: string
+  _rowNumber?: number
 }
 
 export interface ImportResult {
@@ -12,6 +15,7 @@ export interface ImportResult {
   totalRows: number
   successCount: number
   errorCount: number
+  skippedCount: number
   errors: Array<{ row: number; data: any; error: string }>
 }
 
@@ -63,6 +67,7 @@ export const usePropertyImport = () => {
 
       // Validate that required fields are present
       if (property.name && property.address && property.community_id) {
+        property._rowNumber = i + 1 // Store row number for display
         properties.push(property)
       } else {
         console.warn(`Row ${i + 1} is missing required fields, skipping`)
@@ -73,7 +78,80 @@ export const usePropertyImport = () => {
   }
 
   /**
-   * Import properties from CSV content
+   * Check for duplicates against existing database records
+   */
+  const checkDuplicates = async (properties: PropertyImportRow[]): Promise<PropertyImportRow[]> => {
+    // Get all property IDs and names+community combinations to check
+    const idsToCheck = properties.filter(p => p.id).map(p => p.id!)
+    const nameCommunityPairs = properties.map(p => ({ name: p.name, community_id: p.community_id }))
+
+    // Fetch existing properties by ID
+    let existingByIds: Set<string> = new Set()
+    if (idsToCheck.length > 0) {
+      const { data: existingById } = await supabase
+        .from('property')
+        .select('id')
+        .in('id', idsToCheck)
+
+      if (existingById) {
+        existingByIds = new Set(existingById.map(p => p.id))
+      }
+    }
+
+    // Fetch existing properties by name+community combination
+    const communityIds = [...new Set(properties.map(p => p.community_id))]
+    const { data: existingByCommunity } = await supabase
+      .from('property')
+      .select('id, name, community_id')
+      .in('community_id', communityIds)
+
+    const existingNameCommunity = new Set(
+      (existingByCommunity || []).map(p => `${p.name.toLowerCase()}|${p.community_id}`)
+    )
+
+    // Also check for duplicates within the CSV file itself
+    const seenInFile = new Map<string, number>() // key -> first row number
+
+    // Mark duplicates
+    return properties.map(property => {
+      const nameCommunityKey = `${property.name.toLowerCase()}|${property.community_id}`
+
+      // Check if ID already exists in database
+      if (property.id && existingByIds.has(property.id)) {
+        return {
+          ...property,
+          _isDuplicate: true,
+          _duplicateReason: 'id_exists',
+        }
+      }
+
+      // Check if name+community already exists in database
+      if (existingNameCommunity.has(nameCommunityKey)) {
+        return {
+          ...property,
+          _isDuplicate: true,
+          _duplicateReason: 'name_community_exists',
+        }
+      }
+
+      // Check for duplicate within the CSV file
+      if (seenInFile.has(nameCommunityKey)) {
+        return {
+          ...property,
+          _isDuplicate: true,
+          _duplicateReason: 'duplicate_in_file',
+        }
+      }
+
+      // Mark as seen in file
+      seenInFile.set(nameCommunityKey, property._rowNumber || 0)
+
+      return property
+    })
+  }
+
+  /**
+   * Import properties from CSV content (skips duplicates)
    */
   const importFromCSV = async (csvContent: string): Promise<ImportResult> => {
     try {
@@ -86,64 +164,49 @@ export const usePropertyImport = () => {
         throw new Error('No valid properties found in CSV file')
       }
 
+      // Check for duplicates
+      const propertiesWithDuplicates = await checkDuplicates(properties)
+
       const result: ImportResult = {
         success: false,
         totalRows: properties.length,
         successCount: 0,
         errorCount: 0,
+        skippedCount: 0,
         errors: [],
       }
 
-      // Import each property
-      for (let i = 0; i < properties.length; i++) {
-        const property = properties[i]
+      // Import each property (skip duplicates)
+      for (let i = 0; i < propertiesWithDuplicates.length; i++) {
+        const property = propertiesWithDuplicates[i]
+
+        // Skip duplicates
+        if (property._isDuplicate) {
+          result.skippedCount++
+          continue
+        }
 
         try {
           // Generate ID if not provided
           const propertyId = property.id || crypto.randomUUID()
 
-          // Check if property already exists
-          const { data: existing, error: checkError } = await supabase
+          // Insert new property
+          const { error: insertError } = await supabase
             .from('property')
-            .select('id')
-            .eq('id', propertyId)
-            .single()
+            .insert({
+              id: propertyId,
+              name: property.name,
+              address: property.address,
+              community_id: property.community_id,
+            })
 
-          if (checkError && checkError.code !== 'PGRST116') {
-            throw checkError
-          }
-
-          if (existing) {
-            // Update existing property
-            const { error: updateError } = await supabase
-              .from('property')
-              .update({
-                name: property.name,
-                address: property.address,
-                community_id: property.community_id,
-              })
-              .eq('id', propertyId)
-
-            if (updateError) throw updateError
-          } else {
-            // Insert new property
-            const { error: insertError } = await supabase
-              .from('property')
-              .insert({
-                id: propertyId,
-                name: property.name,
-                address: property.address,
-                community_id: property.community_id,
-              })
-
-            if (insertError) throw insertError
-          }
+          if (insertError) throw insertError
 
           result.successCount++
         } catch (err: any) {
           result.errorCount++
           result.errors.push({
-            row: i + 2, // +2 because of header and 0-index
+            row: property._rowNumber || (i + 2),
             data: property,
             error: err.message || 'Unknown error',
           })
@@ -173,6 +236,7 @@ export const usePropertyImport = () => {
   return {
     isImporting,
     parseCSV,
+    checkDuplicates,
     importFromCSV,
     downloadTemplate,
   }
