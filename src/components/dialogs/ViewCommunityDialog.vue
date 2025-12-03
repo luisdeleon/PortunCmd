@@ -347,31 +347,15 @@ const creatorInitials = computed(() => {
           <!-- System Information -->
           <VCol cols="12">
             <VDivider class="my-4" />
-            <div class="d-flex align-center justify-space-between mb-4">
-              <div class="d-flex align-center gap-2">
-                <VIcon
-                  icon="tabler-clock"
-                  size="20"
-                  color="secondary"
-                />
-                <h6 class="text-h6 text-secondary">
-                  System Information
-                </h6>
-              </div>
-              <!-- Created By -->
-              <div class="d-flex flex-column gap-1 text-end">
-                <span class="text-sm text-disabled">Created By</span>
-                <div class="d-flex align-center gap-2 justify-end">
-                  <VAvatar
-                    size="24"
-                    color="primary"
-                    variant="tonal"
-                  >
-                    <span class="text-xs font-weight-medium">{{ creatorInitials }}</span>
-                  </VAvatar>
-                  <span class="text-body-1">{{ creatorName }}</span>
-                </div>
-              </div>
+            <div class="d-flex align-center gap-2 mb-4">
+              <VIcon
+                icon="tabler-clock"
+                size="20"
+                color="secondary"
+              />
+              <h6 class="text-h6 text-secondary">
+                System Information
+              </h6>
             </div>
           </VCol>
 
@@ -388,6 +372,26 @@ const creatorInitials = computed(() => {
                   size="20"
                 />
                 <span class="text-body-1">{{ formatDate(props.communityData.created_at) }}</span>
+              </div>
+            </div>
+          </VCol>
+
+          <!-- Created By -->
+          <VCol
+            cols="12"
+            sm="6"
+          >
+            <div class="d-flex flex-column gap-1">
+              <span class="text-sm text-disabled">Created By</span>
+              <div class="d-flex align-center gap-2">
+                <VAvatar
+                  size="24"
+                  color="primary"
+                  variant="tonal"
+                >
+                  <span class="text-xs font-weight-medium">{{ creatorInitials }}</span>
+                </VAvatar>
+                <span class="text-body-1">{{ creatorName }}</span>
               </div>
             </div>
           </VCol>
