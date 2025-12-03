@@ -1680,7 +1680,16 @@
       "parseError": "Failed to Parse CSV",
       "roleHierarchyViolation": "Role Hierarchy Violation",
       "roleHierarchyMessage": "{count} user(s) have roles above your permission level ({role}). These users will be skipped.",
-      "cannotCreateRole": "You cannot create users with this role"
+      "cannotCreateRole": "You cannot create users with this role",
+      "invalidIdsWarning": "Invalid IDs Detected",
+      "invalidCommunityCount": "{count} invalid community ID(s)",
+      "invalidPropertyCount": "{count} invalid property ID(s)",
+      "invalidIdsNote": "Users will still be imported, but these IDs will be skipped.",
+      "communityNotFound": "Community ID not found in database",
+      "propertyNotFound": "Property ID not found in database",
+      "unauthorizedCommunityWarning": "Unauthorized Community Access",
+      "unauthorizedCommunityMessage": "{count} user(s) are assigned to communities you don't have access to. These users will be skipped.",
+      "unauthorizedCommunity": "You don't have permission to create users in this community"
     },
     "buttons": {
       "downloadTemplate": "Download CSV Template",

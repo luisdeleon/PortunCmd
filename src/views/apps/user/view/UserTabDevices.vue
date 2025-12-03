@@ -463,7 +463,8 @@ onMounted(() => {
 </script>
 
 <template>
-  <VRow v-if="canManageDevices">
+  <div>
+    <VRow v-if="canManageDevices">
     <VCol cols="12">
       <VCard>
         <VCardText class="d-flex justify-space-between align-center flex-wrap gap-4">
@@ -1025,4 +1026,5 @@ onMounted(() => {
   >
     {{ snackbar.message }}
   </VSnackbar>
+  </div>
 </template>

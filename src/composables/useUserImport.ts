@@ -10,6 +10,9 @@ export interface UserImportRow {
   _isDuplicate?: boolean
   _duplicateReason?: string
   _isRoleViolation?: boolean
+  _isInvalidCommunity?: boolean
+  _isInvalidProperty?: boolean
+  _isUnauthorizedCommunity?: boolean
   _rowNumber?: number
 }
 
@@ -144,7 +147,7 @@ export const useUserImport = () => {
   }
 
   /**
-   * Check for duplicates against existing database records and role violations
+   * Check for duplicates against existing database records, role violations, and invalid IDs
    */
   const checkDuplicates = async (users: UserImportRow[]): Promise<UserImportRow[]> => {
     // Get all emails to check
@@ -160,10 +163,79 @@ export const useUserImport = () => {
       (existingUsers || []).map(u => u.email.toLowerCase())
     )
 
+    // Get all unique community IDs from the CSV
+    const communityIdsToCheck = [...new Set(users.map(u => u.community_id).filter(Boolean))] as string[]
+
+    // Fetch existing communities
+    let validCommunityIds = new Set<string>()
+    if (communityIdsToCheck.length > 0) {
+      const { data: existingCommunities } = await supabase
+        .from('community')
+        .select('id')
+        .in('id', communityIdsToCheck)
+
+      validCommunityIds = new Set((existingCommunities || []).map(c => c.id))
+    }
+
+    // Get current user's authorized communities (for Mega Dealer, Dealer, Administrator)
+    let authorizedCommunityIds = new Set<string>()
+    const currentRole = getCurrentUserRole()
+    const isSuperAdmin = currentRole === 'Super Admin'
+
+    if (!isSuperAdmin) {
+      // Get current user's profile_role to check their scope_community_ids
+      const { data: sessionData } = await supabase.auth.getSession()
+      if (sessionData?.session?.user?.id) {
+        const { data: profileRole } = await supabase
+          .from('profile_role')
+          .select('scope_type, scope_community_ids')
+          .eq('profile_id', sessionData.session.user.id)
+          .single()
+
+        if (profileRole) {
+          // If global scope, user can access all communities
+          if (profileRole.scope_type === 'global') {
+            // Mark all valid communities as authorized
+            authorizedCommunityIds = new Set(validCommunityIds)
+          } else if (profileRole.scope_community_ids && profileRole.scope_community_ids.length > 0) {
+            // User can only access their assigned communities
+            authorizedCommunityIds = new Set(profileRole.scope_community_ids)
+          }
+        }
+      }
+    } else {
+      // Super Admin can access all communities
+      authorizedCommunityIds = new Set(validCommunityIds)
+    }
+
+    // Get all unique property IDs from the CSV (both as-is and with community prefix)
+    const propertyIdsToCheck = [...new Set(users.map(u => u.property_id).filter(Boolean))] as string[]
+
+    // Also generate prefixed versions for property IDs
+    const allPropertyIdsToCheck = new Set<string>()
+    propertyIdsToCheck.forEach(pid => {
+      allPropertyIdsToCheck.add(pid)
+      // Also add prefixed versions with each community
+      communityIdsToCheck.forEach(cid => {
+        allPropertyIdsToCheck.add(`${cid}-${pid}`)
+      })
+    })
+
+    // Fetch existing properties
+    let validPropertyIds = new Set<string>()
+    if (allPropertyIdsToCheck.size > 0) {
+      const { data: existingProperties } = await supabase
+        .from('property')
+        .select('id')
+        .in('id', [...allPropertyIdsToCheck])
+
+      validPropertyIds = new Set((existingProperties || []).map(p => p.id))
+    }
+
     // Check for duplicates within the CSV file itself
     const seenInFile = new Map<string, number>() // email -> first row number
 
-    // Mark duplicates and role violations
+    // Mark duplicates, role violations, and invalid IDs
     return users.map(user => {
       const emailKey = user.email.toLowerCase()
       let isDuplicate = false
@@ -184,11 +256,33 @@ export const useUserImport = () => {
         seenInFile.set(emailKey, user._rowNumber || 0)
       }
 
+      // Check if community ID is valid (exists in database)
+      const isInvalidCommunity = user.community_id ? !validCommunityIds.has(user.community_id) : false
+
+      // Check if user is authorized to create users in this community
+      // Only check if community is valid and user is not Super Admin
+      const isUnauthorizedCommunity = user.community_id && !isInvalidCommunity
+        ? !authorizedCommunityIds.has(user.community_id)
+        : false
+
+      // Check if property ID is valid (try both as-is and with community prefix)
+      let isInvalidProperty = false
+      if (user.property_id) {
+        const propertyIdAsIs = validPropertyIds.has(user.property_id)
+        const propertyIdWithPrefix = user.community_id
+          ? validPropertyIds.has(`${user.community_id}-${user.property_id}`)
+          : false
+        isInvalidProperty = !propertyIdAsIs && !propertyIdWithPrefix
+      }
+
       return {
         ...user,
         _isDuplicate: isDuplicate,
         _duplicateReason: duplicateReason || undefined,
         _isRoleViolation: isRoleViolation,
+        _isInvalidCommunity: isInvalidCommunity,
+        _isInvalidProperty: isInvalidProperty,
+        _isUnauthorizedCommunity: isUnauthorizedCommunity,
       }
     })
   }

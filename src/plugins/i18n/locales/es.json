@@ -1207,6 +1207,8 @@
     "tabs": {
       "account": "Cuenta",
       "security": "Seguridad",
+      "community": "Comunidad",
+      "property": "Propiedad",
       "billingPlan": "Facturación y Plan",
       "notifications": "Notificaciones",
       "connections": "Conexiones"
@@ -1889,7 +1891,16 @@
       "parseError": "Error al Analizar CSV",
       "roleHierarchyViolation": "Violación de Jerarquía de Roles",
       "roleHierarchyMessage": "{count} usuario(s) tienen roles por encima de tu nivel de permiso ({role}). Estos usuarios serán omitidos.",
-      "cannotCreateRole": "No puedes crear usuarios con este rol"
+      "cannotCreateRole": "No puedes crear usuarios con este rol",
+      "invalidIdsWarning": "IDs Inválidos Detectados",
+      "invalidCommunityCount": "{count} ID(s) de comunidad inválido(s)",
+      "invalidPropertyCount": "{count} ID(s) de propiedad inválido(s)",
+      "invalidIdsNote": "Los usuarios se importarán, pero estos IDs serán omitidos.",
+      "communityNotFound": "ID de comunidad no encontrado en la base de datos",
+      "propertyNotFound": "ID de propiedad no encontrado en la base de datos",
+      "unauthorizedCommunityWarning": "Acceso a Comunidad No Autorizado",
+      "unauthorizedCommunityMessage": "{count} usuario(s) están asignados a comunidades a las que no tienes acceso. Estos usuarios serán omitidos.",
+      "unauthorizedCommunity": "No tienes permiso para crear usuarios en esta comunidad"
     },
     "buttons": {
       "downloadTemplate": "Descargar Plantilla CSV",

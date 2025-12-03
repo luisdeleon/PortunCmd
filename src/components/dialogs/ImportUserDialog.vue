@@ -136,9 +136,17 @@ const duplicateCount = computed(() => {
   return previewData.value.filter(u => u._isDuplicate).length
 })
 
-// Count importable items (non-duplicates and non-role-violations)
+// Count unauthorized community attempts
+const unauthorizedCommunityCount = computed(() => {
+  return previewData.value.filter(u => u._isUnauthorizedCommunity).length
+})
+
+// Check if there are unauthorized community attempts
+const hasUnauthorizedCommunities = computed(() => unauthorizedCommunityCount.value > 0)
+
+// Count importable items (non-duplicates, non-role-violations, non-unauthorized)
 const importableCount = computed(() => {
-  return previewData.value.filter(u => !u._isDuplicate && !u._isRoleViolation).length
+  return previewData.value.filter(u => !u._isDuplicate && !u._isRoleViolation && !u._isUnauthorizedCommunity).length
 })
 
 // Check if there are any duplicates
@@ -204,9 +212,9 @@ const downloadTemplateFile = () => {
   downloadTemplate()
 }
 
-// Check if a row should be skipped (duplicate or role violation)
+// Check if a row should be skipped (duplicate, role violation, or unauthorized community)
 const shouldSkipRow = (user: UserImportRow) => {
-  return user._isDuplicate || user._isRoleViolation
+  return user._isDuplicate || user._isRoleViolation || user._isUnauthorizedCommunity
 }
 
 // Get skip reason for a row
@@ -216,6 +224,9 @@ const getSkipReason = (user: UserImportRow) => {
   }
   if (user._isRoleViolation) {
     return t('importUserDialog.errors.cannotCreateRole')
+  }
+  if (user._isUnauthorizedCommunity) {
+    return t('importUserDialog.errors.unauthorizedCommunity')
   }
   return ''
 }
@@ -248,6 +259,19 @@ const roleViolationCount = computed(() => {
 
 // Check if there are any role violations in the preview data
 const hasRoleViolations = computed(() => roleViolationCount.value > 0)
+
+// Count how many rows have invalid community IDs
+const invalidCommunityCount = computed(() => {
+  return previewData.value.filter(user => user._isInvalidCommunity).length
+})
+
+// Count how many rows have invalid property IDs
+const invalidPropertyCount = computed(() => {
+  return previewData.value.filter(user => user._isInvalidProperty).length
+})
+
+// Check if there are any invalid IDs in the preview data
+const hasInvalidIds = computed(() => invalidCommunityCount.value > 0 || invalidPropertyCount.value > 0)
 
 // Data table headers for preview
 const previewHeaders = computed(() => [
@@ -415,6 +439,54 @@ const previewHeaders = computed(() => [
             </div>
           </VAlert>
 
+          <!-- Invalid IDs Warning -->
+          <VAlert
+            v-if="hasInvalidIds"
+            color="warning"
+            variant="tonal"
+            class="mb-4"
+          >
+            <VAlertTitle class="mb-2">
+              <VIcon
+                icon="tabler-alert-triangle"
+                size="20"
+                class="me-2"
+              />
+              {{ t('importUserDialog.errors.invalidIdsWarning') }}
+            </VAlertTitle>
+            <div class="text-body-2">
+              <span v-if="invalidCommunityCount > 0">
+                {{ t('importUserDialog.errors.invalidCommunityCount', { count: invalidCommunityCount }) }}
+              </span>
+              <span v-if="invalidCommunityCount > 0 && invalidPropertyCount > 0"> · </span>
+              <span v-if="invalidPropertyCount > 0">
+                {{ t('importUserDialog.errors.invalidPropertyCount', { count: invalidPropertyCount }) }}
+              </span>
+              <br>
+              <span class="text-caption">{{ t('importUserDialog.errors.invalidIdsNote') }}</span>
+            </div>
+          </VAlert>
+
+          <!-- Unauthorized Community Warning -->
+          <VAlert
+            v-if="hasUnauthorizedCommunities"
+            color="error"
+            variant="tonal"
+            class="mb-4"
+          >
+            <VAlertTitle class="mb-2">
+              <VIcon
+                icon="tabler-lock"
+                size="20"
+                class="me-2"
+              />
+              {{ t('importUserDialog.errors.unauthorizedCommunityWarning') }}
+            </VAlertTitle>
+            <div class="text-body-2">
+              {{ t('importUserDialog.errors.unauthorizedCommunityMessage', { count: unauthorizedCommunityCount }) }}
+            </div>
+          </VAlert>
+
           <VCard
             variant="tonal"
             color="info"
@@ -428,7 +500,7 @@ const previewHeaders = computed(() => [
                 />
                 <div class="text-body-2">
                   <strong>{{ importableCount }}</strong> {{ importableCount === 1 ? t('common.user') : t('common.users') }} {{ t('importUserDialog.preview.willBeImported') }}.
-                  <span v-if="hasDuplicates || hasRoleViolations" class="text-warning">
+                  <span v-if="hasDuplicates || hasRoleViolations || hasUnauthorizedCommunities" class="text-warning">
                     {{ t('importUserDialog.duplicates.skipped', { count: previewData.length - importableCount }) }}
                   </span>
                 </div>
@@ -539,32 +611,96 @@ const previewHeaders = computed(() => [
 
               <!-- Community ID -->
               <template #item.community_id="{ item }">
-                <VChip
-                  v-if="item.community_id"
-                  size="small"
-                  :color="shouldSkipRow(item) ? 'secondary' : 'primary'"
-                  variant="tonal"
-                >
-                  {{ item.community_id }}
-                </VChip>
+                <div class="d-flex align-center gap-1">
+                  <VChip
+                    v-if="item.community_id"
+                    size="small"
+                    :color="item._isUnauthorizedCommunity ? 'error' : (shouldSkipRow(item) ? 'secondary' : (item._isInvalidCommunity ? 'warning' : 'primary'))"
+                    variant="tonal"
+                  >
+                    <VIcon
+                      v-if="item._isUnauthorizedCommunity"
+                      icon="tabler-lock"
+                      size="14"
+                      class="me-1"
+                    />
+                    <VIcon
+                      v-else-if="item._isInvalidCommunity && !shouldSkipRow(item)"
+                      icon="tabler-alert-triangle"
+                      size="14"
+                      class="me-1"
+                    />
+                    {{ item.community_id }}
+                  </VChip>
+                  <VTooltip
+                    v-if="item._isUnauthorizedCommunity"
+                    location="top"
+                  >
+                    <template #activator="{ props: tooltipProps }">
+                      <VIcon
+                        v-bind="tooltipProps"
+                        icon="tabler-info-circle"
+                        size="16"
+                        color="error"
+                      />
+                    </template>
+                    <span>{{ t('importUserDialog.errors.unauthorizedCommunity') }}</span>
+                  </VTooltip>
+                  <VTooltip
+                    v-else-if="item._isInvalidCommunity && !shouldSkipRow(item)"
+                    location="top"
+                  >
+                    <template #activator="{ props: tooltipProps }">
+                      <VIcon
+                        v-bind="tooltipProps"
+                        icon="tabler-info-circle"
+                        size="16"
+                        color="warning"
+                      />
+                    </template>
+                    <span>{{ t('importUserDialog.errors.communityNotFound') }}</span>
+                  </VTooltip>
+                </div>
                 <span
-                  v-else
+                  v-if="!item.community_id"
                   class="text-disabled"
                 >-</span>
               </template>
 
               <!-- Property ID -->
               <template #item.property_id="{ item }">
-                <VChip
-                  v-if="item.property_id"
-                  size="small"
-                  :color="shouldSkipRow(item) ? 'secondary' : 'success'"
-                  variant="tonal"
-                >
-                  {{ item.property_id }}
-                </VChip>
+                <div class="d-flex align-center gap-1">
+                  <VChip
+                    v-if="item.property_id"
+                    size="small"
+                    :color="shouldSkipRow(item) ? 'secondary' : (item._isInvalidProperty ? 'warning' : 'success')"
+                    variant="tonal"
+                  >
+                    <VIcon
+                      v-if="item._isInvalidProperty && !shouldSkipRow(item)"
+                      icon="tabler-alert-triangle"
+                      size="14"
+                      class="me-1"
+                    />
+                    {{ item.property_id }}
+                  </VChip>
+                  <VTooltip
+                    v-if="item._isInvalidProperty && !shouldSkipRow(item)"
+                    location="top"
+                  >
+                    <template #activator="{ props: tooltipProps }">
+                      <VIcon
+                        v-bind="tooltipProps"
+                        icon="tabler-info-circle"
+                        size="16"
+                        color="warning"
+                      />
+                    </template>
+                    <span>{{ t('importUserDialog.errors.propertyNotFound') }}</span>
+                  </VTooltip>
+                </div>
                 <span
-                  v-else
+                  v-if="!item.property_id"
                   class="text-disabled"
                 >-</span>
               </template>

@@ -530,7 +530,9 @@ const isAssignRoleDialogVisible = ref(false)
 const isImportDialogVisible = ref(false)
 const selectedUserForRole = ref<string | null>(null)
 const isDeleteDialogVisible = ref(false)
+const isDeleting = ref(false)
 const isBulkDeleteDialogVisible = ref(false)
+const isBulkDeleting = ref(false)
 const isBulkStatusUpdateDialogVisible = ref(false)
 const isStatusChangeDialogVisible = ref(false)
 const selectedUser = ref<any>(null)
@@ -625,6 +627,7 @@ const deleteUser = async () => {
   if (!userToDelete.value) return
 
   const { id, name } = userToDelete.value
+  isDeleting.value = true
 
   try {
     // First check if user has related records that might block deletion
@@ -717,6 +720,8 @@ const deleteUser = async () => {
     }
     isDeleteDialogVisible.value = false
     userToDelete.value = null
+  } finally {
+    isDeleting.value = false
   }
 }
 
@@ -757,6 +762,7 @@ const bulkDeleteUsers = async () => {
   if (selectedRows.value.length === 0) return
 
   const totalToDelete = selectedRows.value.length
+  isBulkDeleting.value = true
 
   try {
     let successCount = 0
@@ -843,6 +849,8 @@ const bulkDeleteUsers = async () => {
     }
 
     isBulkDeleteDialogVisible.value = false
+  } finally {
+    isBulkDeleting.value = false
   }
 }
 
@@ -1548,6 +1556,7 @@ const widgetData = computed(() => {
             <VBtn
               color="error"
               variant="elevated"
+              :loading="isDeleting"
               @click="deleteUser"
             >
               {{ $t('userList.deleteDialog.confirm') }}
@@ -1605,6 +1614,7 @@ const widgetData = computed(() => {
             <VBtn
               color="error"
               variant="elevated"
+              :loading="isBulkDeleting"
               @click="bulkDeleteUsers"
             >
               Delete All
