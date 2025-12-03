@@ -411,7 +411,7 @@ const creatorInitials = computed(() => {
               <span class="text-sm text-disabled">Last Updated</span>
               <div class="d-flex align-center gap-2">
                 <VIcon
-                  icon="tabler-calendar-event"
+                  icon="tabler-calendar-repeat"
                   size="20"
                 />
                 <span class="text-body-1">{{ formatDate(props.communityData.updated_at) }}</span>
