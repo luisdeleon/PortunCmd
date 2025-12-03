@@ -7,17 +7,48 @@ const ONESIGNAL_API_KEY = "MTRhNjA0NGQtYTVkOC00OGUyLWFjOGEtNTM2MjJjZmJkMmYx"
 
 interface EntryPayload {
   visitor_name: string
-  property_name?: string
+  property_address?: string
+  gate_name?: string
   property_id?: string
   host_id?: string
   record_uid?: string
   player_ids?: string[]
 }
 
+// Build notification message: "[name] has arrived to [property_address] via [gate_name]"
+function buildEntryMessage(visitor_name: string, property_address?: string, gate_name?: string, lang: string = 'en'): string {
+  const messages: Record<string, Record<string, string>> = {
+    en: {
+      base: `${visitor_name} has arrived`,
+      withGate: `${visitor_name} has arrived via ${gate_name}`,
+      withAddress: `${visitor_name} has arrived to ${property_address}`,
+      withBoth: `${visitor_name} has arrived to ${property_address} via ${gate_name}`,
+    },
+    es: {
+      base: `${visitor_name} ha llegado`,
+      withGate: `${visitor_name} ha llegado por ${gate_name}`,
+      withAddress: `${visitor_name} ha llegado a ${property_address}`,
+      withBoth: `${visitor_name} ha llegado a ${property_address} por ${gate_name}`,
+    },
+    pt: {
+      base: `${visitor_name} chegou`,
+      withGate: `${visitor_name} chegou por ${gate_name}`,
+      withAddress: `${visitor_name} chegou em ${property_address}`,
+      withBoth: `${visitor_name} chegou em ${property_address} por ${gate_name}`,
+    }
+  }
+
+  const m = messages[lang] || messages.en
+  if (gate_name && property_address) return m.withBoth
+  if (gate_name) return m.withGate
+  if (property_address) return m.withAddress
+  return m.base
+}
+
 serve(async (req) => {
   try {
     const payload: EntryPayload = await req.json()
-    const { visitor_name, property_name, player_ids } = payload
+    const { visitor_name, property_address, gate_name, player_ids } = payload
 
     // Log received payload for debugging
     console.log("=== ONESIGNAL ENTRY NOTIFICATION ===")
@@ -42,9 +73,9 @@ serve(async (req) => {
         pt: "🔔 Chegada de Visitante"
       },
       contents: {
-        en: property_name ? `${visitor_name} has arrived to ${property_name}` : `${visitor_name} has arrived`,
-        es: property_name ? `${visitor_name} ha llegado a ${property_name}` : `${visitor_name} ha llegado`,
-        pt: property_name ? `${visitor_name} chegou a ${property_name}` : `${visitor_name} chegou`
+        en: buildEntryMessage(visitor_name, property_address, gate_name, 'en'),
+        es: buildEntryMessage(visitor_name, property_address, gate_name, 'es'),
+        pt: buildEntryMessage(visitor_name, property_address, gate_name, 'pt'),
       },
     }
 

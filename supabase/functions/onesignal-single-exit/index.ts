@@ -8,16 +8,47 @@ const ONESIGNAL_API_KEY = "MTRhNjA0NGQtYTVkOC00OGUyLWFjOGEtNTM2MjJjZmJkMmYx"
 interface ExitPayload {
   visitor_name: string
   community_name?: string
+  gate_name?: string
   property_id?: string
   host_id?: string
   record_uid?: string
   player_ids?: string[]
 }
 
+// Build notification message: "[name] has left [community_name] via [gate_name]"
+function buildExitMessage(visitor_name: string, community_name?: string, gate_name?: string, lang: string = 'en'): string {
+  const messages: Record<string, Record<string, string>> = {
+    en: {
+      base: `${visitor_name} has left`,
+      withGate: `${visitor_name} has left via ${gate_name}`,
+      withCommunity: `${visitor_name} has left ${community_name}`,
+      withBoth: `${visitor_name} has left ${community_name} via ${gate_name}`,
+    },
+    es: {
+      base: `${visitor_name} se ha retirado`,
+      withGate: `${visitor_name} se ha retirado por ${gate_name}`,
+      withCommunity: `${visitor_name} se ha retirado de ${community_name}`,
+      withBoth: `${visitor_name} se ha retirado de ${community_name} por ${gate_name}`,
+    },
+    pt: {
+      base: `${visitor_name} foi embora`,
+      withGate: `${visitor_name} foi embora por ${gate_name}`,
+      withCommunity: `${visitor_name} foi embora de ${community_name}`,
+      withBoth: `${visitor_name} foi embora de ${community_name} por ${gate_name}`,
+    }
+  }
+
+  const m = messages[lang] || messages.en
+  if (gate_name && community_name) return m.withBoth
+  if (gate_name) return m.withGate
+  if (community_name) return m.withCommunity
+  return m.base
+}
+
 serve(async (req) => {
   try {
     const payload: ExitPayload = await req.json()
-    const { visitor_name, community_name, player_ids } = payload
+    const { visitor_name, community_name, gate_name, player_ids } = payload
 
     // Log received payload for debugging
     console.log("=== ONESIGNAL EXIT NOTIFICATION ===")
@@ -42,9 +73,9 @@ serve(async (req) => {
         pt: "👋 Saída de Visitante"
       },
       contents: {
-        en: community_name ? `${visitor_name} has left ${community_name}` : `${visitor_name} has left`,
-        es: community_name ? `${visitor_name} se ha retirado de ${community_name}` : `${visitor_name} se ha retirado`,
-        pt: community_name ? `${visitor_name} foi embora de ${community_name}` : `${visitor_name} foi embora`
+        en: buildExitMessage(visitor_name, community_name, gate_name, 'en'),
+        es: buildExitMessage(visitor_name, community_name, gate_name, 'es'),
+        pt: buildExitMessage(visitor_name, community_name, gate_name, 'pt'),
       },
     }
 
