@@ -196,6 +196,15 @@
       "bulkStatusPartial": "Se actualizaron {success} {entity}, {failed} fallaron",
       "fetchFailed": "Error al cargar las comunidades"
     },
+    "deleteError": {
+      "generic": "Error al eliminar la comunidad",
+      "hasAutomationDevices": "No se puede eliminar esta comunidad porque tiene dispositivos de automatización (puertas/accesos). Por favor elimine los dispositivos primero.",
+      "hasProperties": "No se puede eliminar esta comunidad porque tiene propiedades asignadas. Por favor elimine las propiedades primero.",
+      "hasManagers": "No se puede eliminar esta comunidad porque tiene administradores asignados. Por favor elimine los administradores primero.",
+      "hasVisitorRecords": "No se puede eliminar esta comunidad porque tiene registros de visitantes. Por favor archive o elimine los registros primero.",
+      "hasRelatedRecords": "No se puede eliminar esta comunidad porque tiene registros relacionados. Por favor elimine los datos relacionados primero.",
+      "noPermission": "No tiene permiso para eliminar esta comunidad"
+    },
     "drawer": {
       "addTitle": "Agregar Comunidad",
       "editTitle": "Editar Comunidad",

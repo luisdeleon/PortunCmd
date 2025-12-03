@@ -196,6 +196,15 @@
       "bulkStatusPartial": "Atualizados {success} {entity}, {failed} falharam",
       "fetchFailed": "Falha ao carregar comunidades"
     },
+    "deleteError": {
+      "generic": "Falha ao excluir comunidade",
+      "hasAutomationDevices": "Não é possível excluir esta comunidade porque possui dispositivos de automação (portões/acessos). Por favor remova os dispositivos primeiro.",
+      "hasProperties": "Não é possível excluir esta comunidade porque possui propriedades atribuídas. Por favor remova as propriedades primeiro.",
+      "hasManagers": "Não é possível excluir esta comunidade porque possui gerentes atribuídos. Por favor remova os gerentes primeiro.",
+      "hasVisitorRecords": "Não é possível excluir esta comunidade porque possui registros de visitantes. Por favor arquive ou remova os registros primeiro.",
+      "hasRelatedRecords": "Não é possível excluir esta comunidade porque possui registros relacionados. Por favor remova os dados relacionados primeiro.",
+      "noPermission": "Você não tem permissão para excluir esta comunidade"
+    },
     "drawer": {
       "addTitle": "Adicionar Comunidade",
       "editTitle": "Editar Comunidade",

@@ -377,11 +377,23 @@ const deleteCommunity = async () => {
     if (error) {
       console.error('Error deleting community:', error)
 
-      let errorMessage = 'Failed to delete community'
+      let errorMessage = t('communityList.deleteError.generic')
       if (error.code === '23503') {
-        errorMessage = 'Cannot delete this community because it has related properties or records'
+        // Parse the error details to show which table is blocking
+        const details = error.details || ''
+        if (details.includes('automation_devices')) {
+          errorMessage = t('communityList.deleteError.hasAutomationDevices')
+        } else if (details.includes('property')) {
+          errorMessage = t('communityList.deleteError.hasProperties')
+        } else if (details.includes('community_manager')) {
+          errorMessage = t('communityList.deleteError.hasManagers')
+        } else if (details.includes('visitor_records')) {
+          errorMessage = t('communityList.deleteError.hasVisitorRecords')
+        } else {
+          errorMessage = t('communityList.deleteError.hasRelatedRecords')
+        }
       } else if (error.code === 'PGRST116') {
-        errorMessage = 'You don\'t have permission to delete this community'
+        errorMessage = t('communityList.deleteError.noPermission')
       }
 
       snackbar.value = {

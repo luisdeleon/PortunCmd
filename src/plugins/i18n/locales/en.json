@@ -470,6 +470,15 @@
       "bulkStatusSuccess": "Successfully updated status for {count} {entity}",
       "bulkStatusFailed": "Failed to update status for {count} {entity}",
       "bulkStatusPartial": "Updated {success} {entity}, {failed} failed"
+    },
+    "deleteError": {
+      "generic": "Failed to delete community",
+      "hasAutomationDevices": "Cannot delete this community because it has automation devices (gates/access points). Please remove the devices first.",
+      "hasProperties": "Cannot delete this community because it has properties assigned. Please remove the properties first.",
+      "hasManagers": "Cannot delete this community because it has managers assigned. Please remove the managers first.",
+      "hasVisitorRecords": "Cannot delete this community because it has visitor records. Please archive or remove the records first.",
+      "hasRelatedRecords": "Cannot delete this community because it has related records. Please remove the related data first.",
+      "noPermission": "You don't have permission to delete this community"
     }
   },
 
