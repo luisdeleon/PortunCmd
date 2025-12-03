@@ -419,6 +419,19 @@ const previewHeaders = computed(() => [
                     {{ item.id }}
                   </VChip>
                   <VChip
+                    v-else-if="item._generatedId"
+                    size="small"
+                    :color="item._isDuplicate ? 'secondary' : 'info'"
+                    variant="tonal"
+                  >
+                    <VIcon
+                      icon="tabler-sparkles"
+                      size="12"
+                      class="me-1"
+                    />
+                    {{ item._generatedId }}
+                  </VChip>
+                  <VChip
                     v-else
                     size="small"
                     color="secondary"

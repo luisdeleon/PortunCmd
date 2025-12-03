@@ -8,6 +8,7 @@ export interface PropertyImportRow {
   _isDuplicate?: boolean
   _duplicateReason?: string
   _rowNumber?: number
+  _generatedId?: string
 }
 
 export interface ImportResult {
@@ -21,6 +22,71 @@ export interface ImportResult {
 
 export const usePropertyImport = () => {
   const isImporting = ref(false)
+
+  /**
+   * Generate a 3-character code from property name (same logic as AddEditPropertyDialog)
+   */
+  const generateCodeFromName = (name: string | null | undefined): string => {
+    if (!name || !name.trim()) return ''
+
+    // Remove special characters, accents, and normalize
+    const cleanName = name
+      .normalize('NFD')
+      .replace(/[\u0300-\u036f]/g, '') // Remove accents
+      .toUpperCase()
+      .replace(/[^A-Z0-9\s]/g, '') // Keep only letters, numbers and spaces
+      .trim()
+
+    // Check if it starts with numbers (like "101", "25A")
+    const numberMatch = cleanName.match(/^(\d+)/)
+    if (numberMatch) {
+      // Pad number to 3 digits or take first 3 chars if longer
+      const num = numberMatch[1]
+      if (num.length >= 3) return num.slice(0, 3)
+      return num.padStart(3, '0')
+    }
+
+    const words = cleanName.split(/\s+/).filter(w => w.length > 0)
+
+    if (words.length === 0) return ''
+
+    let letters = ''
+
+    if (words.length === 1) {
+      // Single word: take first 3 characters
+      letters = words[0].slice(0, 3)
+    } else if (words.length === 2) {
+      // Two words: take first 2 chars from first, first 1 from second
+      letters = words[0].slice(0, 2) + words[1].slice(0, 1)
+    } else {
+      // Three or more words: take first character from each of first 3 words
+      letters = words.slice(0, 3).map(w => w[0]).join('')
+    }
+
+    // Pad with additional letters if less than 3
+    while (letters.length < 3) {
+      for (const word of words) {
+        if (letters.length >= 3) break
+        for (let i = 0; i < word.length && letters.length < 3; i++) {
+          if (!letters.includes(word[i]) || letters.length < 3) {
+            letters += word[i]
+          }
+        }
+      }
+      if (letters.length < 3) letters += 'X'
+    }
+
+    return letters.slice(0, 3)
+  }
+
+  /**
+   * Generate property ID: CommunityID-PropertyCode
+   */
+  const generatePropertyId = (communityId: string, propertyName: string): string => {
+    const code = generateCodeFromName(propertyName)
+    if (!communityId || !code) return ''
+    return `${communityId.toUpperCase()}-${code}`
+  }
 
   /**
    * Parse CSV file content
@@ -81,17 +147,24 @@ export const usePropertyImport = () => {
    * Check for duplicates against existing database records
    */
   const checkDuplicates = async (properties: PropertyImportRow[]): Promise<PropertyImportRow[]> => {
-    // Get all property IDs and names+community combinations to check
-    const idsToCheck = properties.filter(p => p.id).map(p => p.id!)
-    const nameCommunityPairs = properties.map(p => ({ name: p.name, community_id: p.community_id }))
+    // Generate IDs for properties that don't have one (for preview and duplicate checking)
+    const propertiesWithGeneratedIds = properties.map(p => ({
+      ...p,
+      _generatedId: p.id || generatePropertyId(p.community_id, p.name),
+    }))
+
+    // Get all property IDs to check (both provided and generated)
+    const allIdsToCheck = propertiesWithGeneratedIds
+      .map(p => p.id || p._generatedId)
+      .filter((id): id is string => !!id)
 
     // Fetch existing properties by ID
     let existingByIds: Set<string> = new Set()
-    if (idsToCheck.length > 0) {
+    if (allIdsToCheck.length > 0) {
       const { data: existingById } = await supabase
         .from('property')
         .select('id')
-        .in('id', idsToCheck)
+        .in('id', allIdsToCheck)
 
       if (existingById) {
         existingByIds = new Set(existingById.map(p => p.id))
@@ -111,13 +184,24 @@ export const usePropertyImport = () => {
 
     // Also check for duplicates within the CSV file itself
     const seenInFile = new Map<string, number>() // key -> first row number
+    const seenIdsInFile = new Map<string, number>() // generated id -> first row number
 
     // Mark duplicates
-    return properties.map(property => {
+    return propertiesWithGeneratedIds.map(property => {
       const nameCommunityKey = `${property.name.toLowerCase()}|${property.community_id}`
+      const effectiveId = property.id || property._generatedId
 
-      // Check if ID already exists in database
+      // Check if provided ID already exists in database
       if (property.id && existingByIds.has(property.id)) {
+        return {
+          ...property,
+          _isDuplicate: true,
+          _duplicateReason: 'id_exists',
+        }
+      }
+
+      // Check if generated ID already exists in database (only if no ID was provided)
+      if (!property.id && property._generatedId && existingByIds.has(property._generatedId)) {
         return {
           ...property,
           _isDuplicate: true,
@@ -134,8 +218,17 @@ export const usePropertyImport = () => {
         }
       }
 
-      // Check for duplicate within the CSV file
+      // Check for duplicate within the CSV file by name+community
       if (seenInFile.has(nameCommunityKey)) {
+        return {
+          ...property,
+          _isDuplicate: true,
+          _duplicateReason: 'duplicate_in_file',
+        }
+      }
+
+      // Check for duplicate generated ID within the CSV file
+      if (effectiveId && seenIdsInFile.has(effectiveId)) {
         return {
           ...property,
           _isDuplicate: true,
@@ -145,6 +238,9 @@ export const usePropertyImport = () => {
 
       // Mark as seen in file
       seenInFile.set(nameCommunityKey, property._rowNumber || 0)
+      if (effectiveId) {
+        seenIdsInFile.set(effectiveId, property._rowNumber || 0)
+      }
 
       return property
     })
@@ -187,8 +283,8 @@ export const usePropertyImport = () => {
         }
 
         try {
-          // Generate ID if not provided
-          const propertyId = property.id || crypto.randomUUID()
+          // Use the generated ID or provided ID
+          const propertyId = property.id || property._generatedId || crypto.randomUUID()
 
           // Insert new property
           const { error: insertError } = await supabase
