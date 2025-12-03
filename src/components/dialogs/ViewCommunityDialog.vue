@@ -359,23 +359,6 @@ const creatorInitials = computed(() => {
             </div>
           </VCol>
 
-          <!-- Created At -->
-          <VCol
-            cols="12"
-            sm="6"
-          >
-            <div class="d-flex flex-column gap-1">
-              <span class="text-sm text-disabled">Created At</span>
-              <div class="d-flex align-center gap-2">
-                <VIcon
-                  icon="tabler-calendar-plus"
-                  size="20"
-                />
-                <span class="text-body-1">{{ formatDate(props.communityData.created_at) }}</span>
-              </div>
-            </div>
-          </VCol>
-
           <!-- Created By -->
           <VCol
             cols="12"
@@ -395,6 +378,29 @@ const creatorInitials = computed(() => {
               </div>
             </div>
           </VCol>
+
+          <!-- Created At -->
+          <VCol
+            cols="12"
+            sm="6"
+          >
+            <div class="d-flex flex-column gap-1">
+              <span class="text-sm text-disabled">Created At</span>
+              <div class="d-flex align-center gap-2">
+                <VIcon
+                  icon="tabler-calendar-plus"
+                  size="20"
+                />
+                <span class="text-body-1">{{ formatDate(props.communityData.created_at) }}</span>
+              </div>
+            </div>
+          </VCol>
+
+          <!-- Empty spacer for alignment -->
+          <VCol
+            cols="12"
+            sm="6"
+          />
 
           <!-- Updated At -->
           <VCol
