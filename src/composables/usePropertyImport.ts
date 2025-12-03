@@ -48,12 +48,16 @@ export const usePropertyImport = () => {
   }
 
   /**
-   * Ensure property code is at least 3 characters (pad with random if shorter)
+   * Ensure property code is exactly 3 characters (pad or truncate as needed)
    */
   const normalizePropertyCode = (code: string): string => {
     const normalized = code.toUpperCase().replace(/[^A-Z0-9]/g, '')
-    if (normalized.length >= 3) {
+    if (normalized.length === 3) {
       return normalized
+    }
+    if (normalized.length > 3) {
+      // Truncate to 3 characters
+      return normalized.slice(0, 3)
     }
     // Pad with random characters to reach 3
     return normalized + generateRandomChars(3 - normalized.length)
@@ -215,106 +219,116 @@ export const usePropertyImport = () => {
   }
 
   /**
-   * Check for duplicates against existing database records
+   * Generate a unique property ID by appending random chars if base ID exists
    */
-  const checkDuplicates = async (properties: PropertyImportRow[]): Promise<PropertyImportRow[]> => {
-    // Generate IDs for properties that don't have one (for preview and duplicate checking)
-    const propertiesWithGeneratedIds = properties.map(p => ({
-      ...p,
-      _generatedId: p.id || generatePropertyId(p.community_id, p.name),
-    }))
+  const generateUniquePropertyId = (
+    communityId: string,
+    baseCode: string,
+    existingIds: Set<string>,
+    usedInBatch: Set<string>
+  ): string => {
+    const normalizedCommunity = normalizeCommunityId(communityId)
+    let code = normalizePropertyCode(baseCode)
+    let fullId = `${normalizedCommunity}-${code}`
 
-    // Get all property IDs to check (both provided and generated)
-    const allIdsToCheck = propertiesWithGeneratedIds
-      .map(p => p.id || p._generatedId)
-      .filter((id): id is string => !!id)
+    // If ID is available, use it
+    if (!existingIds.has(fullId) && !usedInBatch.has(fullId)) {
+      return fullId
+    }
 
-    // Fetch existing properties by ID
-    let existingByIds: Set<string> = new Set()
-    if (allIdsToCheck.length > 0) {
-      const { data: existingById } = await supabase
-        .from('property')
-        .select('id')
-        .in('id', allIdsToCheck)
-
-      if (existingById) {
-        existingByIds = new Set(existingById.map(p => p.id))
+    // ID exists, try with different random suffixes (up to 10 attempts)
+    for (let i = 0; i < 10; i++) {
+      code = generateRandomChars(3)
+      fullId = `${normalizedCommunity}-${code}`
+      if (!existingIds.has(fullId) && !usedInBatch.has(fullId)) {
+        return fullId
       }
     }
 
-    // Fetch existing properties by name+community combination
+    // Fallback: use longer random code
+    code = generateRandomChars(4)
+    return `${normalizedCommunity}-${code}`
+  }
+
+  /**
+   * Check for duplicates against existing database records
+   */
+  const checkDuplicates = async (properties: PropertyImportRow[]): Promise<PropertyImportRow[]> => {
+    // Fetch all existing property IDs for the communities we're importing to
     const communityIds = [...new Set(properties.map(p => p.community_id))]
-    const { data: existingByCommunity } = await supabase
+
+    // Fetch all existing properties in these communities
+    const { data: existingProperties } = await supabase
       .from('property')
       .select('id, name, community_id')
       .in('community_id', communityIds)
 
+    const existingByIds = new Set((existingProperties || []).map(p => p.id))
     const existingNameCommunity = new Set(
-      (existingByCommunity || []).map(p => `${p.name.toLowerCase()}|${p.community_id}`)
+      (existingProperties || []).map(p => `${p.name.toLowerCase()}|${p.community_id}`)
     )
 
-    // Also check for duplicates within the CSV file itself
-    const seenInFile = new Map<string, number>() // key -> first row number
-    const seenIdsInFile = new Map<string, number>() // generated id -> first row number
+    // Track IDs used within this batch to avoid collisions
+    const usedInBatch = new Set<string>()
+    const seenInFile = new Map<string, number>() // name+community -> first row number
 
-    // Mark duplicates
-    return propertiesWithGeneratedIds.map(property => {
+    // Process each property and generate unique IDs
+    const results: PropertyImportRow[] = []
+
+    for (const property of properties) {
       const nameCommunityKey = `${property.name.toLowerCase()}|${property.community_id}`
-      const effectiveId = property.id || property._generatedId
-
-      // Check if provided ID already exists in database
-      if (property.id && existingByIds.has(property.id)) {
-        return {
-          ...property,
-          _isDuplicate: true,
-          _duplicateReason: 'id_exists',
-        }
-      }
-
-      // Check if generated ID already exists in database (only if no ID was provided)
-      if (!property.id && property._generatedId && existingByIds.has(property._generatedId)) {
-        return {
-          ...property,
-          _isDuplicate: true,
-          _duplicateReason: 'id_exists',
-        }
-      }
 
       // Check if name+community already exists in database
       if (existingNameCommunity.has(nameCommunityKey)) {
-        return {
+        results.push({
           ...property,
           _isDuplicate: true,
           _duplicateReason: 'name_community_exists',
-        }
+        })
+        continue
       }
 
       // Check for duplicate within the CSV file by name+community
       if (seenInFile.has(nameCommunityKey)) {
-        return {
+        results.push({
           ...property,
           _isDuplicate: true,
           _duplicateReason: 'duplicate_in_file',
-        }
+        })
+        continue
       }
 
-      // Check for duplicate generated ID within the CSV file
-      if (effectiveId && seenIdsInFile.has(effectiveId)) {
-        return {
-          ...property,
-          _isDuplicate: true,
-          _duplicateReason: 'duplicate_in_file',
+      // Generate or validate the property ID
+      let finalId: string
+
+      if (property.id) {
+        // User provided an ID - check if it's available
+        if (existingByIds.has(property.id) || usedInBatch.has(property.id)) {
+          // ID taken, generate a new unique one based on the provided code
+          const codePart = property.id.includes('-')
+            ? property.id.split('-').pop() || ''
+            : property.id
+          finalId = generateUniquePropertyId(property.community_id, codePart, existingByIds, usedInBatch)
+        } else {
+          finalId = property.id
         }
+      } else {
+        // No ID provided - generate from name
+        const baseCode = generateCodeFromName(property.name) || generateRandomChars(3)
+        finalId = generateUniquePropertyId(property.community_id, baseCode, existingByIds, usedInBatch)
       }
 
-      // Mark as seen in file
+      // Mark as seen
       seenInFile.set(nameCommunityKey, property._rowNumber || 0)
-      if (effectiveId) {
-        seenIdsInFile.set(effectiveId, property._rowNumber || 0)
-      }
+      usedInBatch.add(finalId)
 
-      return property
-    })
+      results.push({
+        ...property,
+        _generatedId: finalId,
+      })
+    }
+
+    return results
   }
 
   /**
