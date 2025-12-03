@@ -1,6 +1,6 @@
 <script setup lang="ts">
 const colors = {
-  series1: '#7367F0',
+  series1: '#6979F8',
   series2: '#8F85F3',
   series3: '#ABA4F6',
 }
