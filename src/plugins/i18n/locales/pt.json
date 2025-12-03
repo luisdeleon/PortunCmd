@@ -1926,5 +1926,17 @@
     "validation": {
       "required": "Este campo é obrigatório"
     }
+  },
+  "notifications": {
+    "entry": {
+      "title": "🔔 Chegada de Visitante",
+      "message": "{visitorName} chegou a {propertyName}",
+      "messageNoProperty": "{visitorName} chegou"
+    },
+    "exit": {
+      "title": "👋 Saída de Visitante",
+      "message": "{visitorName} foi embora de {communityName}",
+      "messageNoCommunity": "{visitorName} foi embora"
+    }
   }
 }

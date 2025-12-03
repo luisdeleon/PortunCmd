@@ -90,6 +90,7 @@ Comprehensive guides are available in the [`/docs`](./docs/) folder:
 
 - 🗄️ [Supabase Schema](./docs/SUPABASE_SCHEMA.md) - Complete database schema
 - 💻 [Supabase Usage](./docs/SUPABASE_USAGE.md) - Code examples and patterns
+- ⚡ [Supabase Functions](./docs/SUPABASE_FUNCTIONS.md) - Edge Functions reference (OneSignal, Shelly, User Management)
 - 🔐 [RBAC Guide](./docs/RBAC_GUIDE.md) - Role-based access control implementation guide
 - 🛡️ [Supabase RLS Policies](./docs/SUPABASE_RLS_POLICIES.md) - **NEW!** Row Level Security reference
 - 🔒 **[Scope Visual Reference](./docs/SCOPE_VISUAL_REFERENCE.md)** - **ALL 4 scopes explained visually**
@@ -330,6 +331,12 @@ All project documentation is available in the [`/docs`](./docs/) directory:
 
 - **[Supabase Schema](./docs/SUPABASE_SCHEMA.md)** - Complete database schema documentation
 - **[Supabase Usage](./docs/SUPABASE_USAGE.md)** - Code examples and usage patterns
+- **[Supabase Functions](./docs/SUPABASE_FUNCTIONS.md)** - Complete Edge Functions reference
+  - OneSignal notification functions (entry, exit, generic, subscription update)
+  - User management functions (create-user, deleteUser)
+  - IoT control (shelly-control for gate access)
+  - Email functions (portun-web-send-contact-email via AWS SES)
+  - Environment variables and deployment guide
 - **[Database Backup](./docs/DATABASE_BACKUP.md)** - Backup procedures, restoration guides, and migration safety
 - **[Status System Design](./docs/STATUS_SYSTEM_DESIGN.md)** - **NEW!** Comprehensive status lifecycle management
   - 5 user statuses (Active, Pending, Suspended, Inactive, Archived)

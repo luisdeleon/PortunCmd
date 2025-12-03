@@ -1867,5 +1867,17 @@
     "validation": {
       "required": "Este campo es requerido"
     }
+  },
+  "notifications": {
+    "entry": {
+      "title": "🔔 Llegada de Visitante",
+      "message": "{visitorName} ha llegado a {propertyName}",
+      "messageNoProperty": "{visitorName} ha llegado"
+    },
+    "exit": {
+      "title": "👋 Salida de Visitante",
+      "message": "{visitorName} se ha retirado de {communityName}",
+      "messageNoCommunity": "{visitorName} se ha retirado"
+    }
   }
 }

@@ -7,8 +7,11 @@ import { AppContentLayoutNav, ContentWidth, FooterType, NavbarType } from '@layo
 
 export const { themeConfig, layoutConfig } = defineThemeConfig({
   app: {
-    title: 'portun',
-    logo: h('img', { src: 'https://media.portun.app/i/AppIcon.png', style: 'height: 40px; width: auto;' }),
+    title: '',
+    logo: h('div', { style: 'display: flex; align-items: center; gap: 8px;' }, [
+      h('img', { src: 'https://media.portun.app/i/Portun-Icon-400.png', style: 'height: 32px; width: auto;' }),
+      h('img', { src: 'https://media.portun.app/i/Portun-500-6979F8.png', style: 'height: 42px; width: auto;' }),
+    ]),
     contentWidth: ContentWidth.Boxed,
     contentLayoutNav: AppContentLayoutNav.Vertical,
     overlayNavFromBreakpoint: breakpointsVuetifyV3.lg - 1, // 1 for matching with vuetify breakpoint. Docs: https://next.vuetifyjs.com/en/features/display-and-platform/

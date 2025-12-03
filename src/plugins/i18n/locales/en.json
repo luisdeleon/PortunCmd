@@ -1660,5 +1660,17 @@
     "validation": {
       "required": "This field is required"
     }
+  },
+  "notifications": {
+    "entry": {
+      "title": "🔔 Visitor Arrival",
+      "message": "{visitorName} has arrived to {propertyName}",
+      "messageNoProperty": "{visitorName} has arrived"
+    },
+    "exit": {
+      "title": "👋 Visitor Departure",
+      "message": "{visitorName} has left {communityName}",
+      "messageNoCommunity": "{visitorName} has left"
+    }
   }
 }
