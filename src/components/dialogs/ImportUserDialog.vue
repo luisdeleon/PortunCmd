@@ -253,10 +253,11 @@ const hasRoleViolations = computed(() => roleViolationCount.value > 0)
 const previewHeaders = computed(() => [
   { title: t('importUserDialog.table.status'), key: 'status', width: '120px' },
   { title: t('importUserDialog.table.email'), key: 'email', width: '250px' },
-  { title: t('importUserDialog.table.displayName'), key: 'display_name', width: '200px' },
+  { title: t('importUserDialog.table.displayName'), key: 'display_name', width: '180px' },
+  { title: t('importUserDialog.table.password'), key: 'password', width: '100px' },
   { title: t('importUserDialog.table.role'), key: 'role', width: '150px' },
-  { title: t('importUserDialog.table.communityId'), key: 'community_id', width: '150px' },
-  { title: t('importUserDialog.table.propertyId'), key: 'property_id', width: '150px' },
+  { title: t('importUserDialog.table.communityId'), key: 'community_id', width: '130px' },
+  { title: t('importUserDialog.table.propertyId'), key: 'property_id', width: '130px' },
 ])
 </script>
 
@@ -507,6 +508,16 @@ const previewHeaders = computed(() => [
                 </div>
               </template>
 
+              <!-- Password (masked) -->
+              <template #item.password="{ item }">
+                <div
+                  class="text-body-2 font-mono"
+                  :class="{ 'text-disabled': shouldSkipRow(item) }"
+                >
+                  ••••••••
+                </div>
+              </template>
+
               <!-- Role -->
               <template #item.role="{ item }">
                 <div class="d-flex align-center gap-1">
@@ -583,6 +594,7 @@ const previewHeaders = computed(() => [
                 <li>{{ t('importUserDialog.instructions.step1') }}</li>
                 <li>{{ t('importUserDialog.instructions.step2') }}</li>
                 <li>{{ t('importUserDialog.instructions.step3') }}</li>
+                <li>{{ t('importUserDialog.instructions.step4') }}</li>
                 <li>
                   {{ t('importUserDialog.instructions.step4Prefix') }}
                   <strong>{{ allowedRoles.join(', ') }}</strong>

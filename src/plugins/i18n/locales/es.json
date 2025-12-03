@@ -1841,10 +1841,11 @@
     "instructions": {
       "title": "Instrucciones",
       "step1": "Descarga la plantilla CSV para ver el formato requerido",
-      "step2": "Completa los detalles del usuario (email, display_name, role son requeridos)",
-      "step3": "Columnas opcionales: community_id, property_id",
+      "step2": "Completa los detalles del usuario (email, display_name, password, role son requeridos)",
+      "step3": "La contraseña debe tener al menos 8 caracteres",
+      "step4": "Columnas opcionales: community_id, property_id",
       "step4Prefix": "Roles permitidos para tu cuenta:",
-      "step5": "Los usuarios se crearán con una contraseña temporal y serán invitados a configurar la suya"
+      "step5": "Los usuarios se crearán con la contraseña proporcionada en el CSV"
     },
     "upload": {
       "dropOrClick": "Arrastra el archivo CSV aquí o haz clic para buscar",
@@ -1858,6 +1859,7 @@
       "status": "Estado",
       "email": "Correo Electrónico",
       "displayName": "Nombre para Mostrar",
+      "password": "Contraseña",
       "role": "Rol",
       "communityId": "ID de Comunidad",
       "propertyId": "ID de Propiedad"

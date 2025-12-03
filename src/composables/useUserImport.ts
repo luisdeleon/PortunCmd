@@ -3,6 +3,7 @@ import { supabase } from '@/lib/supabase'
 export interface UserImportRow {
   email: string
   display_name: string
+  password: string
   role: string
   community_id?: string
   property_id?: string
@@ -94,7 +95,7 @@ export const useUserImport = () => {
     const header = lines[0].split(',').map(h => h.trim().toLowerCase())
 
     // Validate required columns
-    const requiredColumns = ['email', 'display_name', 'role']
+    const requiredColumns = ['email', 'display_name', 'password', 'role']
     const missingColumns = requiredColumns.filter(col => !header.includes(col))
 
     if (missingColumns.length > 0) {
@@ -124,10 +125,11 @@ export const useUserImport = () => {
       })
 
       // Validate that required fields are present
-      if (user.email && user.display_name && user.role) {
+      if (user.email && user.display_name && user.password && user.role) {
         users.push({
           email: user.email,
           display_name: user.display_name,
+          password: user.password,
           role: user.role,
           community_id: user.community_id || undefined,
           property_id: user.property_id || undefined,
@@ -267,6 +269,12 @@ export const useUserImport = () => {
         errors: [],
       }
 
+      // Get current session for Edge Function authorization
+      const { data: sessionData } = await supabase.auth.getSession()
+      if (!sessionData.session) {
+        throw new Error('Not authenticated')
+      }
+
       // Import each user (skip duplicates and role violations)
       for (let i = 0; i < usersWithStatus.length; i++) {
         const user = usersWithStatus[i]
@@ -284,50 +292,31 @@ export const useUserImport = () => {
             throw new Error(`Invalid role: ${user.role}`)
           }
 
-          // Determine scope type based on role
-          let scopeType = 'global'
-          if (['Administrator', 'Guard', 'Client'].includes(user.role)) {
-            scopeType = 'community'
-          } else if (user.role === 'Resident') {
-            scopeType = 'property'
-          } else if (['Mega Dealer', 'Dealer'].includes(user.role)) {
-            scopeType = 'dealer'
-          }
-
-          // Generate a new UUID for the profile
-          const profileId = crypto.randomUUID()
-
-          // Create user profile
-          const { error: createError } = await supabase
-            .from('profile')
-            .insert({
-              id: profileId,
+          // Call the Edge Function to create user (handles Auth + Profile creation)
+          const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/create-user`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${sessionData.session.access_token}`,
+            },
+            body: JSON.stringify({
               email: user.email,
+              password: user.password,
               display_name: user.display_name,
               enabled: true,
               language: 'en',
-              status: 'active',
-            })
+              def_community_id: user.community_id || null,
+              def_property_id: user.property_id || null,
+              communities: user.community_id ? [user.community_id] : [],
+              properties: user.property_id ? [user.property_id] : [],
+              roles: [roleId],
+            }),
+          })
 
-          if (createError) {
-            throw createError
-          }
+          const responseData = await response.json()
 
-          // Assign role to the user
-          const { error: roleError } = await supabase
-            .from('profile_role')
-            .insert({
-              profile_id: profileId,
-              role_id: roleId,
-              scope_type: scopeType,
-              scope_community_ids: user.community_id ? [user.community_id] : null,
-              scope_property_ids: user.property_id ? [user.property_id] : null,
-            })
-
-          if (roleError) {
-            // Rollback profile creation if role assignment fails
-            await supabase.from('profile').delete().eq('id', profileId)
-            throw roleError
+          if (!response.ok) {
+            throw new Error(responseData.error || 'Failed to create user')
           }
 
           result.successCount++
@@ -355,10 +344,10 @@ export const useUserImport = () => {
    * Generate CSV template content
    */
   const getTemplateContent = (): string => {
-    const header = 'email,display_name,role,community_id,property_id'
-    const example1 = 'admin@example.com,John Admin,Administrator,COMM1,'
-    const example2 = 'guard@example.com,Jane Guard,Guard,COMM1,'
-    const example3 = 'resident@example.com,Bob Resident,Resident,COMM1,PROP1'
+    const header = 'email,display_name,password,role,community_id,property_id'
+    const example1 = 'admin@example.com,John Admin,Password123!,Administrator,COMM1,'
+    const example2 = 'guard@example.com,Jane Guard,Password123!,Guard,COMM1,'
+    const example3 = 'resident@example.com,Bob Resident,Password123!,Resident,COMM1,PROP1'
 
     return `${header}\n${example1}\n${example2}\n${example3}`
   }

@@ -1632,10 +1632,11 @@
     "instructions": {
       "title": "Instructions",
       "step1": "Download the CSV template to see the required format",
-      "step2": "Fill in the user details (email, display_name, role are required)",
-      "step3": "Optional columns: community_id, property_id",
+      "step2": "Fill in the user details (email, display_name, password, role are required)",
+      "step3": "Password must be at least 8 characters",
+      "step4": "Optional columns: community_id, property_id",
       "step4Prefix": "Allowed roles for your account:",
-      "step5": "Users will be created with a temporary password and invited to set their own"
+      "step5": "Users will be created with the password provided in the CSV"
     },
     "upload": {
       "dropOrClick": "Drop CSV file here or click to browse",
@@ -1649,6 +1650,7 @@
       "status": "Status",
       "email": "Email",
       "displayName": "Display Name",
+      "password": "Password",
       "role": "Role",
       "communityId": "Community ID",
       "propertyId": "Property ID"

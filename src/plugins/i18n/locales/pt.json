@@ -1900,10 +1900,11 @@
     "instructions": {
       "title": "Instruções",
       "step1": "Baixe o modelo CSV para ver o formato necessário",
-      "step2": "Preencha os detalhes do usuário (email, display_name, role são obrigatórios)",
-      "step3": "Colunas opcionais: community_id, property_id",
+      "step2": "Preencha os detalhes do usuário (email, display_name, password, role são obrigatórios)",
+      "step3": "A senha deve ter pelo menos 8 caracteres",
+      "step4": "Colunas opcionais: community_id, property_id",
       "step4Prefix": "Funções permitidas para sua conta:",
-      "step5": "Os usuários serão criados com uma senha temporária e convidados a definir a sua própria"
+      "step5": "Os usuários serão criados com a senha fornecida no CSV"
     },
     "upload": {
       "dropOrClick": "Arraste o arquivo CSV aqui ou clique para procurar",
@@ -1917,6 +1918,7 @@
       "status": "Status",
       "email": "E-mail",
       "displayName": "Nome de Exibição",
+      "password": "Senha",
       "role": "Função",
       "communityId": "ID da Comunidade",
       "propertyId": "ID da Propriedade"
