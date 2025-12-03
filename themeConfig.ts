@@ -9,7 +9,7 @@ export const { themeConfig, layoutConfig } = defineThemeConfig({
   app: {
     title: '',
     logo: h('div', { style: 'display: flex; align-items: center; gap: 8px;' }, [
-      h('img', { src: 'https://media.portun.app/i/Portun-Icon-400.png', style: 'height: 32px; width: auto;' }),
+      h('img', { src: 'https://media.portun.app/i/Portun-Icon-400.png', style: 'height: 38px; width: auto;' }),
       h('img', { src: 'https://media.portun.app/i/Portun-500-6979F8.png', style: 'height: 42px; width: auto;' }),
     ]),
     contentWidth: ContentWidth.Boxed,
