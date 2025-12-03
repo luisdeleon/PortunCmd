@@ -134,6 +134,22 @@ export const usePropertyImport = () => {
       // Validate that required fields are present
       if (property.name && property.address && property.community_id) {
         property._rowNumber = i + 1 // Store row number for display
+
+        // Ensure community_id is uppercase
+        property.community_id = property.community_id.toUpperCase()
+
+        // If user provided an ID, normalize it (uppercase, add community prefix if missing)
+        if (property.id) {
+          let normalizedId = property.id.toUpperCase()
+          const communityPrefix = `${property.community_id}-`
+
+          // Add community prefix if not present
+          if (!normalizedId.startsWith(communityPrefix)) {
+            normalizedId = `${communityPrefix}${normalizedId}`
+          }
+          property.id = normalizedId
+        }
+
         properties.push(property)
       } else {
         console.warn(`Row ${i + 1} is missing required fields, skipping`)
