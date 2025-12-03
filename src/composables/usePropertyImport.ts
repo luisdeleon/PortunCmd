@@ -24,6 +24,42 @@ export const usePropertyImport = () => {
   const isImporting = ref(false)
 
   /**
+   * Generate random uppercase characters
+   */
+  const generateRandomChars = (length: number): string => {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'
+    let result = ''
+    for (let i = 0; i < length; i++) {
+      result += chars.charAt(Math.floor(Math.random() * chars.length))
+    }
+    return result
+  }
+
+  /**
+   * Ensure community ID is exactly 4 characters (pad with random if shorter)
+   */
+  const normalizeCommunityId = (communityId: string): string => {
+    const normalized = communityId.toUpperCase().replace(/[^A-Z0-9]/g, '')
+    if (normalized.length >= 4) {
+      return normalized.slice(0, 4)
+    }
+    // Pad with random characters to reach 4
+    return normalized + generateRandomChars(4 - normalized.length)
+  }
+
+  /**
+   * Ensure property code is at least 3 characters (pad with random if shorter)
+   */
+  const normalizePropertyCode = (code: string): string => {
+    const normalized = code.toUpperCase().replace(/[^A-Z0-9]/g, '')
+    if (normalized.length >= 3) {
+      return normalized
+    }
+    // Pad with random characters to reach 3
+    return normalized + generateRandomChars(3 - normalized.length)
+  }
+
+  /**
    * Generate a 3-character code from property name (same logic as AddEditPropertyDialog)
    */
   const generateCodeFromName = (name: string | null | undefined): string => {
@@ -80,12 +116,23 @@ export const usePropertyImport = () => {
   }
 
   /**
-   * Generate property ID: CommunityID-PropertyCode
+   * Generate property ID: CommunityID (4 chars) - PropertyCode (min 3 chars)
    */
   const generatePropertyId = (communityId: string, propertyName: string): string => {
-    const code = generateCodeFromName(propertyName)
-    if (!communityId || !code) return ''
-    return `${communityId.toUpperCase()}-${code}`
+    if (!communityId) return ''
+
+    const normalizedCommunity = normalizeCommunityId(communityId)
+    let code = generateCodeFromName(propertyName)
+
+    // If no code generated from name, create random 3-char code
+    if (!code) {
+      code = generateRandomChars(3)
+    }
+
+    // Ensure code is at least 3 characters
+    code = normalizePropertyCode(code)
+
+    return `${normalizedCommunity}-${code}`
   }
 
   /**
@@ -135,19 +182,27 @@ export const usePropertyImport = () => {
       if (property.name && property.address && property.community_id) {
         property._rowNumber = i + 1 // Store row number for display
 
-        // Ensure community_id is uppercase
-        property.community_id = property.community_id.toUpperCase()
+        // Normalize community_id to 4 uppercase characters
+        property.community_id = normalizeCommunityId(property.community_id)
 
-        // If user provided an ID, normalize it (uppercase, add community prefix if missing)
+        // If user provided an ID, normalize it
         if (property.id) {
-          let normalizedId = property.id.toUpperCase()
+          let normalizedId = property.id.toUpperCase().replace(/[^A-Z0-9-]/g, '')
           const communityPrefix = `${property.community_id}-`
 
-          // Add community prefix if not present
-          if (!normalizedId.startsWith(communityPrefix)) {
-            normalizedId = `${communityPrefix}${normalizedId}`
+          // Check if ID already has community prefix
+          if (normalizedId.startsWith(communityPrefix)) {
+            // Extract the property code part and ensure it's at least 3 chars
+            const codePart = normalizedId.slice(communityPrefix.length)
+            property.id = `${communityPrefix}${normalizePropertyCode(codePart)}`
+          } else if (normalizedId.includes('-')) {
+            // Has a different prefix, replace with correct community prefix
+            const codePart = normalizedId.split('-').pop() || ''
+            property.id = `${communityPrefix}${normalizePropertyCode(codePart)}`
+          } else {
+            // No prefix, add community prefix and ensure code is at least 3 chars
+            property.id = `${communityPrefix}${normalizePropertyCode(normalizedId)}`
           }
-          property.id = normalizedId
         }
 
         properties.push(property)
