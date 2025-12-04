@@ -339,6 +339,7 @@ declare global {
   const useTranslations: typeof import('./src/composables/useTranslations')['useTranslations']
   const useTrunc: typeof import('@vueuse/math')['useTrunc']
   const useUrlSearchParams: typeof import('@vueuse/core')['useUrlSearchParams']
+  const useUserImport: typeof import('./src/composables/useUserImport')['useUserImport']
   const useUserMedia: typeof import('@vueuse/core')['useUserMedia']
   const useVModel: typeof import('@vueuse/core')['useVModel']
   const useVModels: typeof import('@vueuse/core')['useVModels']
@@ -708,6 +709,7 @@ declare module 'vue' {
     readonly useTranslations: UnwrapRef<typeof import('./src/composables/useTranslations')['useTranslations']>
     readonly useTrunc: UnwrapRef<typeof import('@vueuse/math')['useTrunc']>
     readonly useUrlSearchParams: UnwrapRef<typeof import('@vueuse/core')['useUrlSearchParams']>
+    readonly useUserImport: UnwrapRef<typeof import('./src/composables/useUserImport')['useUserImport']>
     readonly useUserMedia: UnwrapRef<typeof import('@vueuse/core')['useUserMedia']>
     readonly useVModel: UnwrapRef<typeof import('@vueuse/core')['useVModel']>
     readonly useVModels: UnwrapRef<typeof import('@vueuse/core')['useVModels']>
