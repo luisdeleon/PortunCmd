@@ -639,11 +639,8 @@ const requiredRule = (v: string) => !!v || t('deviceDialog.validation.required')
               </div>
             </VCol>
 
-            <!-- Enabled Switch -->
-            <VCol
-              cols="12"
-              md="4"
-            >
+            <!-- Enabled Switch - Full Row -->
+            <VCol cols="12">
               <VSwitch
                 v-model="deviceForm.enabled"
                 :label="t('deviceDialog.fields.deviceEnabled')"
@@ -655,7 +652,7 @@ const requiredRule = (v: string) => !!v || t('deviceDialog.validation.required')
             <!-- Guest Access Switch -->
             <VCol
               cols="12"
-              md="4"
+              md="6"
             >
               <VSwitch
                 v-model="deviceForm.guest_access"
@@ -668,7 +665,7 @@ const requiredRule = (v: string) => !!v || t('deviceDialog.validation.required')
             <!-- Resident Access Switch -->
             <VCol
               cols="12"
-              md="4"
+              md="6"
             >
               <VSwitch
                 v-model="deviceForm.resident_access"
