@@ -1,4 +1,5 @@
 import type { TurnstileValidationResponse } from '@/types/turnstile'
+import { supabase } from '@/lib/supabase'
 
 // Use onload callback instead of turnstile.ready() to avoid async/defer issues
 const TURNSTILE_CALLBACK_NAME = '__onTurnstileLoad__'
@@ -181,9 +182,7 @@ export const useTurnstile = () => {
     }
 
     try {
-      const supabase = useSupabase()
-
-      const { data, error: fnError } = await supabase.client.functions.invoke('cloudflare-turnstile', {
+      const { data, error: fnError } = await supabase.functions.invoke('cloudflare-turnstile', {
         body: { token: token.value },
       })
 
