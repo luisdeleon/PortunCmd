@@ -1,4 +1,12 @@
 # Cloudflare Pages - Headers Configuration
+# Security and MIME type headers
+
+/*
+  Content-Security-Policy: default-src 'self'; script-src 'self' 'unsafe-inline' https://challenges.cloudflare.com; style-src 'self' 'unsafe-inline'; img-src 'self' data: https: blob:; font-src 'self' data:; connect-src 'self' https: wss:; frame-src https://challenges.cloudflare.com;
+  X-Content-Type-Options: nosniff
+  X-Frame-Options: DENY
+  Referrer-Policy: strict-origin-when-cross-origin
+
 # Ensure proper MIME types for assets
 
 /assets/*.js
