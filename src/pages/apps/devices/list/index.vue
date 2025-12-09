@@ -891,7 +891,7 @@ const getDirectionColor = (direction: string) => {
         <!-- Guest Access -->
         <template #item.guest_access="{ item }">
           <VChip
-            :color="item.guest_access ? 'info' : 'warning'"
+            :color="item.guest_access ? 'success' : 'error'"
             size="small"
             label
             :style="canManage ? 'cursor: pointer' : ''"
