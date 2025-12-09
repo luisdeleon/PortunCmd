@@ -7,7 +7,7 @@ import { AppContentLayoutNav, ContentWidth, FooterType, NavbarType } from '@layo
 
 export const { themeConfig, layoutConfig } = defineThemeConfig({
   app: {
-    title: '',
+    title: 'portun' as Lowercase<string>,
     logo: h('div', { style: 'display: flex; align-items: center; gap: 8px;' }, [
       h('img', { src: 'https://media.portun.app/i/portun-shield.png', style: 'height: 38px; width: auto;' }),
       h('img', { src: 'https://media.portun.app/i/Portun-500-6979F8.png', style: 'height: 42px; width: auto;' }),
