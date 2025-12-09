@@ -69,6 +69,8 @@
   "Gate Control": "Gate Control",
   "Email": "Email",
   "Password": "Password",
+  "Please complete the security verification": "Please complete the security verification",
+  "Security verification failed. Please try again.": "Security verification failed. Please try again.",
   "Chat": "Chat",
   "Invoice": "Invoice",
   "Preview": "Preview",

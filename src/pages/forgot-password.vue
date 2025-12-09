@@ -6,6 +6,7 @@ import { themeConfig } from '@themeConfig'
 import { useAuth } from '@/composables/useAuth'
 import { getErrorMessageTranslationKey } from '@/utils/errorTranslations'
 import { useValidators } from '@/composables/useValidators'
+import { useTurnstile } from '@/composables/useTurnstile'
 
 import forgotPasswordImage from '@images/pages/img-forgot-w.png'
 import authV2MaskDark from '@images/pages/misc-mask-dark.png'
@@ -60,6 +61,26 @@ const authThemeMask = useGenerateImageVariant(authV2MaskLight, authV2MaskDark)
 
 const { resetPassword } = useAuth()
 
+// Turnstile CAPTCHA
+const {
+  token: turnstileToken,
+  isVerified: isTurnstileVerified,
+  render: renderTurnstile,
+  reset: resetTurnstile,
+  validate: validateTurnstile,
+} = useTurnstile()
+
+// Render Turnstile widget on mount
+onMounted(() => {
+  nextTick(() => {
+    renderTurnstile('#turnstile-forgot-password', {
+      theme: 'auto',
+      size: 'flexible',
+      action: 'forgot-password',
+    })
+  })
+})
+
 definePage({
   meta: {
     layout: 'blank',
@@ -69,15 +90,31 @@ definePage({
 
 const onSubmit = async () => {
   const { valid } = await refVForm.value?.validate() ?? { valid: false }
-  
+
   if (!valid)
     return
+
+  // Validate Turnstile token first
+  if (!turnstileToken.value) {
+    errorMessage.value = t('Please complete the security verification')
+    return
+  }
 
   isLoading.value = true
   errorMessage.value = undefined
   isSuccess.value = false
 
   try {
+    // Validate Turnstile token server-side
+    const turnstileResult = await validateTurnstile()
+    if (!turnstileResult.success) {
+      console.error('Turnstile validation failed:', turnstileResult['error-codes'])
+      errorMessage.value = t('Security verification failed. Please try again.')
+      resetTurnstile()
+      isLoading.value = false
+      return
+    }
+
     await resetPassword(email.value)
     isSuccess.value = true
   }
@@ -85,6 +122,8 @@ const onSubmit = async () => {
     // Translate error message
     const errorKey = getErrorMessageTranslationKey(err?.message)
     errorMessage.value = t(errorKey)
+    // Reset Turnstile on error
+    resetTurnstile()
   }
   finally {
     isLoading.value = false
@@ -206,12 +245,21 @@ const onSubmit = async () => {
                 />
               </VCol>
 
+              <!-- Cloudflare Turnstile CAPTCHA -->
+              <VCol cols="12">
+                <div
+                  id="turnstile-forgot-password"
+                  class="d-flex justify-center mb-2"
+                />
+              </VCol>
+
               <!-- Reset link -->
               <VCol cols="12">
                 <VBtn
                   block
                   type="submit"
                   :loading="isLoading"
+                  :disabled="!isTurnstileVerified"
                 >
                   {{ t('Send Reset Link') }}
                 </VBtn>

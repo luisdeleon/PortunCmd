@@ -738,6 +738,8 @@
   },
   "Email": "Correo Electrónico",
   "Password": "Contraseña",
+  "Please complete the security verification": "Por favor complete la verificación de seguridad",
+  "Security verification failed. Please try again.": "La verificación de seguridad falló. Por favor intente de nuevo.",
   "Chat": "Chat",
   "Invoice": "Factura",
   "Preview": "Vista Previa",

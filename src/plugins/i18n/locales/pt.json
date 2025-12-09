@@ -797,6 +797,8 @@
   },
   "Email": "E-mail",
   "Password": "Senha",
+  "Please complete the security verification": "Por favor complete a verificação de segurança",
+  "Security verification failed. Please try again.": "A verificação de segurança falhou. Por favor tente novamente.",
   "Chat": "Chat",
   "Invoice": "Fatura",
   "Preview": "Visualizar",

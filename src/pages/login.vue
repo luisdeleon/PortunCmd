@@ -15,6 +15,7 @@ import { cookieRef } from '@layouts/stores/config'
 import { COOKIE_MAX_AGE_1_YEAR } from '@/utils/constants'
 import { getErrorMessageTranslationKey } from '@/utils/errorTranslations'
 import { useValidators } from '@/composables/useValidators'
+import { useTurnstile } from '@/composables/useTurnstile'
 
 const authThemeMask = useGenerateImageVariant(authV2MaskLight, authV2MaskDark)
 
@@ -97,6 +98,27 @@ const credentials = ref({
 const rememberMe = ref(false)
 const isLoading = ref(false)
 
+// Turnstile CAPTCHA
+const {
+  token: turnstileToken,
+  isVerified: isTurnstileVerified,
+  error: turnstileError,
+  render: renderTurnstile,
+  reset: resetTurnstile,
+  validate: validateTurnstile,
+} = useTurnstile()
+
+// Render Turnstile widget on mount
+onMounted(() => {
+  nextTick(() => {
+    renderTurnstile('#turnstile-login', {
+      theme: 'auto',
+      size: 'flexible',
+      action: 'login',
+    })
+  })
+})
+
 // Watch for locale changes and trigger form re-validation to update error messages
 watch(locale, () => {
   // When locale changes, the computed rules will update automatically
@@ -127,9 +149,25 @@ const login = async () => {
     password: undefined,
   }
 
+  // Validate Turnstile token first
+  if (!turnstileToken.value) {
+    errors.value.email = t('Please complete the security verification')
+    return
+  }
+
   isLoading.value = true
 
   try {
+    // Validate Turnstile token server-side
+    const turnstileResult = await validateTurnstile()
+    if (!turnstileResult.success) {
+      console.error('Turnstile validation failed:', turnstileResult['error-codes'])
+      errors.value.email = t('Security verification failed. Please try again.')
+      resetTurnstile()
+      isLoading.value = false
+      return
+    }
+
     const res = await authLogin(credentials.value.email, credentials.value.password)
 
     // Only proceed with redirect if login was successful
@@ -191,7 +229,10 @@ const login = async () => {
     // Show error on email field (as it's the most prominent)
     // This will be displayed in red by Vuetify
     errors.value.email = translatedMessage
-    
+
+    // Reset Turnstile on error so user can retry
+    resetTurnstile()
+
     // Don't redirect - stay on login page
     return
   }
@@ -328,10 +369,17 @@ const onSubmit = () => {
                   </RouterLink>
                 </div>
 
+                <!-- Cloudflare Turnstile CAPTCHA -->
+                <div
+                  id="turnstile-login"
+                  class="d-flex justify-center mb-4"
+                />
+
                 <VBtn
                   block
                   type="submit"
                   :loading="isLoading"
+                  :disabled="!isTurnstileVerified"
                 >
                   {{ t('Login') }}
                 </VBtn>
