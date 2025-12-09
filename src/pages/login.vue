@@ -177,8 +177,6 @@ const login = async () => {
 
     const { accessToken, userData, userAbilityRules } = res
 
-    console.log('Login successful:', { userData, role: userData.role })
-
     // Set cookie expiration based on rememberMe
     // Note: Cookies are set without namespace for auth tokens
     const maxAge = rememberMe.value
@@ -199,12 +197,6 @@ const login = async () => {
     const accessTokenCookie = useCookie('accessToken', cookieOptions)
     accessTokenCookie.value = accessToken
 
-    console.log('Cookies set:', {
-      hasUserData: !!userDataCookie.value,
-      hasAccessToken: !!accessTokenCookie.value,
-      hasAbilityRules: !!userAbilityRulesCookie.value
-    })
-
     // Determine redirect target
     const redirectQuery = route.query.to
     const redirectTo = typeof redirectQuery === 'string' && redirectQuery.length
@@ -212,8 +204,6 @@ const login = async () => {
       : Array.isArray(redirectQuery) && redirectQuery.length
         ? redirectQuery[0]
         : '/dashboard'
-
-    console.log('Login successful, redirecting to:', redirectTo)
 
     // Ensure navigation completes before finishing login flow
     await router.replace(redirectTo)
