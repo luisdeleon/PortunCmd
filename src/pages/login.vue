@@ -245,9 +245,6 @@ const onSubmit = () => {
     <RouterLink to="/">
       <div class="auth-logo d-flex align-center gap-x-3">
         <VNodeRenderer :nodes="themeConfig.app.logo" />
-        <h1 class="auth-title">
-          {{ themeConfig.app.title }}
-        </h1>
       </div>
     </RouterLink>
     
