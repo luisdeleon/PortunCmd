@@ -790,6 +790,7 @@
       "direction": "Direction",
       "status": "Status",
       "guestAccess": "Guest Access",
+      "residentAccess": "Resident Access",
       "actions": "Actions"
     },
     "direction": {
@@ -802,6 +803,10 @@
       "disabled": "Disabled"
     },
     "guestAccess": {
+      "allowed": "Allowed",
+      "denied": "Denied"
+    },
+    "residentAccess": {
       "allowed": "Allowed",
       "denied": "Denied"
     },
@@ -1747,7 +1752,8 @@
       "geolocation": "Geolocation",
       "geolocationHint": "Format: latitude, longitude",
       "deviceEnabled": "Device Enabled",
-      "guestAccessAllowed": "Guest Access Allowed"
+      "guestAccessAllowed": "Guest Access Allowed",
+      "residentAccessAllowed": "Resident Access Allowed"
     },
     "options": {
       "other": "Other",

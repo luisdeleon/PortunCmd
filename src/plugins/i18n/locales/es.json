@@ -567,6 +567,7 @@
       "type": "Tipo",
       "status": "Estado",
       "guestAccess": "Acceso de Invitados",
+      "residentAccess": "Acceso de Residentes",
       "lastSeen": "Última Vez Visto",
       "actions": "Acciones"
     },
@@ -583,6 +584,10 @@
       "error": "Error"
     },
     "guestAccess": {
+      "allowed": "Permitido",
+      "denied": "Denegado"
+    },
+    "residentAccess": {
       "allowed": "Permitido",
       "denied": "Denegado"
     },
@@ -1957,7 +1962,8 @@
       "community": "Comunidad *",
       "communityPlaceholder": "Seleccione comunidad",
       "enabled": "Habilitado",
-      "guestAccess": "Acceso de Invitados"
+      "guestAccess": "Acceso de Invitados",
+      "residentAccess": "Acceso de Residentes"
     },
     "options": {
       "other": "Otro",

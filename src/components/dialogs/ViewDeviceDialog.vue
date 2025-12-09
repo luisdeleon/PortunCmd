@@ -18,6 +18,7 @@ interface DeviceData {
   device_id_out?: string
   enabled?: boolean
   guest_access?: boolean
+  resident_access?: boolean
   created_at?: string
   updated_at?: string
 }
@@ -472,7 +473,7 @@ const maskedAuthKey = computed(() => {
           <!-- Enabled Status -->
           <VCol
             cols="12"
-            sm="6"
+            sm="4"
           >
             <div class="d-flex flex-column gap-1">
               <span class="text-sm text-disabled">Device Status</span>
@@ -495,7 +496,7 @@ const maskedAuthKey = computed(() => {
           <!-- Guest Access -->
           <VCol
             cols="12"
-            sm="6"
+            sm="4"
           >
             <div class="d-flex flex-column gap-1">
               <span class="text-sm text-disabled">Guest Access</span>
@@ -510,6 +511,29 @@ const maskedAuthKey = computed(() => {
                   label
                 >
                   {{ props.deviceData.guest_access ? 'Allowed' : 'Denied' }}
+                </VChip>
+              </div>
+            </div>
+          </VCol>
+
+          <!-- Resident Access -->
+          <VCol
+            cols="12"
+            sm="4"
+          >
+            <div class="d-flex flex-column gap-1">
+              <span class="text-sm text-disabled">Resident Access</span>
+              <div class="d-flex align-center gap-2">
+                <VIcon
+                  icon="tabler-home"
+                  size="20"
+                />
+                <VChip
+                  :color="props.deviceData.resident_access ? 'success' : 'error'"
+                  size="small"
+                  label
+                >
+                  {{ props.deviceData.resident_access ? 'Allowed' : 'Denied' }}
                 </VChip>
               </div>
             </div>

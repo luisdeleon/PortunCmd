@@ -55,6 +55,7 @@ const headers = computed(() => [
   { title: t('deviceList.table.direction'), key: 'direction_type' },
   { title: t('deviceList.table.status'), key: 'enabled' },
   { title: t('deviceList.table.guestAccess'), key: 'guest_access' },
+  { title: t('deviceList.table.residentAccess'), key: 'resident_access' },
   { title: t('deviceList.table.actions'), key: 'actions', sortable: false },
 ])
 
@@ -88,6 +89,7 @@ const fetchDevices = async () => {
         device_id_out,
         enabled,
         guest_access,
+        resident_access,
         created_at,
         updated_at,
         community:community_id(id, name)
@@ -546,6 +548,41 @@ const toggleGuestAccess = async (device: any) => {
   }
 }
 
+// 👉 Toggle resident access
+const toggleResidentAccess = async (device: any) => {
+  try {
+    const { error } = await supabase
+      .from('automation_devices')
+      .update({ resident_access: !device.resident_access })
+      .eq('id', device.id)
+
+    if (error) {
+      console.error('Error updating resident access:', error)
+      snackbar.value = {
+        show: true,
+        message: 'Failed to update resident access',
+        color: 'error',
+      }
+      return
+    }
+
+    snackbar.value = {
+      show: true,
+      message: `Resident access ${device.resident_access ? 'denied' : 'allowed'} successfully`,
+      color: 'success',
+    }
+
+    fetchDevices()
+  } catch (err) {
+    console.error('Error in toggleResidentAccess:', err)
+    snackbar.value = {
+      show: true,
+      message: 'Failed to update resident access',
+      color: 'error',
+    }
+  }
+}
+
 const widgetData = computed(() => {
   // Calculate growth percentage based on devices created in last 30 days
   const growthPercentage = totalDevices.value > 0 && devicesLast30Days.value > 0
@@ -861,6 +898,19 @@ const getDirectionColor = (direction: string) => {
             @click="canManage && toggleGuestAccess(item)"
           >
             {{ item.guest_access ? t('deviceList.guestAccess.allowed') : t('deviceList.guestAccess.denied') }}
+          </VChip>
+        </template>
+
+        <!-- Resident Access -->
+        <template #item.resident_access="{ item }">
+          <VChip
+            :color="item.resident_access ? 'success' : 'error'"
+            size="small"
+            label
+            :style="canManage ? 'cursor: pointer' : ''"
+            @click="canManage && toggleResidentAccess(item)"
+          >
+            {{ item.resident_access ? t('deviceList.residentAccess.allowed') : t('deviceList.residentAccess.denied') }}
           </VChip>
         </template>
 

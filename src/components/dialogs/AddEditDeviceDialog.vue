@@ -22,6 +22,7 @@ interface DeviceData {
   device_id_out: string
   enabled: boolean
   guest_access: boolean
+  resident_access: boolean
 }
 
 interface CommunityOption {
@@ -83,6 +84,7 @@ const deviceForm = ref<DeviceData>({
   device_id_out: '',
   enabled: true,
   guest_access: false,
+  resident_access: false,
 })
 
 // Options
@@ -145,6 +147,7 @@ watch(() => props.isDialogVisible, (newVal) => {
         device_id_out: props.deviceData.device_id_out || '',
         enabled: props.deviceData.enabled ?? true,
         guest_access: props.deviceData.guest_access ?? false,
+        resident_access: props.deviceData.resident_access ?? false,
       }
     } else {
       // Create mode - reset to defaults
@@ -175,6 +178,7 @@ const resetForm = () => {
     device_id_out: '',
     enabled: true,
     guest_access: false,
+    resident_access: false,
   }
   isEditMode.value = false
   isDuplicateMode.value = false
@@ -207,6 +211,7 @@ const onSubmit = async () => {
       device_id_out: deviceForm.value.device_id_out || null,
       enabled: deviceForm.value.enabled,
       guest_access: deviceForm.value.guest_access,
+      resident_access: deviceForm.value.resident_access,
     }
 
     if (isEditMode.value && deviceForm.value.id) {
@@ -637,7 +642,7 @@ const requiredRule = (v: string) => !!v || t('deviceDialog.validation.required')
             <!-- Enabled Switch -->
             <VCol
               cols="12"
-              md="6"
+              md="4"
             >
               <VSwitch
                 v-model="deviceForm.enabled"
@@ -650,12 +655,25 @@ const requiredRule = (v: string) => !!v || t('deviceDialog.validation.required')
             <!-- Guest Access Switch -->
             <VCol
               cols="12"
-              md="6"
+              md="4"
             >
               <VSwitch
                 v-model="deviceForm.guest_access"
                 :label="t('deviceDialog.fields.guestAccessAllowed')"
                 color="info"
+                hide-details
+              />
+            </VCol>
+
+            <!-- Resident Access Switch -->
+            <VCol
+              cols="12"
+              md="4"
+            >
+              <VSwitch
+                v-model="deviceForm.resident_access"
+                :label="t('deviceDialog.fields.residentAccessAllowed')"
+                color="success"
                 hide-details
               />
             </VCol>
