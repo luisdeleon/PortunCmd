@@ -681,7 +681,7 @@ const widgetData = computed(() => [
       <VDivider />
 
       <VCardText class="d-flex flex-wrap gap-4">
-        <div class="me-3 d-flex gap-3">
+        <div class="me-3 d-flex gap-3 align-center">
           <AppSelect
             :model-value="itemsPerPage"
             :items="[
@@ -694,6 +694,17 @@ const widgetData = computed(() => [
             style="inline-size: 6.25rem;"
             @update:model-value="itemsPerPage = parseInt($event, 10)"
           />
+
+          <!-- Bulk delete button (visible when rows selected) -->
+          <VBtn
+            v-if="canManage && selectedRows.length > 0"
+            color="error"
+            variant="tonal"
+            prepend-icon="tabler-trash"
+            @click="openBulkDeleteDialog"
+          >
+            {{ t('Delete') }} ({{ selectedRows.length }})
+          </VBtn>
         </div>
         <VSpacer />
 
@@ -707,17 +718,6 @@ const widgetData = computed(() => [
               clear-icon="tabler-x"
             />
           </div>
-
-          <!-- Bulk delete button (visible when rows selected) -->
-          <VBtn
-            v-if="canManage && selectedRows.length > 0"
-            color="error"
-            variant="tonal"
-            prepend-icon="tabler-trash"
-            @click="openBulkDeleteDialog"
-          >
-            {{ t('Delete') }} ({{ selectedRows.length }})
-          </VBtn>
 
           <!-- Refresh button -->
           <VBtn
