@@ -131,6 +131,7 @@
   "Statistics": "Statistics",
   "Actions": "Actions",
   "Access Control": "Access Control",
+  "Super Admin": "Super Admin",
   "User Interface": "User Interface",
   "CRM": "CRM",
   "eCommerce": "eCommerce",
@@ -175,6 +176,7 @@
   "Tables": "Tables",
   "Data Table": "Data Table",
   "Permissions": "Permissions",
+  "System Audit": "System Audit",
   "Apps": "Apps",
   "Misc": "Misc",
   "Wizard Pages": "Wizard Pages",
@@ -438,9 +440,24 @@
     },
     "deleteDialog": {
       "title": "Delete Community",
-      "message": "Are you sure you want to delete {name}? This action cannot be undone.",
-      "confirm": "Delete",
-      "cancel": "Cancel"
+      "message": "Are you sure you want to delete {name}?",
+      "warningTitle": "This will permanently delete:",
+      "properties": "{count} properties",
+      "devices": "{count} automation devices",
+      "visitors": "{count} visitor records",
+      "managers": "{count} manager assignments",
+      "propertyOwners": "{count} property owner assignments",
+      "noRelatedData": "This community has no related data.",
+      "permanentWarning": "This action cannot be undone. All data will be permanently deleted.",
+      "confirm": "Delete Permanently",
+      "cancel": "Cancel",
+      "propertiesLabel": "properties",
+      "devicesLabel": "devices",
+      "visitorsLabel": "visitor records"
+    },
+    "deleteSuccess": {
+      "simple": "Community \"{name}\" has been deleted successfully",
+      "withData": "Community \"{name}\" and all related data ({items}) have been deleted successfully"
     },
     "bulkDeleteDialog": {
       "title": "Delete Multiple Communities",
@@ -480,8 +497,44 @@
       "hasManagers": "Cannot delete this community because it has managers assigned. Please remove the managers first.",
       "hasVisitorRecords": "Cannot delete this community because it has visitor records. Please archive or remove the records first.",
       "hasRelatedRecords": "Cannot delete this community because it has related records. Please remove the related data first.",
-      "noPermission": "You don't have permission to delete this community"
+      "noPermission": "You don't have permission to delete this community. Only Super Admins can delete communities.",
+      "notFound": "Community not found. It may have already been deleted."
     }
+  },
+
+  "communityAudit": {
+    "title": "System Deletion Audit",
+    "superAdminOnly": "Super Admin Only",
+    "search": {
+      "placeholder": "Search by ID or name..."
+    },
+    "table": {
+      "communityId": "Community ID",
+      "communityName": "Community Name",
+      "deletedAt": "Deleted At",
+      "deletedBy": "Deleted By",
+      "recordsDeleted": "Records Deleted",
+      "actions": "Actions"
+    },
+    "actions": {
+      "viewDetails": "View Details"
+    },
+    "viewDialog": {
+      "title": "Deletion Details",
+      "communityDetails": "Community Details",
+      "deletionInfo": "Deletion Information",
+      "cascadeCounts": "Cascade Deletion Counts",
+      "id": "ID",
+      "name": "Name",
+      "address": "Address",
+      "status": "Status",
+      "createdAt": "Created At",
+      "deletedAt": "Deleted At",
+      "deletedBy": "Deleted By",
+      "close": "Close"
+    },
+    "unknownUser": "Unknown User",
+    "noData": "No deletion records found"
   },
 
   "propertyList": {

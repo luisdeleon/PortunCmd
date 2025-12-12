@@ -160,13 +160,28 @@
     },
     "deleteDialog": {
       "title": "Eliminar Comunidad",
-      "message": "¿Está seguro de que desea eliminar {name}? Esta acción no se puede deshacer.",
-      "confirm": "Eliminar",
-      "cancel": "Cancelar"
+      "message": "¿Está seguro de que desea eliminar {name}?",
+      "warningTitle": "Esto eliminará permanentemente:",
+      "properties": "{count} propiedades",
+      "devices": "{count} dispositivos de automatización",
+      "visitors": "{count} registros de visitantes",
+      "managers": "{count} asignaciones de administradores",
+      "propertyOwners": "{count} asignaciones de propietarios",
+      "noRelatedData": "Esta comunidad no tiene datos relacionados.",
+      "permanentWarning": "Esta acción no se puede revertir. Todos los datos serán eliminados permanentemente.",
+      "confirm": "Eliminar Permanentemente",
+      "cancel": "Cancelar",
+      "propertiesLabel": "propiedades",
+      "devicesLabel": "dispositivos",
+      "visitorsLabel": "registros de visitantes"
+    },
+    "deleteSuccess": {
+      "simple": "La comunidad \"{name}\" ha sido eliminada exitosamente",
+      "withData": "La comunidad \"{name}\" y todos los datos relacionados ({items}) han sido eliminados exitosamente"
     },
     "bulkDeleteDialog": {
       "title": "Eliminar Múltiples Comunidades",
-      "message": "¿Está seguro de que desea eliminar {count} {entity}? Esta acción no se puede deshacer.",
+      "message": "¿Está seguro de que desea eliminar {count} {entity}? Esta acción no se puede revertir.",
       "warning": "Está a punto de eliminar permanentemente {count} {entity}. Esto eliminará todos los datos asociados.",
       "confirm": "Eliminar Todo",
       "cancel": "Cancelar"
@@ -203,7 +218,8 @@
       "hasManagers": "No se puede eliminar esta comunidad porque tiene administradores asignados. Por favor elimine los administradores primero.",
       "hasVisitorRecords": "No se puede eliminar esta comunidad porque tiene registros de visitantes. Por favor archive o elimine los registros primero.",
       "hasRelatedRecords": "No se puede eliminar esta comunidad porque tiene registros relacionados. Por favor elimine los datos relacionados primero.",
-      "noPermission": "No tiene permiso para eliminar esta comunidad"
+      "noPermission": "No tiene permiso para eliminar esta comunidad. Solo los Super Administradores pueden eliminar comunidades.",
+      "notFound": "Comunidad no encontrada. Es posible que ya haya sido eliminada."
     },
     "drawer": {
       "addTitle": "Agregar Comunidad",
@@ -228,6 +244,40 @@
     },
     "noData": "No se encontraron comunidades",
     "noCommunities": "Sin comunidades"
+  },
+  "communityAudit": {
+    "title": "Auditoría de Eliminación del Sistema",
+    "superAdminOnly": "Solo Super Admin",
+    "search": {
+      "placeholder": "Buscar por ID o nombre..."
+    },
+    "table": {
+      "communityId": "ID de Comunidad",
+      "communityName": "Nombre de Comunidad",
+      "deletedAt": "Eliminado El",
+      "deletedBy": "Eliminado Por",
+      "recordsDeleted": "Registros Eliminados",
+      "actions": "Acciones"
+    },
+    "actions": {
+      "viewDetails": "Ver Detalles"
+    },
+    "viewDialog": {
+      "title": "Detalles de Eliminación",
+      "communityDetails": "Detalles de Comunidad",
+      "deletionInfo": "Información de Eliminación",
+      "cascadeCounts": "Conteos de Eliminación en Cascada",
+      "id": "ID",
+      "name": "Nombre",
+      "address": "Dirección",
+      "status": "Estado",
+      "createdAt": "Creado El",
+      "deletedAt": "Eliminado El",
+      "deletedBy": "Eliminado Por",
+      "close": "Cerrar"
+    },
+    "unknownUser": "Usuario Desconocido",
+    "noData": "No se encontraron registros de eliminación"
   },
   "propertyList": {
     "title": "Propiedades",
@@ -275,13 +325,13 @@
     },
     "deleteDialog": {
       "title": "Eliminar Propiedad",
-      "message": "¿Está seguro de que desea eliminar {name}? Esta acción no se puede deshacer.",
+      "message": "¿Está seguro de que desea eliminar {name}? Esta acción no se puede revertir.",
       "confirm": "Eliminar",
       "cancel": "Cancelar"
     },
     "bulkDeleteDialog": {
       "title": "Eliminar Múltiples Propiedades",
-      "message": "¿Está seguro de que desea eliminar {count} {entity}? Esta acción no se puede deshacer.",
+      "message": "¿Está seguro de que desea eliminar {count} {entity}? Esta acción no se puede revertir.",
       "warning": "Está a punto de eliminar permanentemente {count} {entity}. Esto eliminará todos los datos asociados.",
       "confirm": "Eliminar Todo",
       "cancel": "Cancelar"
@@ -372,13 +422,13 @@
     },
     "deleteDialog": {
       "title": "Eliminar Pase de Visitante",
-      "message": "¿Está seguro de que desea eliminar el pase de visitante de {name}? Esta acción no se puede deshacer.",
+      "message": "¿Está seguro de que desea eliminar el pase de visitante de {name}? Esta acción no se puede revertir.",
       "confirm": "Eliminar",
       "cancel": "Cancelar"
     },
     "bulkDeleteDialog": {
       "title": "Eliminar Múltiples Pases de Visitantes",
-      "message": "¿Está seguro de que desea eliminar {count} {entity} de visitante? Esta acción no se puede deshacer.",
+      "message": "¿Está seguro de que desea eliminar {count} {entity} de visitante? Esta acción no se puede revertir.",
       "warning": "Está a punto de eliminar permanentemente {count} {entity} de visitante.",
       "confirm": "Eliminar Todos",
       "cancel": "Cancelar"
@@ -613,7 +663,7 @@
     },
     "deleteDialog": {
       "title": "Eliminar Dispositivo",
-      "message": "¿Está seguro de que desea eliminar {name}? Esta acción no se puede deshacer.",
+      "message": "¿Está seguro de que desea eliminar {name}? Esta acción no se puede revertir.",
       "confirm": "Eliminar",
       "cancel": "Cancelar"
     },
@@ -805,6 +855,7 @@
   "Statistics": "Estadísticas",
   "Actions": "Acciones",
   "Access Control": "Control de Acceso",
+  "Super Admin": "Super Admin",
   "User Interface": "Interfaz de Usuario",
   "CRM": "CRM",
   "eCommerce": "Comercio Electrónico",
@@ -849,6 +900,7 @@
   "Tables": "Tablas",
   "Data Table": "Tabla de Datos",
   "Permissions": "Permisos",
+  "System Audit": "Auditoría del Sistema",
   "Apps": "Aplicaciones",
   "Misc": "Misceláneos",
   "Wizard Pages": "Páginas del Asistente",
@@ -1155,7 +1207,7 @@
     },
     "deleteDialog": {
       "title": "Eliminar Usuario",
-      "message": "¿Está seguro de que desea eliminar a {name}? Esta acción no se puede deshacer.",
+      "message": "¿Está seguro de que desea eliminar a {name}? Esta acción no se puede revertir.",
       "confirm": "Eliminar",
       "cancel": "Cancelar"
     },
@@ -1419,7 +1471,7 @@
       "deleteDialog": {
         "title": "Eliminar Dispositivo",
         "message": "¿Está seguro de que desea eliminar {name}?",
-        "warning": "Esta acción no se puede deshacer. El dispositivo será eliminado permanentemente.",
+        "warning": "Esta acción no se puede revertir. El dispositivo será eliminado permanentemente.",
         "cancel": "Cancelar",
         "delete": "Eliminar"
       },
@@ -1435,7 +1487,7 @@
     },
     "deleteDialog": {
       "title": "Eliminar Usuario",
-      "description": "¿Está seguro de que desea eliminar a {name}? Esta acción no se puede deshacer y eliminará permanentemente la cuenta del usuario.",
+      "description": "¿Está seguro de que desea eliminar a {name}? Esta acción no se puede revertir y eliminará permanentemente la cuenta del usuario.",
       "warning": "Eliminar este usuario eliminará todos los datos asociados y no se puede revertir.",
       "cancel": "Cancelar",
       "delete": "Eliminar Usuario"
@@ -1931,39 +1983,40 @@
       "basicInfo": "Información Básica",
       "deviceIdentifiers": "Identificadores del Dispositivo",
       "apiConfiguration": "Configuración de API",
-      "relayConfiguration": "Configuración de Relé",
+      "relayConfiguration": "Configuración de Relevador",
       "location": "Ubicación",
       "statusAccess": "Estado y Acceso"
     },
     "fields": {
       "deviceName": "Nombre del Dispositivo *",
       "deviceNamePlaceholder": "Ingrese nombre del dispositivo",
+      "community": "Comunidad *",
+      "communityPlaceholder": "Seleccione comunidad",
       "brand": "Marca",
       "brandPlaceholder": "Seleccione marca",
       "model": "Modelo",
       "modelPlaceholder": "Seleccione modelo",
-      "deviceIdIn": "ID de Dispositivo de Entrada",
-      "deviceIdInPlaceholder": "Ingrese ID de dispositivo de entrada",
-      "deviceIdOut": "ID de Dispositivo de Salida",
-      "deviceIdOutPlaceholder": "Ingrese ID de dispositivo de salida",
+      "deviceIdIn": "ID de Dispositivo (Entrada)",
+      "deviceIdInHint": "ID de hardware para relevador de entrada",
+      "deviceIdOut": "ID de Dispositivo (Salida)",
+      "deviceIdOutHint": "ID de hardware para relevador de salida",
       "apiUrl": "URL de API",
-      "apiUrlPlaceholder": "https://",
       "apiEndpoint": "Endpoint de API",
-      "apiEndpointPlaceholder": "/rpc/Switch.Set",
       "authKey": "Clave de Autenticación",
       "authKeyPlaceholder": "Ingrese clave de autenticación",
-      "authKeyHint": "La clave de autenticación está protegida. Haga clic en el ojo para revelar.",
-      "direction": "Dirección",
-      "directionPlaceholder": "Seleccione dirección",
-      "turn": "Acción de Interruptor",
-      "turnPlaceholder": "Seleccione acción",
-      "channelIn": "Canal de Entrada",
-      "channelOut": "Canal de Salida",
-      "community": "Comunidad *",
-      "communityPlaceholder": "Seleccione comunidad",
-      "enabled": "Habilitado",
-      "guestAccess": "Acceso de Invitados",
-      "residentAccess": "Acceso de Residentes"
+      "authKeyProtectedHint": "La clave de autenticación está protegida. Haga clic en el ojo para revelar.",
+      "directionType": "Tipo de Dirección",
+      "directionTypePlaceholder": "Seleccione dirección",
+      "turnAction": "Acción de Encendido",
+      "turnActionPlaceholder": "Seleccione acción",
+      "entryChannel": "Canal de Entrada",
+      "exitChannel": "Canal de Salida",
+      "channelPlaceholder": "Seleccione canal",
+      "geolocation": "Geolocalización",
+      "geolocationHint": "Formato: latitud, longitud",
+      "deviceEnabled": "Dispositivo Habilitado",
+      "guestAccessAllowed": "Acceso de Invitados Permitido",
+      "residentAccessAllowed": "Acceso de Residentes Permitido"
     },
     "options": {
       "other": "Otro",

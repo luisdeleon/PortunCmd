@@ -69,7 +69,7 @@ export default [
   },
 
   {
-    heading: 'Access Control',
+    heading: 'Super Admin',
     action: 'manage',
     subject: 'all',
   },
@@ -86,6 +86,13 @@ export default [
     title: 'Permissions',
     icon: { icon: 'tabler-lock' },
     to: 'apps-permissions',
+    action: 'manage',
+    subject: 'all',
+  },
+  {
+    title: 'System Audit',
+    icon: { icon: 'tabler-history' },
+    to: 'apps-audit-deletion',
     action: 'manage',
     subject: 'all',
   },

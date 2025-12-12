@@ -160,9 +160,24 @@
     },
     "deleteDialog": {
       "title": "Excluir Comunidade",
-      "message": "Tem certeza de que deseja excluir {name}? Esta ação não pode ser desfeita.",
-      "confirm": "Excluir",
-      "cancel": "Cancelar"
+      "message": "Tem certeza de que deseja excluir {name}?",
+      "warningTitle": "Isso excluirá permanentemente:",
+      "properties": "{count} propriedades",
+      "devices": "{count} dispositivos de automação",
+      "visitors": "{count} registros de visitantes",
+      "managers": "{count} atribuições de gerentes",
+      "propertyOwners": "{count} atribuições de proprietários",
+      "noRelatedData": "Esta comunidade não possui dados relacionados.",
+      "permanentWarning": "Esta ação não pode ser desfeita. Todos os dados serão excluídos permanentemente.",
+      "confirm": "Excluir Permanentemente",
+      "cancel": "Cancelar",
+      "propertiesLabel": "propriedades",
+      "devicesLabel": "dispositivos",
+      "visitorsLabel": "registros de visitantes"
+    },
+    "deleteSuccess": {
+      "simple": "A comunidade \"{name}\" foi excluída com sucesso",
+      "withData": "A comunidade \"{name}\" e todos os dados relacionados ({items}) foram excluídos com sucesso"
     },
     "bulkDeleteDialog": {
       "title": "Excluir Múltiplas Comunidades",
@@ -203,7 +218,8 @@
       "hasManagers": "Não é possível excluir esta comunidade porque possui gerentes atribuídos. Por favor remova os gerentes primeiro.",
       "hasVisitorRecords": "Não é possível excluir esta comunidade porque possui registros de visitantes. Por favor arquive ou remova os registros primeiro.",
       "hasRelatedRecords": "Não é possível excluir esta comunidade porque possui registros relacionados. Por favor remova os dados relacionados primeiro.",
-      "noPermission": "Você não tem permissão para excluir esta comunidade"
+      "noPermission": "Você não tem permissão para excluir esta comunidade. Apenas Super Administradores podem excluir comunidades.",
+      "notFound": "Comunidade não encontrada. Pode já ter sido excluída."
     },
     "drawer": {
       "addTitle": "Adicionar Comunidade",
@@ -228,6 +244,40 @@
     },
     "noData": "Nenhuma comunidade encontrada",
     "noCommunities": "Sem comunidades"
+  },
+  "communityAudit": {
+    "title": "Auditoria de Exclusão do Sistema",
+    "superAdminOnly": "Apenas Super Admin",
+    "search": {
+      "placeholder": "Pesquisar por ID ou nome..."
+    },
+    "table": {
+      "communityId": "ID da Comunidade",
+      "communityName": "Nome da Comunidade",
+      "deletedAt": "Excluído Em",
+      "deletedBy": "Excluído Por",
+      "recordsDeleted": "Registros Excluídos",
+      "actions": "Ações"
+    },
+    "actions": {
+      "viewDetails": "Ver Detalhes"
+    },
+    "viewDialog": {
+      "title": "Detalhes da Exclusão",
+      "communityDetails": "Detalhes da Comunidade",
+      "deletionInfo": "Informações da Exclusão",
+      "cascadeCounts": "Contagens de Exclusão em Cascata",
+      "id": "ID",
+      "name": "Nome",
+      "address": "Endereço",
+      "status": "Status",
+      "createdAt": "Criado Em",
+      "deletedAt": "Excluído Em",
+      "deletedBy": "Excluído Por",
+      "close": "Fechar"
+    },
+    "unknownUser": "Usuário Desconhecido",
+    "noData": "Nenhum registro de exclusão encontrado"
   },
   "propertyList": {
     "title": "Propriedades",
@@ -864,6 +914,7 @@
   "Statistics": "Estatísticas",
   "Actions": "Ações",
   "Access Control": "Controle de Acesso",
+  "Super Admin": "Super Admin",
   "User Interface": "Interface do Usuário",
   "CRM": "CRM",
   "eCommerce": "Comércio Eletrônico",
@@ -908,6 +959,7 @@
   "Tables": "Tabelas",
   "Data Table": "Tabela de Dados",
   "Permissions": "Permissões",
+  "System Audit": "Auditoria do Sistema",
   "Apps": "Aplicativos",
   "Misc": "Diversos",
   "Wizard Pages": "Páginas do Assistente",
