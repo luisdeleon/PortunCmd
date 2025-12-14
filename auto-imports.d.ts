@@ -239,6 +239,7 @@ declare global {
   const useGamepad: typeof import('@vueuse/core')['useGamepad']
   const useGenerateImageVariant: typeof import('./src/@core/composable/useGenerateImageVariant')['useGenerateImageVariant']
   const useGeolocation: typeof import('@vueuse/core')['useGeolocation']
+  const useGlobalSearch: typeof import('./src/composables/useGlobalSearch')['useGlobalSearch']
   const useI18n: typeof import('vue-i18n')['useI18n']
   const useId: typeof import('vue')['useId']
   const useIdle: typeof import('@vueuse/core')['useIdle']
@@ -613,6 +614,7 @@ declare module 'vue' {
     readonly useGamepad: UnwrapRef<typeof import('@vueuse/core')['useGamepad']>
     readonly useGenerateImageVariant: UnwrapRef<typeof import('./src/@core/composable/useGenerateImageVariant')['useGenerateImageVariant']>
     readonly useGeolocation: UnwrapRef<typeof import('@vueuse/core')['useGeolocation']>
+    readonly useGlobalSearch: UnwrapRef<typeof import('./src/composables/useGlobalSearch')['useGlobalSearch']>
     readonly useI18n: UnwrapRef<typeof import('vue-i18n')['useI18n']>
     readonly useId: UnwrapRef<typeof import('vue')['useId']>
     readonly useIdle: UnwrapRef<typeof import('@vueuse/core')['useIdle']>

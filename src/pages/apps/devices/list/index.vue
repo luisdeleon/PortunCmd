@@ -625,6 +625,20 @@ const getDirectionColor = (direction: string) => {
       return 'secondary'
   }
 }
+
+// Get translated direction label
+const getDirectionLabel = (direction: string) => {
+  switch (direction) {
+    case 'Enter':
+      return t('deviceList.direction.enter')
+    case 'Exit':
+      return t('deviceList.direction.exit')
+    case 'Both':
+      return t('deviceList.direction.both')
+    default:
+      return direction || 'N/A'
+  }
+}
 </script>
 
 <template>
@@ -871,7 +885,7 @@ const getDirectionColor = (direction: string) => {
             size="small"
             label
           >
-            {{ item.direction_type || 'N/A' }}
+            {{ getDirectionLabel(item.direction_type) }}
           </VChip>
         </template>
 

@@ -34,6 +34,7 @@ export type Database = {
           geolocation: string | null
           guest_access: boolean | null
           id: string
+          resident_access: boolean | null
           updated_at: string
         }
         Insert: {
@@ -55,6 +56,7 @@ export type Database = {
           geolocation?: string | null
           guest_access?: boolean | null
           id?: string
+          resident_access?: boolean | null
           updated_at?: string
         }
         Update: {
@@ -76,6 +78,7 @@ export type Database = {
           geolocation?: string | null
           guest_access?: boolean | null
           id?: string
+          resident_access?: boolean | null
           updated_at?: string
         }
         Relationships: [
@@ -94,6 +97,7 @@ export type Database = {
           city: string | null
           country: string | null
           created_at: string
+          created_by: string | null
           geolocation: string | null
           googlemaps: string | null
           id: string
@@ -113,6 +117,7 @@ export type Database = {
           city?: string | null
           country?: string | null
           created_at?: string
+          created_by?: string | null
           geolocation?: string | null
           googlemaps?: string | null
           id: string
@@ -132,6 +137,7 @@ export type Database = {
           city?: string | null
           country?: string | null
           created_at?: string
+          created_by?: string | null
           geolocation?: string | null
           googlemaps?: string | null
           id?: string
@@ -148,6 +154,13 @@ export type Database = {
         }
         Relationships: [
           {
+            foreignKeyName: "community_created_by_profile_fk"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profile"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "community_status_changed_by_fkey"
             columns: ["status_changed_by"]
             isOneToOne: false
@@ -155,6 +168,166 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      community_alert_templates: {
+        Row: {
+          category: string
+          color: string
+          community_id: string | null
+          created_at: string
+          created_by: string | null
+          enabled: boolean
+          icon: string
+          id: string
+          is_system: boolean
+          message_en: string
+          message_es: string | null
+          message_pt: string | null
+          sort_order: number
+          title_en: string
+          title_es: string | null
+          title_pt: string | null
+          updated_at: string
+        }
+        Insert: {
+          category: string
+          color?: string
+          community_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          enabled?: boolean
+          icon: string
+          id?: string
+          is_system?: boolean
+          message_en: string
+          message_es?: string | null
+          message_pt?: string | null
+          sort_order?: number
+          title_en: string
+          title_es?: string | null
+          title_pt?: string | null
+          updated_at?: string
+        }
+        Update: {
+          category?: string
+          color?: string
+          community_id?: string | null
+          created_at?: string
+          created_by?: string | null
+          enabled?: boolean
+          icon?: string
+          id?: string
+          is_system?: boolean
+          message_en?: string
+          message_es?: string | null
+          message_pt?: string | null
+          sort_order?: number
+          title_en?: string
+          title_es?: string | null
+          title_pt?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_alert_templates_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "community"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "community_alert_templates_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profile"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      community_alerts: {
+        Row: {
+          category: string
+          community_id: string
+          created_at: string
+          id: string
+          message: string
+          recipients_count: number
+          sent_by: string
+          template_id: string | null
+          title: string
+        }
+        Insert: {
+          category: string
+          community_id: string
+          created_at?: string
+          id?: string
+          message: string
+          recipients_count?: number
+          sent_by: string
+          template_id?: string | null
+          title: string
+        }
+        Update: {
+          category?: string
+          community_id?: string
+          created_at?: string
+          id?: string
+          message?: string
+          recipients_count?: number
+          sent_by?: string
+          template_id?: string | null
+          title?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_alerts_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "community"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "community_alerts_sent_by_fkey"
+            columns: ["sent_by"]
+            isOneToOne: false
+            referencedRelation: "profile"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "community_alerts_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "community_alert_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      community_deletion_audit: {
+        Row: {
+          community_id: string
+          community_name: string | null
+          deleted_at: string | null
+          deleted_by: string | null
+          deleted_data: Json
+          id: string
+        }
+        Insert: {
+          community_id: string
+          community_name?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
+          deleted_data: Json
+          id?: string
+        }
+        Update: {
+          community_id?: string
+          community_name?: string | null
+          deleted_at?: string | null
+          deleted_by?: string | null
+          deleted_data?: Json
+          id?: string
+        }
+        Relationships: []
       }
       community_manager: {
         Row: {
@@ -270,67 +443,122 @@ export type Database = {
         Row: {
           community_id: string | null
           created_at: string
+          email_system_alerts: boolean
           external_user_id: string
           fcm_token: string | null
           id: string
           notifications_enabled: boolean
+          notify_access_denied: boolean
+          notify_check_in_out: boolean
+          notify_community_alerts: boolean
+          notify_pass_expiring: boolean
+          notify_system_alerts: boolean
           onesignal_token: string | null
           property_id: string | null
+          push_enabled: boolean
+          quiet_hours_enabled: boolean
+          quiet_hours_end: string
+          quiet_hours_start: string
           updated_at: string
         }
         Insert: {
           community_id?: string | null
           created_at?: string
+          email_system_alerts?: boolean
           external_user_id: string
           fcm_token?: string | null
           id?: string
           notifications_enabled?: boolean
+          notify_access_denied?: boolean
+          notify_check_in_out?: boolean
+          notify_community_alerts?: boolean
+          notify_pass_expiring?: boolean
+          notify_system_alerts?: boolean
           onesignal_token?: string | null
           property_id?: string | null
+          push_enabled?: boolean
+          quiet_hours_enabled?: boolean
+          quiet_hours_end?: string
+          quiet_hours_start?: string
           updated_at?: string
         }
         Update: {
           community_id?: string | null
           created_at?: string
+          email_system_alerts?: boolean
           external_user_id?: string
           fcm_token?: string | null
           id?: string
           notifications_enabled?: boolean
+          notify_access_denied?: boolean
+          notify_check_in_out?: boolean
+          notify_community_alerts?: boolean
+          notify_pass_expiring?: boolean
+          notify_system_alerts?: boolean
           onesignal_token?: string | null
           property_id?: string | null
+          push_enabled?: boolean
+          quiet_hours_enabled?: boolean
+          quiet_hours_end?: string
+          quiet_hours_start?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "notification_users_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "property"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       notifications: {
         Row: {
+          body: string | null
           created_at: string
+          data: Json | null
           id: string
           image: string | null
-          message: string | null
+          read_at: string | null
           title: string | null
           type: string | null
           updated_at: string
+          user_id: string | null
         }
         Insert: {
+          body?: string | null
           created_at?: string
+          data?: Json | null
           id?: string
           image?: string | null
-          message?: string | null
+          read_at?: string | null
           title?: string | null
           type?: string | null
           updated_at?: string
+          user_id?: string | null
         }
         Update: {
+          body?: string | null
           created_at?: string
+          data?: Json | null
           id?: string
           image?: string | null
-          message?: string | null
+          read_at?: string | null
           title?: string | null
           type?: string | null
           updated_at?: string
+          user_id?: string | null
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "notifications_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profile"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       permissions: {
         Row: {
@@ -364,6 +592,7 @@ export type Database = {
       }
       profile: {
         Row: {
+          avatar_url: string | null
           created_at: string
           def_community_id: string | null
           def_property_id: string | null
@@ -380,6 +609,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          avatar_url?: string | null
           created_at?: string
           def_community_id?: string | null
           def_property_id?: string | null
@@ -396,6 +626,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          avatar_url?: string | null
           created_at?: string
           def_community_id?: string | null
           def_property_id?: string | null
@@ -565,6 +796,30 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      property_id_mapping: {
+        Row: {
+          community_id: string | null
+          created_at: string | null
+          new_id: string
+          old_id: string
+          property_name: string | null
+        }
+        Insert: {
+          community_id?: string | null
+          created_at?: string | null
+          new_id: string
+          old_id: string
+          property_name?: string | null
+        }
+        Update: {
+          community_id?: string | null
+          created_at?: string | null
+          new_id?: string
+          old_id?: string
+          property_name?: string | null
+        }
+        Relationships: []
       }
       property_owner: {
         Row: {
@@ -754,6 +1009,8 @@ export type Database = {
           doc3_upload_url: string | null
           doc4_hash: string | null
           doc4_upload_url: string | null
+          entry_device_id: string | null
+          exit_device_id: string | null
           host_uid: string
           id: string
           in_time: string | null
@@ -773,6 +1030,8 @@ export type Database = {
           doc3_upload_url?: string | null
           doc4_hash?: string | null
           doc4_upload_url?: string | null
+          entry_device_id?: string | null
+          exit_device_id?: string | null
           host_uid: string
           id?: string
           in_time?: string | null
@@ -792,6 +1051,8 @@ export type Database = {
           doc3_upload_url?: string | null
           doc4_hash?: string | null
           doc4_upload_url?: string | null
+          entry_device_id?: string | null
+          exit_device_id?: string | null
           host_uid?: string
           id?: string
           in_time?: string | null
@@ -801,7 +1062,22 @@ export type Database = {
           updated_at?: string
           visitor_name?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "visitor_record_logs_entry_device_id_fkey"
+            columns: ["entry_device_id"]
+            isOneToOne: false
+            referencedRelation: "automation_devices"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "visitor_record_logs_exit_device_id_fkey"
+            columns: ["exit_device_id"]
+            isOneToOne: false
+            referencedRelation: "automation_devices"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       visitor_records_uid: {
         Row: {
@@ -914,17 +1190,97 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      visitor_records_public: {
+        Row: {
+          community_id: string | null
+          entries_allowed: number | null
+          entries_used: number | null
+          host_uid: string | null
+          id: string | null
+          property_id: string | null
+          record_uid: string | null
+          validity_end: string | null
+          validity_start: string | null
+          visitor_name: string | null
+        }
+        Insert: {
+          community_id?: string | null
+          entries_allowed?: number | null
+          entries_used?: number | null
+          host_uid?: string | null
+          id?: string | null
+          property_id?: string | null
+          record_uid?: string | null
+          validity_end?: string | null
+          validity_start?: string | null
+          visitor_name?: string | null
+        }
+        Update: {
+          community_id?: string | null
+          entries_allowed?: number | null
+          entries_used?: number | null
+          host_uid?: string | null
+          id?: string | null
+          property_id?: string | null
+          record_uid?: string | null
+          validity_end?: string | null
+          validity_start?: string | null
+          visitor_name?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "visitor_records_uid_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "community"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "visitor_records_uid_host_uid_fkey"
+            columns: ["host_uid"]
+            isOneToOne: false
+            referencedRelation: "profile"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "visitor_records_uid_property_id_fkey"
+            columns: ["property_id"]
+            isOneToOne: false
+            referencedRelation: "property"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
+      admin_update_profile: {
+        Args: {
+          p_def_community_id?: string
+          p_def_property_id?: string
+          p_display_name?: string
+          p_enabled?: boolean
+          p_id: string
+          p_language?: string
+        }
+        Returns: undefined
+      }
       auto_inactive_users: {
         Args: { p_days_threshold?: number }
         Returns: Json
       }
-      can_archive_property: {
-        Args: { p_property_id: string }
-        Returns: boolean
-      }
+      can_archive_property:
+        | {
+            Args: { p_property_id: string }
+            Returns: {
+              error: true
+            } & "Could not choose the best candidate function between: public.can_archive_property(p_property_id => text), public.can_archive_property(p_property_id => uuid). Try renaming the parameters or the function itself in the database so function overloading can be resolved"
+          }
+        | {
+            Args: { p_property_id: string }
+            Returns: {
+              error: true
+            } & "Could not choose the best candidate function between: public.can_archive_property(p_property_id => text), public.can_archive_property(p_property_id => uuid). Try renaming the parameters or the function itself in the database so function overloading can be resolved"
+          }
       change_community_status: {
         Args: {
           p_changed_by: string
@@ -943,7 +1299,7 @@ export type Database = {
           p_property_id: string
           p_reason?: string
         }
-        Returns: Json
+        Returns: undefined
       }
       change_user_status: {
         Args: {
@@ -954,6 +1310,12 @@ export type Database = {
         }
         Returns: Json
       }
+      cleanup_old_notifications: { Args: never; Returns: undefined }
+      delete_community_cascade: {
+        Args: { community_id_param: string }
+        Returns: Json
+      }
+      delete_user_completely: { Args: { user_id: string }; Returns: Json }
       func_count_table_rows: {
         Args: {
           p_column_name?: string
@@ -984,7 +1346,12 @@ export type Database = {
         }[]
       }
       func_update_onesignal_external_id: { Args: never; Returns: undefined }
+      get_community_deletion_preview: {
+        Args: { community_id_param: string }
+        Returns: Json
+      }
       get_status_statistics: { Args: { p_entity_type: string }; Returns: Json }
+      unaccent: { Args: { "": string }; Returns: string }
     }
     Enums: {
       [_ in never]: never

@@ -174,6 +174,12 @@ export const useTurnstile = () => {
    * Validate the Turnstile token server-side via Edge Function
    */
   const validate = async (): Promise<TurnstileValidationResponse> => {
+    // Bypass Turnstile validation in development mode
+    if (import.meta.env.DEV) {
+      console.log('[DEV] Turnstile validation bypassed')
+      return { success: true }
+    }
+
     if (!token.value) {
       return {
         success: false,
