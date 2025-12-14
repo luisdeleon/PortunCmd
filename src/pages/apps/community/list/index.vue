@@ -29,8 +29,11 @@ const isSuperAdmin = computed(() => {
 // 👉 i18n
 const { t } = useI18n()
 
+// 👉 Route for URL search params
+const route = useRoute()
+
 // 👉 Store
-const searchQuery = ref('')
+const searchQuery = ref((route.query.search as string) || '')
 const selectedId = ref()
 const selectedCity = ref()
 const selectedCountry = ref()
@@ -268,6 +271,11 @@ watch([searchQuery, selectedId, selectedCity, selectedCountry, selectedStatus, p
   fetchCommunities()
 })
 
+// Watch for URL search param changes (when navigating from global search)
+watch(() => route.query.search, (newSearch) => {
+  searchQuery.value = (newSearch as string) || ''
+})
+
 // 👉 Dialogs state
 const isAddCommunityDialogVisible = ref(false)
 const isEditCommunityDialogVisible = ref(false)
@@ -279,6 +287,18 @@ const isStatusChangeDialogVisible = ref(false)
 const selectedCommunity = ref<any>(null)
 const communityToDelete = ref<{ id: string; name: string } | null>(null)
 const snackbar = ref({ show: false, message: '', color: 'success' })
+
+// Deletion preview state
+const deletionPreview = ref<{
+  visitor_records: number
+  devices: number
+  properties: number
+  managers: number
+  property_owners: number
+  notification_users: number
+} | null>(null)
+const isLoadingPreview = ref(false)
+const isDeleting = ref(false)
 
 // Bulk status update state
 const bulkStatusForm = ref({
@@ -336,15 +356,37 @@ const handleStatusChanged = () => {
 }
 
 // 👉 Open delete confirmation dialog
-const openDeleteDialog = (community: any) => {
+const openDeleteDialog = async (community: any) => {
   communityToDelete.value = { id: community.id, name: community.name || community.id }
+  deletionPreview.value = null
+  isLoadingPreview.value = true
   isDeleteDialogVisible.value = true
+
+  try {
+    const { data, error } = await supabase.rpc('get_community_deletion_preview', {
+      community_id_param: community.id,
+    })
+
+    if (error) {
+      console.error('Error fetching deletion preview:', error)
+    }
+    else {
+      deletionPreview.value = data
+    }
+  }
+  catch (err) {
+    console.error('Error in openDeleteDialog:', err)
+  }
+  finally {
+    isLoadingPreview.value = false
+  }
 }
 
 // 👉 Cancel delete
 const cancelDelete = () => {
   isDeleteDialogVisible.value = false
   communityToDelete.value = null
+  deletionPreview.value = null
 }
 
 // 👉 Handle community saved
@@ -362,38 +404,27 @@ const handleCommunitySaved = () => {
   }
 }
 
-// 👉 Delete community
+// 👉 Delete community (cascade delete with audit)
 const deleteCommunity = async () => {
   if (!communityToDelete.value) return
 
   const { id, name } = communityToDelete.value
+  isDeleting.value = true
 
   try {
-    const { error } = await supabase
-      .from('community')
-      .delete()
-      .eq('id', id)
+    const { data, error } = await supabase.rpc('delete_community_cascade', {
+      community_id_param: id,
+    })
 
     if (error) {
       console.error('Error deleting community:', error)
 
       let errorMessage = t('communityList.deleteError.generic')
-      if (error.code === '23503') {
-        // Parse the error details to show which table is blocking
-        const details = error.details || ''
-        if (details.includes('automation_devices')) {
-          errorMessage = t('communityList.deleteError.hasAutomationDevices')
-        } else if (details.includes('property')) {
-          errorMessage = t('communityList.deleteError.hasProperties')
-        } else if (details.includes('community_manager')) {
-          errorMessage = t('communityList.deleteError.hasManagers')
-        } else if (details.includes('visitor_records')) {
-          errorMessage = t('communityList.deleteError.hasVisitorRecords')
-        } else {
-          errorMessage = t('communityList.deleteError.hasRelatedRecords')
-        }
-      } else if (error.code === 'PGRST116') {
+      if (error.message?.includes('Super Admin')) {
         errorMessage = t('communityList.deleteError.noPermission')
+      }
+      else if (error.message?.includes('not found')) {
+        errorMessage = t('communityList.deleteError.notFound')
       }
 
       snackbar.value = {
@@ -404,13 +435,25 @@ const deleteCommunity = async () => {
 
       isDeleteDialogVisible.value = false
       communityToDelete.value = null
+      deletionPreview.value = null
+      isDeleting.value = false
       return
     }
 
-    // Success
+    // Success - show what was deleted
+    const counts = data?.counts || {}
+    const deletedItems = []
+    if (counts.properties > 0) deletedItems.push(`${counts.properties} ${t('communityList.deleteDialog.propertiesLabel')}`)
+    if (counts.devices > 0) deletedItems.push(`${counts.devices} ${t('communityList.deleteDialog.devicesLabel')}`)
+    if (counts.visitor_records > 0) deletedItems.push(`${counts.visitor_records} ${t('communityList.deleteDialog.visitorsLabel')}`)
+
+    const successMessage = deletedItems.length > 0
+      ? t('communityList.deleteSuccess.withData', { name, items: deletedItems.join(', ') })
+      : t('communityList.deleteSuccess.simple', { name })
+
     snackbar.value = {
       show: true,
-      message: `Community "${name}" has been deleted successfully`,
+      message: successMessage,
       color: 'success',
     }
 
@@ -422,19 +465,25 @@ const deleteCommunity = async () => {
     // Close dialog and clear selection
     isDeleteDialogVisible.value = false
     communityToDelete.value = null
+    deletionPreview.value = null
 
     // Refetch communities
     fetchCommunities()
     fetchCommunityGrowth()
-  } catch (err) {
+  }
+  catch (err) {
     console.error('Error in deleteCommunity:', err)
     snackbar.value = {
       show: true,
-      message: 'Failed to delete community',
+      message: t('communityList.deleteError.generic'),
       color: 'error',
     }
     isDeleteDialogVisible.value = false
     communityToDelete.value = null
+    deletionPreview.value = null
+  }
+  finally {
+    isDeleting.value = false
   }
 }
 
@@ -1011,38 +1060,88 @@ const widgetData = computed(() => {
       @status-changed="handleStatusChanged"
     />
 
-    <!-- 👉 Delete Confirmation Dialog -->
+    <!-- 👉 Delete Confirmation Dialog (Enhanced with Preview) -->
     <VDialog
       v-model="isDeleteDialogVisible"
-      max-width="500"
+      max-width="550"
+      persistent
     >
       <VCard>
         <VCardText class="text-center px-10 py-6">
-          <VBtn
-            icon
-            variant="outlined"
-            color="warning"
+          <VIcon
+            icon="tabler-alert-triangle"
+            color="error"
+            size="56"
             class="my-4"
-            style="block-size: 88px; inline-size: 88px; pointer-events: none;"
-          >
-            <VIcon
-              icon="tabler-exclamation-circle"
-              size="56"
-            />
-          </VBtn>
+          />
 
           <h6 class="text-h6 mb-4">
             {{ t('communityList.deleteDialog.title') }}
           </h6>
 
-          <p class="text-body-1 mb-6">
+          <p class="text-body-1 mb-4">
             {{ t('communityList.deleteDialog.message', { name: communityToDelete?.name }) }}
+          </p>
+
+          <!-- Loading Preview -->
+          <div
+            v-if="isLoadingPreview"
+            class="d-flex justify-center my-4"
+          >
+            <VProgressCircular
+              indeterminate
+              color="primary"
+            />
+          </div>
+
+          <!-- Deletion Preview Warning -->
+          <VAlert
+            v-else-if="deletionPreview && (deletionPreview.properties > 0 || deletionPreview.devices > 0 || deletionPreview.visitor_records > 0 || deletionPreview.managers > 0)"
+            color="error"
+            variant="tonal"
+            class="mb-4 text-start"
+          >
+            <div class="text-subtitle-2 font-weight-bold mb-2">
+              {{ t('communityList.deleteDialog.warningTitle') }}
+            </div>
+            <ul class="ps-4 mb-0">
+              <li v-if="deletionPreview.properties > 0">
+                {{ t('communityList.deleteDialog.properties', { count: deletionPreview.properties }) }}
+              </li>
+              <li v-if="deletionPreview.devices > 0">
+                {{ t('communityList.deleteDialog.devices', { count: deletionPreview.devices }) }}
+              </li>
+              <li v-if="deletionPreview.visitor_records > 0">
+                {{ t('communityList.deleteDialog.visitors', { count: deletionPreview.visitor_records }) }}
+              </li>
+              <li v-if="deletionPreview.managers > 0">
+                {{ t('communityList.deleteDialog.managers', { count: deletionPreview.managers }) }}
+              </li>
+              <li v-if="deletionPreview.property_owners > 0">
+                {{ t('communityList.deleteDialog.propertyOwners', { count: deletionPreview.property_owners }) }}
+              </li>
+            </ul>
+          </VAlert>
+
+          <!-- No related data message -->
+          <VAlert
+            v-else-if="deletionPreview"
+            color="info"
+            variant="tonal"
+            class="mb-4 text-start"
+          >
+            {{ t('communityList.deleteDialog.noRelatedData') }}
+          </VAlert>
+
+          <p class="text-body-2 text-error mb-6">
+            {{ t('communityList.deleteDialog.permanentWarning') }}
           </p>
 
           <div class="d-flex gap-4 justify-center">
             <VBtn
               color="secondary"
               variant="tonal"
+              :disabled="isDeleting"
               @click="cancelDelete"
             >
               {{ t('communityList.deleteDialog.cancel') }}
@@ -1051,6 +1150,8 @@ const widgetData = computed(() => {
             <VBtn
               color="error"
               variant="elevated"
+              :loading="isDeleting"
+              :disabled="isLoadingPreview"
               @click="deleteCommunity"
             >
               {{ t('communityList.deleteDialog.confirm') }}

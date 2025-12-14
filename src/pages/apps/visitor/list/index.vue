@@ -13,6 +13,9 @@ definePage({
 
 const { t } = useI18n()
 
+// Route for URL search params
+const route = useRoute()
+
 // Translations for visitor types
 const { loadTranslations, translateVisitorType } = useTranslations()
 
@@ -38,7 +41,7 @@ const totalVisitors = ref(0)
 const isLoading = ref(false)
 
 // Filters
-const searchQuery = ref('')
+const searchQuery = ref((route.query.search as string) || '')
 const selectedCommunity = ref()
 const selectedStatus = ref()
 const selectedType = ref()
@@ -553,6 +556,11 @@ onMounted(() => {
 // Watch for filter changes
 watch([searchQuery, selectedCommunity, selectedStatus, selectedType, page, itemsPerPage, sortBy, orderBy], () => {
   fetchVisitors()
+})
+
+// Watch for URL search param changes (when navigating from global search)
+watch(() => route.query.search, (newSearch) => {
+  searchQuery.value = (newSearch as string) || ''
 })
 
 // Widget data

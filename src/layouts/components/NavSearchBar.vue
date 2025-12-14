@@ -1,14 +1,18 @@
 <script setup lang="ts">
 import Shepherd from 'shepherd.js'
-import { withQuery } from 'ufo'
+import { useDebounceFn } from '@vueuse/core'
 import type { RouteLocationRaw } from 'vue-router'
-import type { SearchResults } from '@db/app-bar-search/types'
+import { useGlobalSearch, type SearchResults } from '@/composables/useGlobalSearch'
 import { useConfigStore } from '@core/stores/config'
+import { can } from '@layouts/plugins/casl'
+import AppBarSearch from '@core/components/AppBarSearch.vue'
 
 interface Suggestion {
   icon: string
   title: string
   url: RouteLocationRaw
+  action?: string
+  subject?: string
 }
 
 defineOptions({
@@ -18,6 +22,9 @@ defineOptions({
 const configStore = useConfigStore()
 const { t } = useI18n({ useScope: 'global' })
 
+// 👉 Global search composable
+const { search, results: searchResults, isLoading: searchLoading, clearResults } = useGlobalSearch()
+
 interface SuggestionGroup {
   title: string
   content: Suggestion[]
@@ -25,91 +32,100 @@ interface SuggestionGroup {
 
 // 👉 Is App Search Bar Visible
 const isAppSearchBarVisible = ref(false)
-const isLoading = ref(false)
 
 // 👉 Default suggestions
 
 const suggestionGroups = computed<SuggestionGroup[]>(() => [
   {
-    title: t('Popular Searches'),
+    title: t('Quick Access'),
     content: [
-      { icon: 'tabler-chart-bar', title: t('Analytics'), url: { name: 'dashboards-analytics' } },
-      { icon: 'tabler-chart-donut-3', title: t('CRM'), url: { name: 'dashboards-crm' } },
-      { icon: 'tabler-shopping-cart', title: t('eCommerce'), url: { name: 'dashboards-ecommerce' } },
-      { icon: 'tabler-truck', title: t('Logistics'), url: { name: 'dashboards-logistics' } },
+      { icon: 'tabler-layout-dashboard', title: t('Dashboard'), url: { name: 'dashboard' } },
+      { icon: 'tabler-ticket', title: t('Active Passes'), url: { name: 'apps-visitor-list' } },
+      { icon: 'tabler-plus', title: t('Create Pass'), url: { name: 'apps-visitor-add' }, action: 'create', subject: 'visitor_pass' },
+      { icon: 'tabler-list-check', title: t('Access Logs'), url: { name: 'apps-visitor-logs' } },
     ],
   },
   {
-    title: t('Apps & Pages'),
+    title: t('Management'),
     content: [
-      { icon: 'tabler-calendar', title: t('Calendar'), url: { name: 'apps-calendar' } },
-      { icon: 'tabler-lock', title: t('Roles & Permissions'), url: { name: 'apps-roles' } },
-      { icon: 'tabler-settings', title: t('Account Settings'), url: { name: 'pages-account-settings-tab', params: { tab: 'account' } } },
-      { icon: 'tabler-copy', title: t('Dialog Examples'), url: { name: 'pages-dialog-examples' } },
-    ],
-  },
-  {
-    title: t('User Interface'),
-    content: [
-      { icon: 'tabler-typography', title: t('Typography'), url: { name: 'pages-typography' } },
-      { icon: 'tabler-menu-2', title: t('Accordion'), url: { name: 'components-expansion-panel' } },
-      { icon: 'tabler-info-triangle', title: t('Alert'), url: { name: 'components-alert' } },
-      { icon: 'tabler-checkbox', title: t('Cards'), url: { name: 'pages-cards-card-basic' } },
-    ],
-  },
-  {
-    title: t('Forms & Tables'),
-    content: [
-      { icon: 'tabler-circle-dot', title: t('Radio'), url: { name: 'forms-radio' } },
-      { icon: 'tabler-file-invoice', title: t('Form Layouts'), url: { name: 'forms-form-layouts' } },
-      { icon: 'tabler-table', title: t('Table'), url: { name: 'tables-data-table' } },
-      { icon: 'tabler-edit', title: t('Editor'), url: { name: 'forms-editors' } },
+      { icon: 'tabler-building-community', title: t('Communities'), url: { name: 'apps-community-list' } },
+      { icon: 'tabler-home', title: t('Properties'), url: { name: 'apps-property-list' } },
+      { icon: 'tabler-users', title: t('Users'), url: { name: 'apps-user-list' }, action: 'read', subject: 'users' },
+      { icon: 'tabler-device-desktop', title: t('Devices'), url: { name: 'apps-devices-list' }, action: 'read', subject: 'automation' },
     ],
   },
 ])
 
+// 👉 Filtered suggestions based on user permissions
+const filteredSuggestionGroups = computed(() =>
+  suggestionGroups.value.map(group => ({
+    ...group,
+    content: group.content.filter(item => can(item.action, item.subject)),
+  })).filter(group => group.content.length > 0),
+)
+
 // 👉 No Data suggestion
 const noDataSuggestions = computed<Suggestion[]>(() => [
   {
-    title: t('Analytics'),
-    icon: 'tabler-chart-bar',
-    url: { name: 'dashboards-analytics' },
+    title: t('Dashboard'),
+    icon: 'tabler-layout-dashboard',
+    url: { name: 'dashboard' },
   },
   {
-    title: t('CRM'),
-    icon: 'tabler-chart-donut-3',
-    url: { name: 'dashboards-crm' },
+    title: t('Communities'),
+    icon: 'tabler-building-community',
+    url: { name: 'apps-community-list' },
   },
   {
-    title: t('eCommerce'),
-    icon: 'tabler-shopping-cart',
-    url: { name: 'dashboards-ecommerce' },
+    title: t('Active Passes'),
+    icon: 'tabler-ticket',
+    url: { name: 'apps-visitor-list' },
   },
 ])
 
 const searchQuery = ref('')
 
 const router = useRouter()
-const searchResult = ref<SearchResults[]>([])
 
-const fetchResults = async () => {
-  isLoading.value = true
+// 👉 Filtered search results based on user permissions
+const filteredSearchResults = computed(() => {
+  if (!searchResults.value || !Array.isArray(searchResults.value)) {
+    return []
+  }
 
-  const { data } = await useApi<any>(withQuery('/app-bar/search', { q: searchQuery.value }))
+  // Filter each group's children based on CASL permissions
+  return searchResults.value.map(group => {
+    const filteredChildren = (group.children || []).filter(item => {
+      // Items without action/subject defined are always visible
+      if (!item.action && !item.subject) {
+        return true
+      }
 
-  searchResult.value = data.value
+      // Check CASL permission for items with action/subject
+      return can(item.action, item.subject)
+    })
 
-  // ℹ️ simulate loading: we have used setTimeout for better user experience your can remove it
-  setTimeout(() => {
-    isLoading.value = false
-  }, 500)
-}
+    return {
+      ...group,
+      children: filteredChildren,
+    }
+  }).filter(group => group.children.length > 0)
+})
 
-watch(searchQuery, fetchResults)
+// 👉 Debounced search function (300ms delay)
+const debouncedSearch = useDebounceFn((query: string) => {
+  search(query)
+}, 300)
+
+// Watch for search query changes
+watch(searchQuery, query => {
+  debouncedSearch(query)
+})
 
 const closeSearchBar = () => {
   isAppSearchBarVisible.value = false
   searchQuery.value = ''
+  clearResults()
 }
 
 // 👉 redirect the selected page
@@ -118,7 +134,6 @@ const redirectToSuggestedPage = (selected: Suggestion) => {
   closeSearchBar()
 }
 
-const LazyAppBarSearch = defineAsyncComponent(() => import('@core/components/AppBarSearch.vue'))
 </script>
 
 <template>
@@ -145,18 +160,18 @@ const LazyAppBarSearch = defineAsyncComponent(() => import('@core/components/App
   </div>
 
   <!-- 👉 App Bar Search -->
-  <LazyAppBarSearch
+  <AppBarSearch
     v-model:is-dialog-visible="isAppSearchBarVisible"
-    :search-results="searchResult"
-    :is-loading="isLoading"
+    :search-results="filteredSearchResults"
+    :is-loading="searchLoading"
     @search="searchQuery = $event"
   >
     <!-- suggestion -->
     <template #suggestions>
       <VCardText class="app-bar-search-suggestions pa-12">
-        <VRow v-if="suggestionGroups">
+        <VRow v-if="filteredSuggestionGroups">
           <VCol
-            v-for="suggestion in suggestionGroups"
+            v-for="suggestion in filteredSuggestionGroups"
             :key="suggestion.title"
             cols="12"
             sm="6"
@@ -237,9 +252,12 @@ const LazyAppBarSearch = defineAsyncComponent(() => import('@core/components/App
         <VListItemTitle>
           {{ list.title }}
         </VListItemTitle>
+        <VListItemSubtitle v-if="list.subtitle">
+          {{ list.subtitle }}
+        </VListItemSubtitle>
       </VListItem>
     </template>
-  </LazyAppBarSearch>
+  </AppBarSearch>
 </template>
 
 <style lang="scss">

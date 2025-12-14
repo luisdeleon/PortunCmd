@@ -25,8 +25,11 @@ const canManage = computed(() => {
 // 👉 i18n
 const { t } = useI18n()
 
+// 👉 Route for URL search params
+const route = useRoute()
+
 // 👉 Store
-const searchQuery = ref('')
+const searchQuery = ref((route.query.search as string) || '')
 const selectedCommunity = ref()
 const selectedStatus = ref()
 
@@ -221,6 +224,11 @@ onMounted(() => {
 // Watch for filter changes
 watch([searchQuery, selectedCommunity, selectedStatus, page, itemsPerPage, sortBy, orderBy], () => {
   fetchProperties()
+})
+
+// Watch for URL search param changes (when navigating from global search)
+watch(() => route.query.search, (newSearch) => {
+  searchQuery.value = (newSearch as string) || ''
 })
 
 // 👉 Dialog handlers
