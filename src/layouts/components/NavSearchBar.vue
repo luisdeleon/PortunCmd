@@ -85,6 +85,15 @@ const noDataSuggestions = computed<Suggestion[]>(() => [
 
 const searchQuery = ref('')
 
+// 👉 Detect if user is on Mac for keyboard shortcut display
+const isMac = computed(() => {
+  if (typeof navigator !== 'undefined') {
+    return navigator.platform?.toLowerCase().includes('mac') ||
+           navigator.userAgent?.toLowerCase().includes('mac')
+  }
+  return false
+})
+
 const router = useRouter()
 
 // 👉 Filtered search results based on user permissions
@@ -154,8 +163,7 @@ const redirectToSuggestedPage = (selected: Suggestion) => {
       class="d-none d-md-flex align-center text-disabled ms-2"
       @click="Shepherd.activeTour?.cancel()"
     >
-      <span class="me-2">{{ t('Search') }}</span>
-      <span class="meta-key">&#8984;K</span>
+      <span class="meta-key">{{ isMac ? '⌘K' : 'Ctrl+K' }}</span>
     </span>
   </div>
 
