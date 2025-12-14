@@ -39,7 +39,7 @@ import { VerticalNavLayout } from '@layouts'
           :languages="themeConfig.app.i18n.langConfig"
         />
         <NavbarThemeSwitcher />
-        <NavBarNotifications class="me-1" />
+        <!-- <NavBarNotifications class="me-1" /> -->
         <UserProfile />
       </div>
     </template>
